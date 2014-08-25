@@ -1,0 +1,74 @@
+TODO:
+=====
+
+CGContext:
+ - Have a CGColorSpaceRef attached to the context (currently assumed to be
+   sRGB). This will enable things like:
+   - Creating a CGBitmapContext in a given color space, then drawing in it
+     to convert colors to that color space
+   - For people with wide-gamut monitors, we would want to set the appropriate
+     color space on the window CGContext.
+ - Shadow support is not finished.
+ - Image masks are not supported.
+ - Need to write a OPGState class that encapsulates the graphics state,
+   like CairoGState in -back.
+ - Could follow the example of GNUstep back, and factor 
+   out Cairo specific code in CGContext to a OPCairoContext subclass.
+
+PostScript/PDF parsing classes are unimplemented.
+
+CGPattern and CGShading unimplemented
+
+Image framework:
+ - Need to add TIFF writing
+ - The decoders/encoders could be polished:
+   - They should read colorspace info, now that Opal can take advantage of it
+   - They use the decoding libs to convert to RGBA32, but should pass though
+     higher bit-depth images in to Opal and let Opal convert.
+ - Could add a plugin which uses ImageMagick for more format support
+
+Build system:
+ - Set up so that image plugins, and LCMS classes are only compiled if the 
+   libraries are available.
+
+CGFont:
+ - Need to refactor to share implementation with OpalText
+
+CGGradient:
+ - Should clip the gradient to match Quartz output
+
+Color space and image conversion:
+ - Add a placeholder color space conversion class which does non-color managed
+   conversions so that LCMS isn't a necessary dependency
+
+OpalText:
+ - Still in very early stages. Here is a sketch of what needs to be done:
+   - Finish CTFont/CTFontDescriptor/CTFontCollection/CTFontManager with 
+     both Fontconfig/Freetype and Windows GDI backends.
+     (The basics of CTFontDescriptor are currently working with the
+      Fontconfig backend)
+   - Implement CTTypesetter, the core part, which requires:
+     - Identifying permissible places to break a string with the Unicode
+       linebreaking algorithm
+     - Run GNU fribidi on the string if needed
+     - Deciding what font to use for each range in the string, doing fallback
+       where necessary
+     - Itemizing the attributed string using 
+       -attributesAtIndex:longestEffectiveRange:inRange
+       to get the character runs
+     - Calling harfbuzz to do OpenType layout, yielding glyph runs and advances
+       (+ other simpler layout routines for non-OpenType fonts?)
+   - Finish CTFramesetter
+
+Design principles to follow:
+============================
+- Build on public Cairo APIs as much as possible, use private APIs only if
+  there is no appropriate public one or would simplify implementation a lot
+- Avoid duplicate representation of the same thing (should not store a copy
+  of what Cairo already stores to avoid getting out of sync or too many
+  conversions). Choose between Quartz or Cairo representation and convert to
+  that and then stick to it.
+- Keep performance in mind. This is a low level part of the system that
+  should be fast, small and stable so follow K.I.S.S.
+- Keep dependencies clean, only #include what you need and put functions
+  that depend on the same thing in one file.

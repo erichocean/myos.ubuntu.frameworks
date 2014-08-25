@@ -1,0 +1,13 @@
+SSL/config.h
+#SSL/config.h.in
+SSL/config.log
+SSL/config.mak
+SSL/config.status
+Source/config.h
+config.log
+config.mak
+config.status
+confdefs.h
+Headers/GNUstepBase/GSConfig.h
+Headers/GNUstepBase/config.h
+

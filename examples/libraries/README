@@ -1,0 +1,40 @@
+
+Libraries
+=========
+
+1. Run:
+
+	HelloWorld$ make clean
+	HelloWorld$ make
+	HelloWorld$ sudo make install
+
+2. Check if it is successfully installed:
+
+2.1 Check The shared object library:
+
+	~$ cd /usr/local/lib
+	/usr/local/lib$ lh
+
+- You should see:
+
+	-rwxr-xr-x  1 root root    13K 2011-11-23 08:50 libHelloWorld.so.0.0.1
+	lrwxrwxrwx  1 root root     22 2011-11-23 08:50 libHelloWorld.so.0 -> libHelloWorld.so.0.0.1
+	lrwxrwxrwx  1 root root     18 2011-11-23 08:50 libHelloWorld.so -> libHelloWorld.so.0
+
+2.2 Check the headers:
+
+	/usr/local/lib$ cd ../include
+	/usr/local/include$ lh
+
+- You should see:
+
+	drwxr-xr-x 2 root root 4.0K 2011-11-23 08:50 HelloWorld
+- Then:
+
+	/usr/local/include$ cd HelloWorld
+	/usr/local/include/HelloWorld$ lh
+
+- You should see:
+
+	-rw-r--r-- 1 root root 96 2011-10-18 23:05 HelloWorld.h
+

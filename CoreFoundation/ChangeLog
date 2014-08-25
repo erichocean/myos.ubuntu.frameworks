@@ -1,0 +1,1455 @@
+2012-02-18 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFURL.c: Fixes to CFURLStringParse() and
+	CFURLCopyAbsoluteURL().
+	* Tests/CFString/general.m:
+	* Tests/CFLocale/displayvalues.m:
+	* Tests/CFURL/file_system_path.m:
+	* Tests/CFURL/create.m: Fix tests.
+
+2012-02-16 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFURL.c: A little clean up.
+	* Tests/CFURL/file_system_path.m:
+	* Tests/CFURL/create.m: Added more tests.
+
+2012-02-15 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFURL.c: Some more work on file system paths.
+	* Tests/CFNumber/general.m:
+	* Tests/CFLocale/create.m: Modified tests.
+	* Tests/CFURL/create.m: Moved file system path tests from here...
+	* Tests/CFURL/file_system_path.m: ...to here.
+
+2012-02-14 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c:
+	* Source/CFStringUtilities.c: Implement function to separate strings.
+	* CFString/general.m: Added new tests.
+	* CFLocale/displayvalues.m: Remove some unnecessary tests.
+	* CFURL/create.m: Added more tests.
+
+2012-02-07 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFURL.c: Add "file://localhost/" to file URLs.
+	* Tests/CFURL/create.m: Fixed tests.
+
+2012-02-01 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFNumberFormatter.c: Revert back to using '*' as padding
+	character.
+
+2012-02-01 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Tests/CFNumberFormatter/format.m:
+	* Tests/CFTree/basic.m:
+	* Tests/CFDateFormatter/basic.m:
+	* Tests/CFURL/create.m: First attempt at fixing tests for OS X.
+
+2012-01-29 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFCharacterSet.c: Fixed bugs found with new tests.
+	* Tests/CFCharacterSet:
+	* Tests/CFTree: New tests.
+
+2012-01-29 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c:
+	* Source/CFBase.c:
+	* Source/CFNumber.c:
+	* Source/CFRuntime.c:
+	* Source/GSPrivate.h:
+	* Source/NSCFType.m: Generate a table of constant instances
+	to be initialized.
+
+2012-01-29 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFData.c: Fix bug in CFDataEqual().
+	* Tests/CFData:
+	* Tests/CFDate: New tests.
+
+2012-01-29 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFError.c:
+	* Source/CFString.c:
+	* Source/CFLocale.c:
+	* Source/GSPrivate.h:
+	* Source/CFDateFormatter.c:
+	* Source/CFNumberFormatter.c:
+	* Source/CFXMLParser.c:
+	* Source/NSCFType.m: Try to work around library loading issues
+	a little better and initialize all constant instances.
+	* Headers/CoreFoundation/CFBase.h: Define CF_EXPORT for C++ files.
+	* Source/common.mk:
+	* Source/Keys+Identifiers.c: Removed.
+
+2012-01-28 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFUUID.c: Correctly identify OpenBSD.
+
+2012-01-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Tests/GNUmakefile: Done print command.
+	* Tests/CFDateFormatter/basic.m: Added some more tests.
+	* Tests/CFURL/create.m: Marked failing tests as hopefuls.
+
+2012-01-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/common.mk: Remove CFStream.h and CFPropertyList.h.
+	* Headers/CoreFoundation/CoreFoundation.h: Remove CFPropertyList.h.
+
+2012-01-25 Ivan Vucica <ivan@vucica.net>
+
+	* Source/common.mk: Added missing CFStream.h to list of headers.
+
+2012-01-25 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFDateFormatter.c: Fix bug in 
+	CFDateFormatterCreateStringFromAbsoluteTime().
+	* Headers/CoreFoundation/CFDateFormatter.h: Include CFDate.h.
+	* Tests/CFDateFormatter: Basic tests for CFDateFormatter.
+
+2012-01-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/Makefile.nmake:
+	* Source/CFString.c:
+	* Source/GSPrivate.h:
+	* Headers/CoreFoundation/CFString.h:
+	* Headers/CoreFoundation/CFBase.h: Fixes for Windows.
+
+2012-01-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFURL.c: Added class functions.
+	* Source/GSPrivate.h: Fix for atomic operations on Windows.
+
+2012-01-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Tests/CFArray/mutablearray.m:
+	* Tests/CFArray/create.m: Fix tests for 64-bit systems.
+	* Tests/CFNumberFormatter/parse.m:
+	* Tests/CFRuntime/runtime.m:
+	* Tests/CFString/format.m:
+	* Tests/CFString/mutablestring.m:
+	* Tests/CFString/create.m: Quiet compiler.
+
+2012-01-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* GNUMakefile: Include Tests as a subproject.
+	* Tests/GNUmakefile: Add 'make check'.
+
+2012-01-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFURL.c: Implmented function to remove dot segments in paths.
+	* Tests/CFURL/ref_resolution.m: Added an extra test.
+
+2012-01-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFURL.c: Resolve URIs in CFURLCopyAbsoluteURL().
+	* Source/CFString.c: Fixed a few big bugs in CFMutableString.
+	* Tests/CFURL/ref_resolution.m: Added a few more tests.
+
+2012-01-21 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFURL.c: Added a URI parser.
+	* Source/GSPrivate.h: Added CHAR_V.
+	* Tests/CFURL/create.m: Added a few more tests.
+	* Tests/CFURL/ref_resolution.m: Tests for reference resolution.
+
+2012-01-17 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GNUmakefile: Remove CFPropertyList from build.
+	* Source/CFURL.c: Basic work on Append functions.
+	* Tests/CFURL/create.m: Add more tests.
+
+2012-01-17 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CFBase.h:
+	* Source/CFStringFormat.c:
+	* Source/CFNumber.c:
+	* Source/GSPrivate.h:
+	* Source/GSHashTable.c: Fixes for 64-bit Windows.
+
+2012-01-17 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Tools/: Remove make_c_interface tool.
+	* Headers/CoreFoundation/CoreFoundation.h:
+	* Source/GNUmakefile:
+	* Source/common.mk: Remove CFStream from build for now.
+
+2012-01-17 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFURL.c: Set correct delimiter and return an empty string
+	instead of NULL for some functions just so the test suite won't crash.
+	* Source/CFString.c: Fixed bug in CFStringCreateWithBytesNoCopy.
+	* Source/CFBase.c: Fixed bug with kCFAllocatorNull.
+	* Tests/CFURL/create.m: Ported some tests from -base.
+
+2012-01-17 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GSPrivate.h: Added function to guess file system encoding.
+	* Source/CFURL.c: Added some more create functions.
+	* Source/CFRuntime.c: Initialize CFURL class.
+	* Tests/CFURL/create.m: Some simple create tests.
+
+2012-01-15 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GSPrivate.h:
+	* Source/CFURL.c: Added percent escape replacement function.
+	* Tests/CFURL/escaping.m: Added more tests.
+
+2012-01-15 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GSPrivate.h:
+	* Source/CFURL.c: Fixed bug in percent escape function.
+	* Tests/CFURL/escaping.m: Added first CFURL test.
+
+2012-01-14 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFURL.c:
+	* Source/CFString.c:
+	* Source/CFStringEncoding.c:
+	* Source/GSPrivate.h: Redesigned Unicode conversion.
+	* Headers/CoreFoundation/CFBase.h: Define __BIG_ENDIAN__ or 
+	__LITTLE_ENDIAN__ macros for platforms do not already define them.
+	* Headers/CoreFoundation/CFByteOrder.h: Use new endian macros.
+	* Headers/CoreFoundation/ForFoundationOnly.h: Delete.
+
+
+2012-01-11 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFURL.c:
+	* Source/CFURL.m:
+	* Source/common.mk:
+	* Source/GNUmakefile: Replace CFURL.m with CFURL.c.  CFURL still not
+	functional.
+	* Source/CFStringEncoding.c:
+	* Source/CFStringFormat.c:
+	* Source/GSPrivate.h: Moved some defines and functions to GSPrivate.h.
+
+2012-01-11 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFCalendar.c:
+	* Source/CFDateFormatter.c:
+	* Source/CFBundle.m: Avoid compiler warnings.
+	* Source/Keys+Identifiers.c: Fix broken build.
+
+2012-01-08 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CFRuntime.h:
+	* Headers/CoreFoundation/CFByteOrder.h:
+	* Headers/CoreFoundation/CFString.h:
+	* Headers/CoreFoundation/CFLocale.h:
+	* Headers/CoreFoundation/CFNumberFormatter.h:
+	* Source/CFString.c:
+	* Source/CFStringFormat.c:
+	* Source/CFBundle.m:
+	* Source/CFLocale.c:
+	* Source/GSPrivate.h:
+	* Source/CFDateFormatter.c:
+	* Source/CFStringUtilities.c:
+	* Source/Keys+Identifiers.c:
+	* Source/CFBinaryHeap.c:
+	* Source/CFRuntime.c: More portability improvements.
+
+2012-01-08 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFTimeZone.c:
+	* Source/CFBitVector.c:
+	* Source/CFCalendar.c:
+	* Source/CFBase.c:
+	* Source/CFStringFormat.c:
+	* Source/CFNumber.c:
+	* Source/tzfile.h:
+	* Source/CFLocale.c:
+	* Source/GSPrivate.h:
+	* Source/Keys+Identifiers.c:
+	* Source/CFUUID.c:
+	* Source/CFXMLNode.c:
+	* Source/GSHashTable.c:
+	* Source/CFStringEncoding.c:
+	* Source/CFXMLParser.c:
+	* Source/CFRuntime.c:
+	* Headers/CoreFoundation/CFRuntime.h:
+	* Headers/CoreFoundation/CFBase.h: Improve portability.
+	* Source/CFBinaryHeap.c: Started adding code.
+
+2012-01-05 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFStringUtilities.c: Include GSPrivate.h.
+	* Source/CFURL.c: CFURL implementation. Not included as part of build.
+
+2012-01-03 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFLocale.c:
+	* Source/CFDateFormatter.c:
+	* Source/CFNumberFormatter.c:
+	* Source/CFStringUtilities.c:
+	* Source/GSPrivate.h: Introduce private function to get a C string
+	locale.
+
+2012-01-02 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFCharacterSet.c: Added predefined set support.
+
+2012-01-02 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFCharacterSet.c: Added most functions.
+
+2012-01-01 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GNUmakefile:
+	* Headers/CoreFoundation/CFCharacterSet.h:
+	* Source/CFCharacterSet.c: CFCharacterSet skeleton.
+
+2012-01-01 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GSPrivate.h: New CAS atomic function.
+	* Source/CFRuntime.c: Make sure corebase is only initialized once.
+	* Source/GNUmakefile:
+	* Source/Identifers.m:
+	* Source/Keys+Identifiers.c: Make constant strings CFString types.
+	* Source/CFString.c:
+	* Source/NSCFType.m: Hack to support constant strings.
+
+2011-12-30 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CFRuntime.h:
+	* Source/CFRuntime.c: Added GC functions and variables.  Not
+	currently used in corebase.
+
+2011-12-30 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFBitVector.c: Added implementation to most functinos.
+	* Source/CFUUID.c: Fixed sscanf usage bug.
+
+2011-12-28 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GSPrivate.h: Added GSHashBytes().
+	* Source/CFString.c: Use GSHashBytes() for hashing strings.
+	* Source/CFUUID.c: Some changes to the Windows code.
+	* Source/GSHashTable.c:
+	* Source/GSHashTable.h: Copy call backs.
+
+2011-12-21 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFBitVector.c: Some work on CFBitVector.
+
+2011-12-21 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GNUmakefile:
+	* Source/CFBitVector.c:
+	* Source/CFBinaryHeap.c:
+	* Headers/CoreFoundation/CFBinaryHeap.h:
+	* Headers/CoreFoundation/CFBitVector.h: Added skeleton for
+	CFBinaryHeap and CFBitVector.
+
+2011-12-19 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CFURL.h: Populate with definitions up 
+	to Mac OS X 10.7.
+
+2011-12-19 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFXMLParser.c: Added some code to CFXMLTree.
+	* Source/CFTree.c: Changes to support CFXMLTree.
+	* Source/Identifier.m: Added CFXMLTree error dictionary keys.
+	* Headers/CoreFoundation/CFXMLNode.h:
+	* Headers/CoreFoundation/CFXMLParser.h: Moved declarations to 
+	correct header.
+
+2011-12-18 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFXMLNode.c: Added rest of the code.
+
+2011-12-17 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFXMLNode.c: Started adding code.
+
+2011-12-16 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CFXMLNode.h:
+	* Headers/CoreFoundation/CFXMLParser.h:
+	* Source/CFXMLNode.c:
+	* Source/CFXMLParser.c:
+	* Source/GNUmakefile: Added skeleton for XML types.
+
+2011-12-16 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFTree.c: Added code.
+
+2011-12-15 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.c:
+	* Source/CFTree.c:
+	* Headers/CoreFoundation/CFTree.h: Add CFTree skeleton.
+
+2011-12-15 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFBag.c:
+	* Source/CFDictionary.c:
+	* Source/CFSet.c:
+	* Source/GSHashTable.c:
+	* Source/GSHashTable.h: Redesigned GSHashTable to reduce code 
+	duplication.
+	* Source/GSPrivate.h: Moved hash functions here.
+	* Headers/CoreFoundation/CFBase.h: Made CFIndex and CFTypeID
+	a long integer everywhere again, including Windows.
+
+2011-12-10 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFCalendar.c:
+	* Source/CFDate.c:
+	* Source/GSPrivate.h: Moved UDate to CFAbsoluteTime conversion macro.
+	* Source/CFDateFormatter.c: Added implementation to most functions.
+
+2011-12-10 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFSet.c:
+	* Headers/CoreFoundation/CFSet.h:
+	* Source/GNUmakefile: New CFSet based on CFBag.
+	* Source/CFBag.c:
+	* Headers/CoreFoundation/CFBag.h: Fixed copy-and-paste error.
+	* Source/GSHashTable.h:
+	* Source/GSHashTable.c: Fixed definition of GSHashTableRemoveValue().
+
+2011-12-08 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFBag.c:
+	* Headers/CoreFoundation/CFBag.h: Added CFBag.  Code is based on
+	CFDicitonary implementation.
+
+2011-12-07 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/Identifiers.m:
+	* Source/GNUmakefile:
+	* Source/CFDateFormatter.c:
+	* Headers/CoreFoundation/CFDateFormatter.h: Added CFDateFormatter
+	skeleton.
+
+2011-12-07 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFArray.c: Cleaned up CFArrayReplaceValue() and had 
+	other functions call it to insert, remove, etc.
+	* Source/CFNumber.c: Added description function.
+
+2011-12-06 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/objc_interface.h:
+	* Source/atomic_ops.h:
+	* Source/callbacks.h:
+	* Source/threading.h:
+	* Source/GSPrivate.h:
+	* Source/CFError.c:
+	* Source/CFArray.c:
+	* Source/CFTimeZone.c:
+	* Source/CFDictionary.c:
+	* Source/CFCalendar.c:
+	* Source/CFBase.c:
+	* Source/CFStringEncoding.c:
+	* Source/CFStringFormat.c:
+	* Source/CFNumber.c:
+	* Source/CFLocale.c:
+	* Source/CFData.c:
+	* Source/CFDate.c:
+	* Source/CFRuntime.c: Replaced four different header files with 
+	GSPrivate.h.
+	* Source/CFString.c: Cleaned up.
+
+2011-12-04 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFCalendar.c: Clean up.
+
+2011-12-04 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFLocale.c: Don't use libicu to create locale identifier.
+
+2011-12-04 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFLocale.c: Clean up.
+
+2011-12-03 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GSHashTable.c:
+	* Source/GSHashTable.h: Add new function to copy hash tables.
+	* Source/CFDictionary.c: Use new GSHashTable functions.
+	* Source/CFRuntime.c: Fix bug in _CFRuntimeGetClassWithTypeID().
+
+2011-12-03 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFDictionary.c: Worked on CFMutableDictionary functions.
+	* Source/GSHashTable.c:
+	* Source/GSHashTable.h: Cleaned up.
+
+2011-12-03 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFDictionary.c: Added class functions.
+	* Source/GSHashTable.c:
+	* Source/GSHashTable.h: Added add, set, replace, and remove functions.
+
+2011-12-02 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.c: Added CFDictionary to build and fixed bug 
+	in _CFRuntimeInitStaticInstance().
+	* Source/GNUmakefile: Added CFDictionary.c.
+	* Source/CFDictionary.m: Removed.
+	* Source/GSHashTable.c:
+	* Source/CFDictionary.c: Fixed bugs.
+	* Source/CFString.c: Modified __CFStringMakeConstantString() to 
+	use the new CFDictionary functionality.
+
+2011-12-02 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.c:
+	* Source/atomic_ops.h: Specify type for atomic operations.
+	* Source/CFDiciontary.c: New CFDictionary implementation in C.
+
+2011-12-01 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GSHashTable.c:
+	* Source/GSHashTable.h: Added new function to help iterate through
+	hash table.
+
+2011-12-01 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GSHashTable.c:
+	* Source/GSHashTable.h: A hash table implementation to be used in
+	CFDictionary, CFBag and CFSet.
+
+2011-12-01 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFBase.c: Move standard includes from here...
+	* Headers/CoreFoundation/CFBase.h: ...to here.  Also define CFHashCode,
+	CFTypeID and CFOptionFlags to be a 64-bit integer, even on Windows.
+	* Source/callbacks.h:
+	* Source/CFArray.c:
+	* Source/CFRuntime.c: Moved callback functions for retain/release 
+	of CFTypeRef in collection objects.
+
+2011-11-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.c: Do not set NSCFTypeClass in CFInitialize().
+
+2011-11-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFArray.c: Fixed quicksort algorithm.
+
+2011-11-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.c:
+        * Source/NSCFType.h:
+        * Source/NSCFType.m:
+        * Source/NSCFArray.m:
+        * Source/NSCFData.m:
+        * Source/NSCFError.m:
+        * Source/NSCFString.m: Make sure runtime is initialized before trying
+        briding classes.
+        * Source/CFStringEncoding.c: Check both MIME and IANA standard encoding
+        names.
+        * Headers/CoreFoundation/CFString.h: Always define CFSTR() to be
+        __CFStringMakeConstantString().
+
+2011-11-25 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/NSCFType.m:
+	* Source/NSCFString.m:
+	* Source/atomic_ops.h: Avoid warnings on FreeBSD.
+	* Source/CFRuntime.c: Improve thread safety.
+	* Source/CFStream.m: Fix bug.
+	* Source/CFStringEncoding.c: Use "MIME" instead of "IANA" standard.
+
+2011-11-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GNUmakefile: 
+	* Source/NSCFArray.m: Objective-C class for CFArray.
+
+2011-11-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFNumber.c: Remove unneeded #if statement.
+	* Source/CFNumberFormatter.c: Simplify SetProperty and 
+	CopyProperty functions.
+
+2011-11-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/Foundation/CFBase.h:
+	* Source/GNUmakefile: Do not define MAC_OS_X_VERSION_MIN_ALLOWED.
+
+2011-11-20 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c:
+	* Source/CFBase.c:
+	* Source/CFStringFormat.c:
+	* Source/CFLocale.c:
+	* Source/CFUUID.c:
+	* Source/CFArray.c:
+	* Source/CFRuntime.c:
+	* Headers/CoreFoundation/CFPropertyList.h:
+	* Headers/CoreFoundation/CFRuntime.h:
+	* Headers/CoreFoundation/CFNumber.h:
+	* Headers/CoreFoundation/CFError.h:
+	* Headers/CoreFoundation/CFTimeZone.h:
+	* Headers/CoreFoundation/CFStream.h:
+	* Headers/CoreFoundation/CFStringEncodingExt.h:
+	* Headers/CoreFoundation/CFLocale.h:
+	* Headers/CoreFoundation/CFString.h:
+	* Headers/CoreFoundation/CFCalendar.h:
+	* Headers/CoreFoundation/CFBase.h:
+	* Headers/CoreFoundation/CFNumberFormatter.h: Do not include
+	GSVersionMacros.h as this file was causing problems due objc
+	extensions in it.
+
+2011-11-20 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFArray.c: Finish runtime function for CFArray type.
+
+2011-11-04 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFArray.c: Fix bugs.
+	* Tests/CFArray: Added tests.
+
+2011-10-29 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFArray.c: Finished up CFArray for now.
+
+2011-10-27 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GNUmakefile:
+	* Source/CFArray.c:
+	* Source/CFArray.m:
+	* Source/CFRuntime.c: Completely replace CFArray with a pure C
+	implementation.
+	* Headers/CoreFoundation/CFArray.h: Export functions for C++ compatibility.
+
+2011-10-03 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFArray.c: Start work on C-only implementation of CFArray.
+
+2011-10-01 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFNumber.c: Removed branch that never existed in the first place.
+
+2011-10-01 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GNUmakefile:
+	* Source/CFRuntime.c:
+	* Source/CFNumber.m:
+	* Source/CFNumber.c: Started writing a C-only implementation of CFNumber.
+	* Tests/CFNumber: Added some basic tests for CFNumber.
+
+2011-09-29 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFBase.c: Initialize allocators.
+
+2011-09-29 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFBase.c: Continued work on CFAllocators.
+
+2011-09-28 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFBundle.m: Do not try to use dlfcn.h on Windows.
+	* Source/CFUUID.c: Define INITRANDOM() on Windows.
+	* Source/GNUmakefile: Add -L/mingw/bin to LDFLAGS on mingw.
+
+2011-09-28 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFUUID.c: Add random number generation on Windows.
+
+2011-09-28 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/objc_interface.h: Move CFRuntimeBridgeClass() to NSCFType.h.
+	* Source/CFBase.c: 
+	* Source/CFData.c:
+	* Source/CFString.c: Delay bridging until ObjC classes are initialized.
+	* Source/NSCFData.m: Bridge to CFData.
+	* Source/NSCFError.m: Bridge to CFError.
+	* Source/NSCFString.m: Bridge to CFString.
+	* Source/NSCFType.m:
+	* Source/NSCFType.h: Move NSCFType interface and some extras to NSCFType.h.
+
+2011-09-27 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFData.c: Bridge CFData to NSCFData.
+
+2011-09-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/threading.h:
+	* Source/CFBase.c:
+	* Source/CFCalendar.c:
+	* Source/CFLocale.c:
+	* Source/CFString.c:
+	* Source/CFStringEncoding.c:
+	* Source/CFRuntime.c: Abstract threading functions for platforms that
+	do not include pthread.
+
+2011-09-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/objc_interface.h:
+	* Source/atomic_ops.h:
+	* Source/GNUmakefile:
+	* Source/CFBase.c:
+	* Headers/CoreFoundation/CFRuntime.h:
+	* Headers/CoreFoundation/CFBase.h: Fixes for compilation on Windows.
+
+2011-09-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFError.c: Retain objects before returning on Copy operations.
+	* Source/CFUUID.c:
+	* Source/CFCalendar.c:
+	* Headers/CoreFoundation/CFCalendar.h: Avoid warnings.
+
+2011-09-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFError.m:
+	* Source/CFError.c:
+	* Source/NSCFError.m:
+	* Source/CFRuntime.c:
+	* Source/GNUmakefile: Add C only implementation of CFError.
+
+2011-09-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.c: Initialize CFData.
+	* Source/CFData.c: Release instead of deallocate ivar.
+
+2011-09-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/NSCFType.h:
+	* Source/NSCFType.m: Delete NSCFType.h and move interface definition to
+	NSCFType.m.
+	* Source/NSCFData.m: Added Objective-C interface to CFData.
+	* Source/Data.c: Check deallocator before setting it.
+
+2011-09-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c: Do not require the use of libicuio.
+	* Source/GNUmakefile: Update library dependency.
+
+2011-09-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CFData.h:
+	* Source/CFData.m:
+	* Source/CFData.c:
+	* Source/GNUmakefile: Replace CFData.m with CFData.c.
+
+2011-09-22 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m:
+	* Source/CFRuntime.c: Increment and decrement reference count ourselves
+	instead of relying on Foundation functions.
+	* Source/GNUmakefile: Replace CFRuntime.m with CFRuntime.c.
+	* Source/atomic_ops.h: Atomic increment and decrement operations.
+
+2011-09-21 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m: Set memory to 0 when creating new objects, and do
+	not accept anything but an actual CFTypeID in CFCopyTypeIDDescription().
+	* Source/CFString.c: Reverted previous changes, bug was actually in
+	CFRuntime.
+
+2011-09-21 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m: Create instances ourselves instead relying on
+	gnustep-base.
+	* Source/GNUmakefile:
+	* Source/CFBase.c:
+	* Source/CFBase.m: Implement a true CFAllocator type.  It is no longer
+	compatible with a NSZone.  This change also eliminates the objc dependency
+	so the file is now pure C.
+	* Source/CFArray.m:
+	* Source/CFNumber.m:
+	* Source/CFStream.m:
+	* Source/CFURL.m:
+	* Source/CFDictionary.m:
+	* Source/CFData.m: Do not use CFAllocators as NSZones.
+	* Source/NSCFType.h:
+	* Source/NSCFType.m: NSCFType no longer conforms to NSCopying.  I'm not
+	sure it ever had to.
+	* Source/CFString.c: Fix bug in CFStringCreateMutable().
+
+2011-09-19 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m: Update to reflect latest changes in gnustep-base.
+	* Source/CFError.m:
+	* Source/Identifiers.m: Moved definition of identifiers.
+	* Headers/CoreFoundation/CFString.h: Do not define CFSTR() to @""
+	in ObjC source files.
+
+2011-08-28 Matt Rice <ratmice@gmail.com>
+
+	* Source/objc_interface.h: Remove referene to preface.h
+	add runtime.h.
+	(CF_IS_OBJC): Add cast to avoid warning.
+	* Source/CFUUID.c: Replace BOOL/YES/NO with Boolean/true/false.
+	* Source/CFBase.m (CFNullInitialize): Avoid +initialize.
+
+2011-07-20 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFDate.c:
+	* Source/CFCalendar.m: Modify absolute time function to not require
+	ucal support and move back into CFDate.c.
+
+2011-07-17 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFTimeZone.c: Fixed bug in CFTimeZoneCreateWithName ().
+	* Source/CFRuntime.m: Fixed bug when setting isa.
+
+2011-07-15 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFTimeZone.c: Complete CFTimeZoneCreateWithName().
+	* Source/CFString.c: Fix a few bugs.
+	* Source/CFStringUtilities.c: Fix compare bug.
+
+2011-07-15 10:57  David Chisnall <theraven@gna.org>
+
+	* libs/corebase/trunk/Source/CFBundle.m,
+	* libs/corebase/trunk/Source/GNUmakefile: Define RTLD_DEFAULT on
+	  systems where it isn't defined (stupid glibc headers).
+	  Remove -luuid, since it seems not to be required anymore.
+
+2011-07-15 10:52  David Chisnall <theraven@gna.org>
+
+	* libs/corebase/trunk/Source/objc_interface.h: Include a file that
+	  actually exists, instead of one that might exist.
+
+2011-07-15 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GNUmakefile:
+	* Source/CFRuntime.m:
+	* Source/CFTimeZone.c:
+	* Headers/CoreFoundation/CFTimeZone.h: Added new CFTimeZone type base on
+	ICU's zoneinfo64 resource bundle.
+
+2011-07-12 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFCalendar.c:
+	* Source/CFDate.c: Added most time utility functions.
+
+2011-07-12 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFCalendar.c: Added CFCalendarGetTimeRangeOfUnit().
+
+2011-07-11 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFCalendar.c: Implemented CFCalendarGetComponentDifference().
+
+2011-07-11 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFCalendar.c: Implemented CFCalendarAddComponents() and
+	CFCalendarDecomposeAbsoluteTime().
+
+2011-07-10 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFCalendar.c: Implemented a few more functions.
+	* Source/CFString.c: Fixed bug in CFStringPad().
+
+2011-07-10 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c: Fixed string hashing and implemented
+	CFStringGetRangeOfComposedCharactersAtIndex().
+
+2011-07-10 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/objc_interface.h:
+	* Source/CFRuntime.m: Add bridging function.
+	* Source/CFString.c: Bridge NSCFString with CFString types.
+
+2011-07-09 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/objc_interface.h:
+	* Source/CFRuntime.m: Minor fixes to ObjC interface.
+	* Source/CFString.c: Add ObjC dispatch to CFStringGetCharacters().
+
+2011-07-09 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/objc_interface.h: Add Objective-C runtime interface.
+	* Source/CFRuntime.m: Moved private functions to objc_interface.h.
+	* Source/CFString.c: First steps towards toll-free bridged objects.
+
+2011-07-08 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFCalendar.c: Added implementation for
+	CFCalendarGetMaximumRangeOfUnit and CFCalendarGetMinimumRangeOfUnit.
+
+2011-07-08 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFDate.m:
+	* Source/CFDate.c:
+	* Source/GNUmakefile:
+	* Headers/CoreFoundation/CFDate.h: Make CFDate a C file.  Will use
+	CFCalendar and ICU functions to implement this functionality.
+	* Source/CFLocale.c: Fix a few bugs found when testing CFCalendar.
+	* Source/Identifiers.m: Add ISO8601 calendar identifier.
+	* Source/CFCalendar.c:
+	* Headers/CoreFoundation/CFCalendar.h: Started implementing CFCalendar.
+
+2011-06-27 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c: Implemented CFStringCreateWithBytesNoCopy() and
+	fixed a bug in CFStringCreateByCombiningStrings().
+
+2011-06-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c: Implement CFStringPad().
+
+2011-06-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFStringFormat.c: Fix a few bugs in string formatting code.
+
+2011-06-25 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFStringFormat.c: Added hex and octal formatting code.
+	* Tests/CFString/format.m: Add hex and octal formatting test.
+
+2011-06-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFStringFormat.c: Added double formatting code.
+	* Tests/CFString/format.m: Add double formatting test.
+
+2011-06-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFStringUtilities.c: Remove use of alloca().
+	* Source/CFStringEncoding.c: Fix conversion bug.
+	* Source/CFStringFormat.c: Added more formatting code.
+
+2011-06-22 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFUUID.c: Generate uuids using random function instead of
+	relying on libuuid.
+
+2011-06-21 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GNUmakefile: Added CFStringFormat.c to build.
+	* Source/CFString.c: Fixed bugs and added a work around.
+	* Source/CFStringFormat.c: Added, still incomplete, string formatting
+	code.
+	* Tests/CFString/format.m: String formatting tests.
+
+2011-06-16 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c: Added CFStringAppendCharacters()
+
+2011-06-15 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m:
+	* Source/CFLocale.c: Use pthread directly.
+	* Source/internal.h: Delete.
+	* Source/CFString.c: Added *FileSystemRepresentation functions.
+	* Source/CFStringEncoding.c: Implemented more encoding functions.
+	* Source/CFStringFormat.c: New file for CFString formatting functions.
+	* Headers/CoreFoundation/CFByteOrder.h: Fix compile mistake.
+
+2011-06-13 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CFByteOrder.h: Actually swap byte order in
+	CFSwappedFloat functions.
+
+2011-06-09 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GNUmakefile:
+	* Source/CFByteOrder.c: Delete CFByteOrder.c.
+	* Headers/CoreFoundation/CFByteOrder.h: Inline byte order functions.
+
+2011-06-04 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c: Fixed a few bugs.
+	* Tests/CFString/mutablestring.m: Modified tests.
+
+2011-06-04 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c: Implemented CFStringReplace().
+	* Tests/CFString/mutablestring.m: Added more tests.
+
+2011-06-04 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c: Use CFStringInlineBuffer where appropriate.
+	Also added CFStringTimeWhitespace().
+	* Source/CFStringEncoding.c: Fixed a bug uncovered by tests.
+	* Tests/CFString/create.m:
+	* Tests/CFString/mutablestring.m: Added a few more tests.
+
+2011-06-03 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c:
+	* Source/CFStringEncoding.c: Fixed bugs uncovered by tests.
+	* Tests/CFString/mutablestring.m: Added CFMutableString tests.
+
+2011-06-03 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c: Implemented a few more functions.
+	* Headers/CoreFoundation/ForFoundationOnly.h: Added 2 more functions
+	to be used internally by CoreFoundation and Foundation.
+
+2011-05-31 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/internal.h: Define mutex functions to be used internally.
+	* Source/CFLocale.c:
+	* Source/CFRuntime.m: Use a mutex instead of spinlock.
+
+2011-05-30 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c: Added CFStringNormalize and CFStringTransform.
+	* Source/NSCFString.m: Return CFString's type ID.
+
+2011-05-29 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/NSCFString.m: Add NSCFString class.
+
+2011-05-27 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.c: Added case mapping functions to CFMutableString.
+
+2011-05-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GNUmakefile:
+	* Source/CFString.c:
+	* Source/CFStringUtilities.c: Moved some CFString functions to a different
+	file to reduce clutter and implemented them.
+
+2011-05-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* GNUmakefile:
+	* Source/CFUUID.c:
+	* Source/CFRuntime.m:
+	* Headers/CoreFoundation/CFUUID.h: Added CFUUID.
+	* Tests/CFUUID: And some tests.
+
+2011-05-20 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/NSCFType.m:
+	* Source/NSCFType.h: Add NSCopying.
+	* Headers/CoreFoundation/CFBase.h: No longer define CFString as NSString.
+
+2011-05-20 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.m: Deleted.
+	* Source/GNUmakefile:
+	* Source/CFRuntime.m:
+	* Source/Identifier.m:
+	* Source/CFString.c:
+	* Source/CFStringEncoding.c:
+	* Headers/CoreFoundation/ForFoundationOnly.h: Added initial CFString
+	implementation using the ICU library.
+	* Headers/CoreFoundation/CFStringEncodingExt.h: Protect against multiple
+	includes.
+	* Tests/CFString: Basic CFString test.
+
+2011-05-06 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.m:
+	* Headers/CoreFoundation/CFString.h: Make inline string buffer functions
+	inline functions.
+	* Headers/CoreFoundation/CFBase.h: Add CF_INLINE.
+
+2011-04-15 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFArray.m:
+	* Source/CFDictionary.m:
+	* Headers/CoreFoundation/CFNumber.h
+	* Headers/CoreFoundation/CFLocale.h
+	* Headers/CoreFoundation/CFDictionary.h
+	* Headers/CoreFoundation/CFString.h
+	* Headers/CoreFoundation/CFBase.h
+	* Headers/CoreFoundation/CFNumberFormatter.h
+	* Headers/CoreFoundation/CFDate.h
+	* Headers/CoreFoundation/CFArray.h: Fixes for C++.
+
+2011-04-02 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m:
+	* Source/GNUmakefile:
+	* Source/CFCalendar.c:
+	* Headers/CoreFoundation/CFCalendar.h: Added empty CFCalendar.
+	* Source/CFLocale.c: Return a CFCalendar for kCFLocaleCalendar.
+
+2011-03-30 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFNumberFormatter.c: (CFNumberFormatterCreateStringWithValue)
+	Implemented.
+	* Tests/CFNumberFormatter/format.m: Added tests.
+
+2011-03-30 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFNumberFormatter.c: (CFNumberFormatterGetValueFromString)
+	Fixed copy-and-paste mistake.
+	* Tests/CFNumberFormatter/parse.m: Added tests.
+
+2011-03-30 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFNumberFormatter.c: (CFNumberFormatterSetProperty)
+	(CFNumberFormatterCreateNumberFromString)
+	(CFNumberFormatterCreateStringWithNumber)
+	(CFNumberFormatterGetValueFromString) Implemented.
+
+2011-03-29 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFLocale.c:
+	* Source/CFNumberFormatter.c: Add class functions.
+	* Headers/CoreFoundation/CFBase.h: Define CFTypeRef as const.
+
+2011-03-29 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFLocale.c: Minor fixes.
+	* Source/CFNumberFormatter.c: Set default format.
+	* Tests/CFNumberFormatter/create.m:
+	* Tests/CFLocale/values.m:
+	* Tests/CFLocale/identifier.m:
+	* Tests/CFRuntime/runtime.m: Minor fixes.
+
+2011-03-29 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFNumberFormatter.c: (CFNumberFormatterCopyProperty) Implemented.
+
+2011-03-29 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m:
+	* Source/CFNumber.m:
+	* Headers/CoreFoundation/CFNumber.h: Added CFBoolean.
+
+2011-03-27 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFLocale.c: (CFLocaleGetValue) Some more code.
+	(CFLocaleCopyISOCurrencyCodes)
+	(CFLocaleCopyCommonISOCurrencyCodes) Implemented.
+	* Source/Identifiers.m: Added CFNumberFormatter identifiers.
+	* Source/CFNumberFormatter.c: Return NULL from all function for now.
+	* Tests/CFLocale/values.m: Worked on test a little more.
+
+2011-03-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFNumberFormatter.c: (CFNumberFormatterSetFormat) Implemented.
+
+2011-03-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GNUmakefile:
+	* Source/CFRuntime.m:
+	* Source/CFNumberFormatter.c:
+	* Headers/CoreFoundation/CFNumberFormatter.h: New type.
+	* Tests/CFNumberFormatter/create.m: First couple of tests.
+
+2011-03-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFLocale.c: (CFLocaleCopyDisplayNameForPropertyValue) Implemented.
+
+2011-03-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFArray.m:
+	* Source/NSCFType.m:
+	* Source/CFNumber.m:
+	* Source/CFError.m:
+	* Source/CFStream.m:
+	* Source/CFURL.m:
+	* Source/CFDictionary.m:
+	* Source/CFString.m:
+	* Source/CFData.m: All NS objects should return _kCFRuntimeNotATypeID,
+	except for NSCFType.
+	* Source/CFRuntime.m: Check for NULL before trying to do anything.
+	* Tests/CFLocale/create.m: Compile again.
+	* Tests/CFTesting.h: Fixed mistake when PASS_CFNEQ was made into macro.
+
+2011-03-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GNUmakefile:
+	* Source/CFByteOrder.m:
+	* Source/CFByteOrder.c: Rename.
+
+2011-03-26 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFLocale.c: (CFLocaleCreateComponentsFromLocaleIdentifier)
+	(CFLocaleCreateLocaleIdentifierFromComponents) Implemented.
+	* Source/CFString.m: ([NSString-_cfTypeID]) Return the class.
+	* Tests/CFTesting.h: Make arguments more unique.
+	* Tests/CFLocale/general.m:
+	* Tests/CFLocale/value.m: Renamed.
+	* Tests/CFLocale/identifier.m: New set of tests.
+
+2011-03-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m: Improve interaction with ObjC objects.
+	* Tests/CFTesting.h: Output in the same format as macros in Testing.h.
+	* Tests/CFRuntime/runtime.m: Added toll-free bridge tests.
+
+2011-03-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m: (CFEqual) Check that type IDs are equal.
+	* Tests/CFRuntime/runtime.m: Added description output tests.
+
+2011-03-22 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m:
+	* Source/NSCFType.m: Make NSCFType class call CF functions instead
+	of the other way around.
+	* Tests/CFTesting.h: Include Testing.h here and make PASS_CF{,N}EQ
+	inline functions.
+	* Tests/CFRuntime/runtime.m: Added a couple of tests.
+
+2011-03-22 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m: Moved NSCFType definition...
+	* Source/NSCFType.m: ...To here.
+	* Source/NSCFType.h: NSCFType interface.
+	* Source/GNUmakefile: Added NSCFType.m.
+	* Headers/CoreFoundation/CFRuntime.h: Additional ivars to help
+	identify CF types.
+	* Tests/CFRuntime/runtime.m: Initial CFRuntime tests.
+
+2011-03-20 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m: Minor changes to make CF types more ObjC friendly.
+	* Source/CFLocale.c: (CFLocaleCreateCanonicalLanguageIdentifierFromString)
+	Added.
+	(CFLocaleGetValue) Added more code.
+	* Tests/CFTesting.h: Fixed output of PASS_CFNEQ.
+
+2011-03-19 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m: Initializae CFNull.
+	* Source/CFBase.m: Create a CFNull class and initialize kCFNull.
+	* Headers/CoreFoundation/CFRuntime.h: Add INIT_CFRUNTIME_BASE() macro.
+	* Headers/CoreFoundation/CFBase.h: Minor fixed to CFNull.
+
+2011-03-19 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m: Add check for NULL in CFEqual.
+	* Source/CFLocale.c: Added a bit of code to CFLocaleGetValue().
+	* Source/Identifiers.m: Added definition for calendar identifiers.
+	* Tests/CFLocale/general.m: New tests.
+	* Tests/CFTesting.h: Initialize char array.
+
+2011-03-18 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CFLocale.h: Added some CFLocale keys.
+	* Source/CFLocale.c: Added implementation for a few more functions
+	and fixed a few possible threading issues.
+	* Source/GNUmakefile:
+	* Source/Identifiers.m: New file to define ObjC constant string.
+
+2011-03-14 Richard Frith-Macdonald <rfm@gnu.org>
+
+	* Tests/GNUmakefile.super:
+	* Tests/CFLocale/create.m:
+	* Tests/CFTesting.h:
+	Minor changes to use testsuite from gnustep-make ...
+	Rename .c file to .m
+	Rename Testing.h to avoid conflict with testsuite header.
+	Add makefile fragment to link corebase
+
+2011-03-13 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* GNUmakefile:
+	* Headers/CoreFoundation/CFLocale.h:
+	* Source/CFLocale.c: New, mostly unimplemented CFLocale type.
+	* Source/CFRuntime.m: Fixed a problem in CFCopyDescription where it
+	tried to look up a typeID > __CFRuntimeClassTableSize.
+	* Source/CFBase.m: Define kCFAllocatorSystemDefault
+	= kCFAllocatorDefault.
+	* Source/CFString.h:
+	* Source/CFBase.h: Changes due to introduction of CFLocale.h.  Also
+	fixed wrong definition of CF_EXTERN_C_{BEGIN,END}.
+
+2010-09-18 Fred Kiefer <fredkiefer@gmx.de>
+
+	* Source/CFPropertyList.m (CFPropertyListCreateDeepCopy):
+	Implement deep copy.
+
+2010-06-22 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m: Use NSAllocateObject() instead of 
+	  duplicating code in this function.
+
+2010-03-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFString.m: Fixed typo in CFShowStr() and return for 
+	CFStringGet*Ptr().
+
+2010-03-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CFBase.h:
+	* Source/CFString.m: Fixed a few bugs and implemented CFShowStr().
+
+2010-03-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFStream.m:
+	* Source/CFArray.m:
+	* Source/CFURL.m:
+	* Source/CFDictionary.m:
+	* Source/CFString.m:
+	* Source/CFNumber.m:
+	* Source/CFData.m:
+	* Source/CFError.m: Added -_cfTypeID to bridged ObjC classes.
+
+2010-03-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m: Correct output of CFCopyDescription(), 
+	fixed CFCopyTypeIDDescription() and added copyright notice.
+	* Headers/CoreFoundation/CFRuntime.h: Added copyright notice.
+	* Source/CFString.m: Fixed typo.
+
+2010-03-22 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFRuntime.m: Fixed output of -description.
+	* Source/CFString.m:
+	* Headers/CoreFoundation/CFString.h: Added CFShow().
+
+2010-03-21 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GNUmakefile:
+	* Source/CFRuntime:
+	* Headers/CoreFoundation/CFRuntime.h: Added CFRuntime implementation.
+	* Source/CFBase.m:
+	* Headers/CoreFoundation/CFBase.h: Moved CFType function to 
+	Source/CFRuntime.m.
+	* Source/CFString.m: Fixed encoding conversion.
+
+2010-03-21 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFBase.m: Cleaned up CFAllocator and removed things 
+	that should not have been there in the first place.
+	* Source/CFString.m:
+	* Source/CFDate.m:
+	* Source/CFArray.m:
+	* Source/CFPropertyList.m:
+	* Source/CFString.m:
+	* Source/CFNumber.m: Cleaned up
+	* Headers/CoreFoundation/CFBase.h: Added and fixed defines and types.
+
+2010-02-28 08:43-EST Gregory John Casamento <greg.casamento@gmail.com>
+
+	* Headers/CoreFoundation/CFBase.h: Declare externs where appropriate.
+
+2010-02-12 19:35-EST Gregory John Casamento <greg.casamento@gmail.com>
+
+	* Source/CFPropertyList.m: Use stream length instead of bufferLength.
+	Correction for compilation error.
+
+2010-01-26 Fred Kiefer <fredkiefer@gmx.de>
+
+	* Source/CFPropertyList.m: Fill in a bit more code.
+
+2010-01-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CoreFoundation.h:
+	* Headers/CoreFoundation/CFNumber.h:
+	* Source/GNUmakefile:
+	* Source/CFNumber.m: Added initial CFNumber implementation.
+
+2010-01-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CFArray.h:
+	* Headers/CoreFoundation/CFDictionary.h: Made immutable and mutable
+	versions of these class be the same structure.
+
+2010-01-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFStream.m: Fixed typo.
+
+2010-01-24 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CFString.h:
+	* Headers/CoreFoundation/CFBase.h: Revert previous change, the correct
+	place for CFSTR is in CFString.h.
+	* Source/CFError.m: Include CFString.h.
+
+2010-01-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CFString.h: Moved CFSTR definition from here...
+	* Headers/CoreFoundation/CFBase.h: To here.
+	* Source/CFError.m:
+	* Source/CFString.m: Use CFSTR() instead of @"".
+
+2010-01-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CoreFoundation.h:
+	* Headers/CoreFoundation/CFBase.h
+	* Headers/CoreFoundation/CFPropertyList.h:
+	* Source/GNUmakefile:
+	* Source/CFPropertyList.m: Added rudimentary CFPropertyList
+	implementaion
+
+2010-01-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CoreFoundation.h:
+	* Headers/CoreFoundation/CFStream.h:
+	* Source/GNUmakefile:
+	* Source/CFStream.m: Added CFStream implementation.
+
+2010-01-23 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CFString.h: Add availability macros.
+
+2010-01-22 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFBase.m:
+	* Source/CFArray.m:
+	* Source/CFData.m:
+	* Source/CFDate.m:
+	* Source/CFError.m:
+	* Source/CFString.m:
+	* Source/CFURL.m: Adopt to GNU coding standards.
+
+2010-01-22 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/GNUmakefile:
+	* Source/CFDate.m:
+	* Headers/CoreFoundation/CFDate.h: Initial CFDate implementation
+	* Headers/CoreFoundation/CoreFoundation.h: Added CFDate.h and CFURL.h
+
+2010-01-21 Eric Wasylishen <ewasylishen@gmail.com>
+
+	* Source/CFURL.m:
+	* Headers/CoreFoundation/CFURL.h: Start implementing CFURL
+
+2010-01-19 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFBase.m:
+	* Source/CFError.m: Correct missing CFRetain in copied objects.
+
+2010-01-19 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Headers/CoreFoundation/CFString.h: Include stdarg.h.
+	* Headers/CoreFoundation/CoreFoundation.h:
+	* Headers/CoreFoundation/CFError.h:
+	* Source/CFError.m:
+	* Source/GNUmakefile: Added CFError.
+
+2010-01-17 Fred Kiefer <fredkiefer@gmx.de>
+
+	* Headers/CoreFoundation/CFString.h: Correct return type of
+	CFStringCreateExternalRepresentation.
+	* Source/CFArray.m,
+	* Source/CFDictionary.m,
+	* Source/CFString.m,
+	* Source/CFData.m: Implement soem missing or incorrect functions.
+
+2010-01-17 Fred Kiefer <fredkiefer@gmx.de>
+
+	* Headers/CoreFoundation/CFDictionary.h,
+	* Headers/CoreFoundation/CFCharacterSet.h: Remove remaining
+	includes of Foundation.h.
+	* Source/CFDictionary.m: Adopt to this change by using type casts.
+	* Source/CFString.m: Add include for NSArray.h.
+
+2010-01-17 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFBase.m: Implemented kCFAllocatorNull and kCFAllocatorMalloc.
+
+2010-01-17 Fred Kiefer <fredkiefer@gmx.de>
+
+	* Headers/CoreFoundation/CFBase.h,
+	* Headers/CoreFoundation/CFArray.h,
+	* Headers/CoreFoundation/CFData.h: Don't include Foundation,h, use
+	abstract types instead.
+	* Source/CFArray.m,
+	* Source/CFData.m,
+	* Source/CFString.m: Adopt to this change by using plenty of type
+	casts.
+
+2010-01-16 Stefan Bidigaray <stefanbidi@gmail.com>
+
+	* Source/CFBase.m: Correctly reallocate memory.
+
+2010-01-16 Fred Kiefer <fredkiefer@gmx.de>
+
+	* Source/CFArray.m: Implement more of the functions and remove
+	compiler warnings.
+
+2010-01-16 Eric Wasylishen <ewasylishen@gmail.com>
+
+	* Initial import of code by Stefan Bidigaray.

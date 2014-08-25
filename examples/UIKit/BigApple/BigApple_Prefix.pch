@@ -1,0 +1,19 @@
+/*
+ * Copyright (c) 2012. All rights reserved.
+ *
+ */
+
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+
+// Use DLog() to log debugging output.
+// Will only be logged when the -DDEBUG_LOG flag is set on the target
+#ifdef DEBUG
+#   define DLog(fmt, ...) NSLog((@"%s:%d " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+#else
+#   define DLog(...)
+#endif
+
+// ALog will always log output, irrespective of the -DDEBUG_LOG flag
+#define ALog(fmt, ...) NSLog((@"%s:%d " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
+

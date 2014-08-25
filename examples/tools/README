@@ -1,0 +1,107 @@
+
+Tools
+=====
+
+1. Compile and run HelloWorld-c:
+
+	tools$ cd HelloWorld-c
+	tools/HelloWorld-c$ make clean
+	tools/HelloWorld-c$ make
+	tools/HelloWorld-c$ cd obj
+	tools/HelloWorld-c$ ./HelloWorld
+
+- You should see:
+
+	Hello World
+
+2. Compile and run HelloWorld-GS:
+
+        tools$ cd HelloWorld-GS
+        tools/HelloWorld-GS$ make clean
+        tools/HelloWorld-GS$ make
+        tools/HelloWorld-GS$ cd obj
+        tools/HelloWorld-GS/obj$ ./HelloWorld
+
+- You should see:
+
+	Hello, World!
+
+3. Compile and run HelloWorldTest:
+
+        tools$ cd HelloWorldTest
+        tools/HelloWorldTest$ make clean
+        tools/HelloWorldTest$ make
+        tools/HelloWorldTest$ cd obj
+        tools/HelloWorldTest/obj$ ./HelloWorldTest
+
+- You should see:
+
+	Hello World 3!
+
+Handling Errors
+---------------
+
+- If you get an error as:
+
+	./HelloWorldTest: error while loading shared libraries: libHelloWorld.so.0: cannot open shared object file: No such file or directory
+
+- Check:
+	
+	HelloWorldTest/obj$ ldd HelloWorldTest
+
+- You will see:
+
+	...
+	libHelloWorld.so.0 => Not Found
+	libgnustep-base.so.1.22 => /usr/lib/libgnustep-base.so.1.22 (0x00110000)
+	...
+
+- Then goto:
+
+	~$ cd /etc
+	/etc/$ ls -ld ld*
+
+- You should see:
+
+	-rw-r--r-- 1 root root    34 2011-10-12 07:27 ld.so.conf
+	drwxr-xr-x 2 root root  4096 2011-10-12 07:30 ld.so.conf.d
+
+- Then:
+
+	/etc/$ cd ld.so.conf.d
+	/etc/ld.so.conf.d/$ vim libc.conf
+
+- It should have:
+
+	# libc default configuration
+	/usr/local/lib
+
+-- If not found then:
+
+	/etc/$ sudo vim ld.so.conf
+
+
+-- Then add:
+
+	/usr/local/lib
+
+- Run:
+
+	$ sudo ldconfig
+
+- Now check again:
+
+        HelloWorldTest/obj$ ldd HelloWorldTest
+
+- You should see:
+
+	...
+	libHelloWorld.so.0 => /usr/local/lib/libHelloWorld.so.0 (0x006da000)
+	libgnustep-base.so.1.24 => /usr/local/lib/libgnustep-base.so.1.24 (0x00510000)
+        ...
+
+- For more info, check:
+
+	http://ubuntuforums.org/archive/index.php/t-466808.html
+
+

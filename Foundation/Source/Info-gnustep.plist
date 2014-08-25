@@ -1,0 +1,8 @@
+{
+  NSExecutable = "gnustep-base";
+  NSPrincipalClass = "NSObject";
+  GSBundleShortVersionString = "1.24.2";
+  GSBundleVersion = 124.2;
+  CFBundleShortVersionString = "1.24.2";
+  CFBundleVersion = 124.2;
+}
