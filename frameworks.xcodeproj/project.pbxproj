@@ -1,0 +1,98 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		C566113A19B2658E005123FA /* AppKit */ = {isa = PBXFileReference; lastKnownFileType = folder; path = AppKit; sourceTree = "<group>"; };
+		C566113B19B2658E005123FA /* common-install.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "common-install.sh"; sourceTree = "<group>"; };
+		C566113C19B2658E005123FA /* CoreAnimation */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CoreAnimation; sourceTree = "<group>"; };
+		C566113D19B2658E005123FA /* CoreFoundation */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CoreFoundation; sourceTree = "<group>"; };
+		C566113E19B2658E005123FA /* CoreGraphics */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CoreGraphics; sourceTree = "<group>"; };
+		C566113F19B2658E005123FA /* CoreText */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CoreText; sourceTree = "<group>"; };
+		C566114019B2658E005123FA /* examples */ = {isa = PBXFileReference; lastKnownFileType = folder; path = examples; sourceTree = "<group>"; };
+		C566114119B2658E005123FA /* Foundation */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Foundation; sourceTree = "<group>"; };
+		C566114219B2658E005123FA /* install.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = install.sh; sourceTree = "<group>"; };
+		C566114319B2658E005123FA /* IOKit */ = {isa = PBXFileReference; lastKnownFileType = folder; path = IOKit; sourceTree = "<group>"; };
+		C566114419B2658E005123FA /* OpenGLES */ = {isa = PBXFileReference; lastKnownFileType = folder; path = OpenGLES; sourceTree = "<group>"; };
+		C566114519B2658E005123FA /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; };
+		C566114619B2658E005123FA /* scheme-install.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = "scheme-install.sh"; sourceTree = "<group>"; };
+		C566114719B2658E005123FA /* UIKit */ = {isa = PBXFileReference; lastKnownFileType = folder; path = UIKit; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		C566113319B2654F005123FA = {
+			isa = PBXGroup;
+			children = (
+				C566113A19B2658E005123FA /* AppKit */,
+				C566113B19B2658E005123FA /* common-install.sh */,
+				C566113C19B2658E005123FA /* CoreAnimation */,
+				C566113D19B2658E005123FA /* CoreFoundation */,
+				C566113E19B2658E005123FA /* CoreGraphics */,
+				C566113F19B2658E005123FA /* CoreText */,
+				C566114019B2658E005123FA /* examples */,
+				C566114119B2658E005123FA /* Foundation */,
+				C566114219B2658E005123FA /* install.sh */,
+				C566114319B2658E005123FA /* IOKit */,
+				C566114419B2658E005123FA /* OpenGLES */,
+				C566114519B2658E005123FA /* README.md */,
+				C566114619B2658E005123FA /* scheme-install.sh */,
+				C566114719B2658E005123FA /* UIKit */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXProject section */
+		C566113419B2654F005123FA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0510;
+			};
+			buildConfigurationList = C566113719B2654F005123FA /* Build configuration list for PBXProject "frameworks" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = C566113319B2654F005123FA;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		C566113819B2654F005123FA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Debug;
+		};
+		C566113919B2654F005123FA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		C566113719B2654F005123FA /* Build configuration list for PBXProject "frameworks" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C566113819B2654F005123FA /* Debug */,
+				C566113919B2654F005123FA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C566113419B2654F005123FA /* Project object */;
+}

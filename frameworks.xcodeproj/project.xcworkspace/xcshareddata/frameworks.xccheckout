@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>516DC2A9-902C-4A9E-92DF-501E3E56BED6</string>
+	<key>IDESourceControlProjectName</key>
+	<string>frameworks</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>7937541E-6108-4666-A0FC-6E6E9961315D</key>
+		<string>https://github.com/amraboelela/myos.ubuntu.frameworks.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>frameworks.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>7937541E-6108-4666-A0FC-6E6E9961315D</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/amraboelela/myos.ubuntu.frameworks.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>7937541E-6108-4666-A0FC-6E6E9961315D</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>7937541E-6108-4666-A0FC-6E6E9961315D</string>
+			<key>IDESourceControlWCCName</key>
+			<string>frameworks</string>
+		</dict>
+	</array>
+</dict>
+</plist>
