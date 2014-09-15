@@ -3,6 +3,7 @@
 Frameworks for myOS applications in Ubuntu environment, using Objective-C, based on GNUstep and Chameleon frameworks.
 
 * Add MYOS_PATH line to ~/.bash_profile, example:
+
         export MYOS_PATH=~/develop/myos
 
 * Clone or fork myos.ubuntu.frameworks repo into path myos/ubuntu/frameworks
