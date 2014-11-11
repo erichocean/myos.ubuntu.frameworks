@@ -6,13 +6,10 @@
 //  Copyright 2011 Sam Soffes. All rights reserved.
 //
 
-#import <UIKit/UISegmentedControl.h>
-#import <UIKit/UITouch.h>
-#import <UIKit/UIColor.h>
-#import <UIKit/UIStringDrawing.h>
-#import <UIKit/UIGraphics.h>
+#import <UIKit/UIKit-private.h>
+#import <CoreAnimation/CoreAnimation-private.h>
 
-static NSString *kSSSegmentedControlEnabledKey = @"enabled";
+static NSString *const kSSSegmentedControlEnabledKey = @"enabled";
 
 @interface UISegmentedControl ()
 @property (nonatomic, retain) UIImage *buttonImage;
@@ -122,8 +119,8 @@ static NSString *kSSSegmentedControlEnabledKey = @"enabled";
     } else {
         [_segments replaceObjectAtIndex:segment withObject:title];
     }
-    
-    [self setNeedsDisplay];
+    _CALayerSetNeedsDisplay(_layer);
+    //[self setNeedsDisplay];
 }
 
 - (NSString *)titleForSegmentAtIndex:(NSUInteger)segment
@@ -147,8 +144,7 @@ static NSString *kSSSegmentedControlEnabledKey = @"enabled";
     } else {
         [_segments replaceObjectAtIndex:segment withObject:image];
     }
-    
-    [self setNeedsDisplay];
+    _CALayerSetNeedsDisplay(_layer);
 }
 
 
@@ -188,7 +184,7 @@ static NSString *kSSSegmentedControlEnabledKey = @"enabled";
     }
     
     _selectedSegmentIndex = index;
-    [self setNeedsDisplay];
+    _CALayerSetNeedsDisplay(_layer);
     [self sendActionsForControlEvents:UIControlEventValueChanged];
 }
 
@@ -213,9 +209,8 @@ static NSString *kSSSegmentedControlEnabledKey = @"enabled";
     if (!_momentary) {
         return;
     }
-    
     _selectedSegmentIndex = UISegmentedControlNoSegment;
-    [self setNeedsDisplay];
+    _CALayerSetNeedsDisplay(_layer);
 }
 
 - (void)drawRect:(CGRect)frame
@@ -349,7 +344,7 @@ static NSString *kSSSegmentedControlEnabledKey = @"enabled";
     }
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
@@ -357,7 +352,7 @@ static NSString *kSSSegmentedControlEnabledKey = @"enabled";
         [keyPath isEqualToString:@"dividerImage"] || [keyPath isEqualToString:@"highlightedDividerImage"] ||
         [keyPath isEqualToString:@"font"] || [keyPath isEqualToString:@"textColor"] || [keyPath isEqualToString:@"textShadowColor"] ||
         [keyPath isEqualToString:@"textShadowOffset"] || [keyPath isEqualToString:@"textEdgeInsets"]) {
-        [self setNeedsDisplay];
+        _CALayerSetNeedsDisplay(_layer);
         return;
     }
     
@@ -366,7 +361,7 @@ static NSString *kSSSegmentedControlEnabledKey = @"enabled";
 
 @end
 
-#pragma mark - Private C functions
+#pragma mark - Shared functions
 
 NSMutableDictionary* _UISegmentedControlMetaForSegmentIndex(UISegmentedControl* segmentedControl, NSUInteger index)
 {
@@ -400,6 +395,6 @@ void _UISegmentedControlSetMetaValue:(UISegmentedControl* segmentedControl, id v
     }
     
     [_segmentMeta setValue:meta forKey:[NSString stringWithFormat:@"%i", index]];
-    [self setNeedsDisplay];
+    _CALayerSetNeedsDisplay(_layer);
 }
 

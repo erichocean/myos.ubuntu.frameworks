@@ -27,30 +27,31 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIViewController.h>
-#import <UIKit/UIView-private.h>
-#import <UIKit/UIScreen.h>
-#import <UIKit/UIWindow.h>
-#import <UIKit/UIScreen.h>
-#import <UIKit/UINavigationItem.h>
-#import <UIKit/UIBarButtonItem.h>
-#import <UIKit/UINavigationController.h>
-#import <UIKit/UISplitViewController.h>
-#import <UIKit/UIToolbar.h>
-#import <UIKit/UIScreen.h>
-#import <UIKit/UITabBarController.h>
+#import <UIKit/UIKit-private.h>
+ 
+static id _UIViewControllerNearestParentViewControllerThatIsKindOf(UIViewController *aController, Class c)
+{
+    UIViewController *controller = aController->_parentViewController;
+    while (controller && ![controller isKindOfClass:c]) {
+        controller = controller->_parentViewController;
+    }
+    return controller;
+}
 
 @implementation UIViewController
+
 @synthesize view=_view, wantsFullScreenLayout=_wantsFullScreenLayout, title=_title, contentSizeForViewInPopover=_contentSizeForViewInPopover;
 @synthesize modalInPopover=_modalInPopover, toolbarItems=_toolbarItems, modalPresentationStyle=_modalPresentationStyle, editing=_editing;
 @synthesize modalViewController=_modalViewController, parentViewController=_parentViewController;
 @synthesize modalTransitionStyle=_modalTransitionStyle, hidesBottomBarWhenPushed=_hidesBottomBarWhenPushed;
 @synthesize searchDisplayController=_searchDisplayController, tabBarItem=_tabBarItem, tabBarController=_tabBarController;
 
+#pragma mark - Life cycle
+
 - (id)init
 {
     return [self initWithNibName:nil bundle:nil];
-}
+} 
 
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle
 {
@@ -61,15 +62,43 @@
     return self;
 }
 
+- (void)viewDidLoad
+{
+    //DLog();
+}
+
+- (void)viewDidUnload
+{
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+}
+
+- (void)viewDidAppear:(BOOL)animated
+{
+}
+
+- (void)viewWillDisappear:(BOOL)animated
+{
+}
+
+- (void)viewDidDisappear:(BOOL)animated
+{
+}
+
 - (void)dealloc
 {
-    [_view _setViewController:nil];
+    _view->_viewController=nil;
     [_modalViewController release];
     [_navigationItem release];
     [_title release];
     [_view release];
+    //DLog();
     [super dealloc];
 }
+
+#pragma mark - Accessors
 
 - (NSString *)nibName
 {
@@ -93,10 +122,12 @@
 
 - (UIView *)view
 {
+    //DLog();
     if ([self isViewLoaded]) {
         return _view;
     } else {
         [self loadView];
+        //DLog();
         [self viewDidLoad];
         return _view;
     }
@@ -104,45 +135,17 @@
 
 - (void)setView:(UIView *)aView
 {
+    //DLog();
     if (aView != _view) {
-        [_view _setViewController:nil];
-        [_view release];
+        //DLog();
+        if (_view) {
+            _view->_viewController=nil;
+            [_view release];
+        }
         _view = [aView retain];
-        [_view _setViewController:self];
+        //DLog();
+        _view->_viewController=self;
     }
-}
-
-- (void)loadView
-{
-    self.view = [[[UIView alloc] initWithFrame:CGRectMake(0,0,320,480)] autorelease];
-}
-
-- (void)viewDidLoad
-{
-}
-
-- (void)viewDidUnload
-{
-}
-
-- (void)didReceiveMemoryWarning
-{
-}
-
-- (void)viewWillAppear:(BOOL)animated
-{
-}
-
-- (void)viewDidAppear:(BOOL)animated
-{
-}
-
-- (void)viewWillDisappear:(BOOL)animated
-{
-}
-
-- (void)viewDidDisappear:(BOOL)animated
-{
 }
 
 - (UIInterfaceOrientation)interfaceOrientation
@@ -188,11 +191,43 @@
     return nil;
 }
 
+- (UINavigationController *)navigationController
+{
+    return _UIViewControllerNearestParentViewControllerThatIsKindOf(self, [UINavigationController class]);
+}
+
+- (UISplitViewController *)splitViewController
+{
+    return _UIViewControllerNearestParentViewControllerThatIsKindOf(self, [UISplitViewController class]);
+}
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@: %p; title = %@; view = %@>", [self className], self, self.title, self.view];
+}
+
+#pragma mark - Delegates
+
+- (void)didReceiveMemoryWarning
+{
+}
+
+#pragma mark - Public methods
+
+- (void)loadView
+{
+    //DLog(); 
+    CGRect frame = [[UIScreen mainScreen] bounds]; 
+    frame = CGRectMake(frame.origin.x, frame.origin.y+_kStatusBarHeight, frame.size.width, frame.size.height-_kStatusBarHeight);
+    //frame = CGRectMake(frame.origin.x, frame.origin.y+50, frame.size.width, frame.size.height-50);
+    self.view = [[[UIView alloc] initWithFrame:frame] autorelease];
+}
+
 - (void)presentModalViewController:(UIViewController *)modalViewController animated:(BOOL)animated
 {
     if (!_modalViewController && _modalViewController != self) {
         _modalViewController = [modalViewController retain];
-        [_modalViewController _setParentViewController:self];
+        _modalViewController->_parentViewController = self;
 
         UIWindow *window = self.view.window;
         UIView *selfView = self.view;
@@ -207,8 +242,6 @@
         [self viewWillDisappear:animated];
         selfView.hidden = YES;		// I think the real one may actually remove it, which would mean needing to remember the superview, I guess? Not sure...
         [self viewDidDisappear:animated];
-
-
         [_modalViewController viewDidAppear:animated];
     }
 }
@@ -232,13 +265,13 @@
         [self viewWillAppear:animated];
         
         [_modalViewController.view removeFromSuperview];
-        [_modalViewController _setParentViewController:nil];
+        _modalViewController->_parentViewController = nil;
         [_modalViewController autorelease];
         _modalViewController = nil;
 
         [self viewDidAppear:animated];
     } else {
-        [self.parentViewController dismissModalViewControllerAnimated:animated];
+        [self->_parentViewController dismissModalViewControllerAnimated:animated];
     }
 }
 
@@ -255,36 +288,4 @@
 {
 }
 
-- (UINavigationController *)navigationController
-{
-    return [self _nearestParentViewControllerThatIsKindOf:[UINavigationController class]];
-}
-
-- (UISplitViewController *)splitViewController
-{
-    return [self _nearestParentViewControllerThatIsKindOf:[UISplitViewController class]];
-}
-
-- (NSString *)description
-{
-    return [NSString stringWithFormat:@"<%@: %p; title = %@; view = %@>", [self className], self, self.title, self.view];
-}
-
 @end
-
-void _UIViewControllerSetParentViewController(UIViewController* controller, UIViewController* parentController)
-{
-    _parentViewController = parentController;
-}
-
-id _UIViewControllerNearestParentViewControllerThatIsKindOf(UIViewController* controller, Class c)
-{
-    UIViewController *controller = _parentViewController;
-
-    while (controller && ![controller isKindOfClass:c]) {
-        controller = [controller parentViewController];
-    }
-
-    return controller;
-}
-

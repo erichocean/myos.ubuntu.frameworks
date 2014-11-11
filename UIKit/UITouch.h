@@ -28,7 +28,7 @@
  */
 
 #import <CoreGraphics/CoreGraphics.h>
-#import <Foundation/Foundation.h>
+//#import <Foundation/Foundation.h>
  
 typedef enum {
     UITouchPhaseBegan,
@@ -61,7 +61,7 @@ typedef enum {
     NSUInteger _tapCount;
     UITouchPhase _phase;
     _UITouchGesture _gesture;
-    CGPoint _delta;
+    CGPoint _delta; 
     CGFloat _rotation;
     CGFloat _magnification;
     CGPoint _location;

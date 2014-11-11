@@ -32,9 +32,9 @@
 NSString *_UIImageMacPathForFile(NSString* path);		// inserts "@mac" into the filename of the file in the given path and returns the result
 NSString *_UIImagePathForFile(NSString* path);		// uses above, checks for existence, if found, returns it otherwise returns the path string un-altered (doesn't verify that the file at the original path exists, though)
 
-void _UIImageCacheImage(UIImage* image, NSString* name);
-NSString *_UIImageNameForCachedImage(UIImage* image);
-UIImage *_UIImageCachedImageForName(NSString* name);
+void _UIImageCacheImage(UIImage* image, NSString *name);
+NSString *_UIImageNameForCachedImage(UIImage *image);
+//UIImage *_UIImageCachedImageForName(NSString *name);
 UIImage *_UIImageBackButtonImage();
 UIImage *_UIImageHighlightedBackButtonImage();
 UIImage *_UIImageToolbarButtonImage();
@@ -54,9 +54,9 @@ UIImage *_UIImageTabBarItemImage();
 
 UIImage *_UIImageToolbarImage(UIImage* image);		// returns a new image which is modified as required for toolbar buttons (turned into a solid color)
 
-UIImage *_UIImageLoadImageNamed(NSString* name);
-NSString *_UIImageMacPathForFile(NSString* path);
-UIImage *_UIImageCachedImageForName(NSString* name);
-void _UIImageCacheImage(UIImage* image, NSString* name);
-UIImage *_UIImageFrameworkImageWithName(NSString* name, NSUInteger leftCapWidth, NSUInteger topCapHeight);
-
+//UIImage *_UIImageLoadImageNamed(NSString *name);
+NSString *_UIImageMacPathForFile(NSString *path);
+//UIImage *_UIImageCachedImageForName(NSString *name);
+void _UIImageCacheImage(UIImage *image, NSString *name);
+UIImage *_UIImageFrameworkImageWithName(NSString *name, NSUInteger leftCapWidth, NSUInteger topCapHeight);
+UIImage *_UIImageCaptureScreen();

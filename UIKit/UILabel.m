@@ -27,10 +27,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UILabel.h>
-#import <UIKit/UIColor.h>
-#import "UIFont.h"
-#import <UIKit/UIGraphics.h>
+#import <UIKit/UIKit-private.h>
+#import <CoreAnimation/CoreAnimation-private.h>
 
 @implementation UILabel
 
@@ -43,20 +41,22 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
+    //DLog(@"1");
     if ((self = [super initWithFrame:frame])) {
-        self.userInteractionEnabled = NO;
-        self.textAlignment = UITextAlignmentLeft;
-        self.lineBreakMode = UILineBreakModeTailTruncation;
-        self.textColor = [UIColor blackColor];
-        self.font = [UIFont systemFontOfSize:[UIFont labelFontSize]];
-        self.backgroundColor = [UIColor whiteColor];
-        self.enabled = YES;
-        self.numberOfLines = 1;
-        self.contentMode = UIViewContentModeLeft;
+        _userInteractionEnabled = NO;
+        _textAlignment = UITextAlignmentLeft;
+        _lineBreakMode = UILineBreakModeTailTruncation;
+        _textColor = [[UIColor blackColor] retain];
+        _font = [[UIFont systemFontOfSize:[UIFont labelFontSize]] retain];
+        _enabled = YES;
+        _numberOfLines = 1;
+        _contentMode = UIViewContentModeLeft;
         self.clipsToBounds = YES;
-        self.shadowOffset = CGSizeMake(0,-1);
-        self.baselineAdjustment = UIBaselineAdjustmentAlignBaselines;
+        _shadowOffset = CGSizeMake(0,-1);
+        _baselineAdjustment = UIBaselineAdjustmentAlignBaselines;
+        self.contentScaleFactor = _UIScreenMainScreen()->_scale;
     }
+    //DLog(@"2");
     return self;
 }
 
@@ -65,6 +65,7 @@
     [_text release];
     [_font release];
     [_textColor release];
+    [_font release];
     [_shadowColor release];
     [_highlightedTextColor release];
     [super dealloc];
@@ -77,27 +78,29 @@
     if (_text != newText) {
         [_text release];
         _text = [newText copy];
-        [self _updateContent];
+        _CALayerSetNeedsDisplay(_layer);
     }
 }
 
 - (void)setFont:(UIFont *)newFont
 {
+    //DLog();
     assert(newFont != nil);
 
     if (newFont != _font) {
         [_font release];
         _font = [newFont retain];
-        [self _updateContent];
+        _CALayerSetNeedsDisplay(_layer);
     }
 }
 
 - (void)setTextColor:(UIColor *)newColor
 {
+    //DLog();
     if (newColor != _textColor) {
         [_textColor release];
         _textColor = [newColor retain];
-        [self _updateContent];
+        _CALayerSetNeedsDisplay(_layer);
     }
 }
 
@@ -106,7 +109,7 @@
     if (newColor != _shadowColor) {
         [_shadowColor release];
         _shadowColor = [newColor retain];
-        [self _updateContent];
+        _CALayerSetNeedsDisplay(_layer);
     }
 }
 
@@ -114,7 +117,7 @@
 {
     if (highlighted != _highlighted) {
         _highlighted = highlighted;
-        [self _updateContent];
+        _CALayerSetNeedsDisplay(_layer);
     }
 }
 
@@ -122,15 +125,16 @@
 {
     if (!CGSizeEqualToSize(newOffset,_shadowOffset)) {
         _shadowOffset = newOffset;
-        [self _updateContent];
+        _CALayerSetNeedsDisplay(_layer);
     }
 }
 
 - (void)setTextAlignment:(UITextAlignment)newAlignment
 {
+    //DLog();
     if (newAlignment != _textAlignment) {
         _textAlignment = newAlignment;
-        [self _updateContent];
+        _CALayerSetNeedsDisplay(_layer);
     }
 }
 
@@ -138,7 +142,7 @@
 {
     if (newMode != _lineBreakMode) {
         _lineBreakMode = newMode;
-        [self _updateContent];
+        _CALayerSetNeedsDisplay(_layer);
     }
 }
 
@@ -153,7 +157,7 @@
 {
     if (lines != _numberOfLines) {
         _numberOfLines = lines;
-        [self _updateContent];
+        _CALayerSetNeedsDisplay(_layer);
     }
 }
 
@@ -162,8 +166,39 @@
     const BOOL redisplay = !CGSizeEqualToSize(newFrame.size,self.frame.size);
     [super setFrame:newFrame];
     if (redisplay) {
-        [self _updateContent];
+        _CALayerSetNeedsDisplay(_layer);
     }
+}
+
+- (void)setAdjustsFontSizeToFitWidth:(BOOL)adjustsFontSizeToFitWidth
+{
+    if (adjustsFontSizeToFitWidth) {
+        //DLog();
+        CGSize boundsSize = self.bounds.size;
+        //DLog();
+        float fontSize = _font.pointSize;
+        //DLog();
+        UIFont *font = [UIFont fontWithName:_font.fontName size:fontSize];
+        //DLog(@"_text: %@", _text);
+        CGSize size = [_text sizeWithFont:_font];
+        //DLog(@"size: %@", NSStringFromCGSize(size));
+        //DLog(@"boundsSize: %@", NSStringFromCGSize(boundsSize));
+        while (size.width > boundsSize.width) {
+            fontSize--;
+            //DLog(@"fontSize: %0.1f", fontSize);
+            font = [UIFont fontWithName:_font.fontName size:fontSize];
+            size = [_text sizeWithFont:font];
+            //DLog(@"size: %@", NSStringFromCGSize(size));
+            //DLog(@"font: %@", font);
+        }
+        self.font = font;
+        //DLog();
+    }
+}
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@: %p; text: %@; frame = %@; layer = %p>", [self className], self, _text, NSStringFromCGRect(self.frame), _layer];
 }
 
 #pragma mark - Overridden methods
@@ -171,7 +206,6 @@
 - (void)drawRect:(CGRect)rect
 {
     if ([_text length] > 0) {
-        //DLog();
         CGContext *context = UIGraphicsGetCurrentContext();
         CGContextSaveGState(context);
         
@@ -183,11 +217,11 @@
         if (_numberOfLines > 0) {
             maxSize.height = _font.lineHeight * _numberOfLines;
         }
+        //DLog(@"_lineBreakMode: %d", _lineBreakMode);
         drawRect.size = [_text sizeWithFont:_font constrainedToSize:maxSize lineBreakMode:_lineBreakMode];
 
         // now vertically center it
         drawRect.origin.y = roundf((bounds.size.height - drawRect.size.height) / 2.f);
-        
         // now position it correctly for the width
         // this might be cheating somehow and not how the real thing does it...
         // I didn't spend a ton of time investigating the sizes that it sends the drawTextInRect: method
@@ -201,15 +235,14 @@
         CGContextSetShadowWithColor(context, offset, 0, _shadowColor.CGColor);
         
         // finally, draw the real label
-        UIColor *drawColor = (_highlighted && _highlightedTextColor)? _highlightedTextColor : _textColor;
+        UIColor *drawColor = (_highlighted && _highlightedTextColor) ? _highlightedTextColor : _textColor;
         [drawColor setFill];
         [self drawTextInRect:drawRect];
-        
         CGContextRestoreGState(context);
     }
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (CGRect)textRectForBounds:(CGRect)bounds limitedToNumberOfLines:(NSInteger)numberOfLines
 {
@@ -218,7 +251,8 @@
         if (numberOfLines > 0) {
             maxSize.height = _font.lineHeight * numberOfLines;
         }
-        CGSize size = [_text sizeWithFont: _font constrainedToSize: maxSize lineBreakMode: _lineBreakMode];
+        //DLog(@"_lineBreakMode: %d", _lineBreakMode);
+        CGSize size = [_text sizeWithFont:_font constrainedToSize:maxSize lineBreakMode:_lineBreakMode];
         return (CGRect){bounds.origin, size};
     }
     return (CGRect){bounds.origin, {0, 0}};
@@ -226,13 +260,16 @@
 
 - (void)drawTextInRect:(CGRect)rect
 {
+    //DLog();
     [_text drawInRect:rect withFont:_font lineBreakMode:_lineBreakMode alignment:_textAlignment];
 }
 
 - (CGSize)sizeThatFits:(CGSize)size
 {
     size = CGSizeMake(((_numberOfLines > 0)? CGFLOAT_MAX : size.width), ((_numberOfLines <= 0)? CGFLOAT_MAX : (_font.lineHeight*_numberOfLines)));
-    return [_text sizeWithFont:_font constrainedToSize:size lineBreakMode:_lineBreakMode];
+    //DLog(@"_lineBreakMode: %d", _lineBreakMode);
+    CGSize result = [_text sizeWithFont:_font constrainedToSize:size lineBreakMode:_lineBreakMode];
+    return CGSizeMake(result.width+2, result.height+2);
 }
 
 @end

@@ -61,6 +61,7 @@ NSString *NSStringFromUIEdgeInsets(UIEdgeInsets insets)
 + (NSValue *)valueWithCGPoint:(CGPoint)point
 {
     //return [NSValue valueWithPoint:NSPointFromCGPoint(point)];
+    //DLog(@"point: %@", NSStringFromCGPoint(point));
     return [NSValue valueWithBytes:&point objCType:@encode(CGPoint)];
 }
 
@@ -120,5 +121,3 @@ NSString *NSStringFromUIEdgeInsets(UIEdgeInsets insets)
     return NSPointToCGPoint([self decodePointForKey:key]);
 }
 @end
-
-

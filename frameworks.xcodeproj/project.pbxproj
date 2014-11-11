@@ -13,7 +13,6 @@
 		C566113D19B2658E005123FA /* CoreFoundation */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CoreFoundation; sourceTree = "<group>"; };
 		C566113E19B2658E005123FA /* CoreGraphics */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CoreGraphics; sourceTree = "<group>"; };
 		C566113F19B2658E005123FA /* CoreText */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CoreText; sourceTree = "<group>"; };
-		C566114019B2658E005123FA /* examples */ = {isa = PBXFileReference; lastKnownFileType = folder; path = examples; sourceTree = "<group>"; };
 		C566114119B2658E005123FA /* Foundation */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Foundation; sourceTree = "<group>"; };
 		C566114219B2658E005123FA /* install.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = install.sh; sourceTree = "<group>"; };
 		C566114319B2658E005123FA /* IOKit */ = {isa = PBXFileReference; lastKnownFileType = folder; path = IOKit; sourceTree = "<group>"; };
@@ -33,7 +32,6 @@
 				C566113D19B2658E005123FA /* CoreFoundation */,
 				C566113E19B2658E005123FA /* CoreGraphics */,
 				C566113F19B2658E005123FA /* CoreText */,
-				C566114019B2658E005123FA /* examples */,
 				C566114119B2658E005123FA /* Foundation */,
 				C566114219B2658E005123FA /* install.sh */,
 				C566114319B2658E005123FA /* IOKit */,

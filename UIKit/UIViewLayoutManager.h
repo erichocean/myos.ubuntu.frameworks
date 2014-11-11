@@ -27,7 +27,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Foundation/Foundation.h>
+//#import <Foundation/Foundation.h>
 #import <CoreAnimation/CoreAnimation.h>
 
 @protocol UIViewLayoutManagerProtocol <NSObject>

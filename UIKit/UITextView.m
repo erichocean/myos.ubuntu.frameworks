@@ -44,6 +44,7 @@ NSString *const UITextViewTextDidEndEditingNotification = @"UITextViewTextDidEnd
 
 
 @implementation UITextView
+
 @synthesize dataDetectorTypes=_dataDetectorTypes, inputAccessoryView=_inputAccessoryView, inputView=_inputView;
 @synthesize editable = _editable;
 @dynamic delegate;
@@ -54,11 +55,11 @@ NSString *const UITextViewTextDidEndEditingNotification = @"UITextViewTextDidEnd
         _textLayer = [[CATextLayer alloc] initWithBounds:frame];
         [self.layer insertSublayer:_textLayer atIndex:0];
 
-        self.textColor = [UIColor blackColor];
-        self.font = [UIFont systemFontOfSize:17];
-        self.dataDetectorTypes = UIDataDetectorTypeAll;
-        self.editable = YES;
-        self.contentMode = UIViewContentModeScaleToFill;
+        _textColor = [[UIColor blackColor] retain];
+        _font = [[UIFont systemFontOfSize:17] retain];
+        _dataDetectorTypes = UIDataDetectorTypeAll;
+        _editable = YES;
+        _contentMode = UIViewContentModeScaleToFill;
         self.clipsToBounds = YES;
     }
     return self;
@@ -70,6 +71,8 @@ NSString *const UITextViewTextDidEndEditingNotification = @"UITextViewTextDidEnd
     [_textLayer release];
     [_inputAccessoryView release];
     [_inputView release];
+    [_textColor release];
+    [_font release];
     [super dealloc];
 }
 

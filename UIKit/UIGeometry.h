@@ -27,7 +27,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Foundation/Foundation.h>
+//#import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 
 typedef struct UIEdgeInsets {

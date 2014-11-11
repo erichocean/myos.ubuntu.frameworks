@@ -27,17 +27,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIView-private.h>
-#import <UIKit/UIWindow.h>
-#import <UIKit/UIGraphics.h>
-#import <UIKit/UIColor.h>
-#import <UIKit/UIGeometry.h>
-#import <UIKit/UIViewLayoutManager.h>
-#import <UIKit/UIViewController.h>
-#import <UIKit/UIApplication-private.h>
-#import <UIKit/UIGestureRecognizer-private.h>
-#import <UIKit/UIViewBlockAnimationDelegate.h>
-#import <UIKit/UIViewAnimationGroup.h>
+#import <UIKit/UIKit-private.h>
 #import <CoreAnimation/CoreAnimation-private.h>
 
 NSString *const UIViewFrameDidChangeNotification = @"UIViewFrameDidChangeNotification";
@@ -45,19 +35,26 @@ NSString *const UIViewBoundsDidChangeNotification = @"UIViewBoundsDidChangeNotif
 NSString *const UIViewDidMoveToSuperviewNotification = @"UIViewDidMoveToSuperviewNotification";
 NSString *const UIViewHiddenDidChangeNotification = @"UIViewHiddenDidChangeNotification";
 
-static NSMutableArray *_animationGroups;
+NSMutableArray *_animationGroups;
 static BOOL _animationsEnabled = YES;
 
-BOOL _UIViewInstanceImplementsDrawRect(Class c);
 BOOL _UIViewSubviewControllersNeedAppearAndDisappear(UIView* view);
 void _UIViewWillMoveFromWindow(UIView* view, UIWindow* fromWindow, UIWindow* toWindow);
 void _UIViewDidMoveFromWindow(UIView* view, UIWindow* fromWindow, UIWindow* toWindow);
 void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds);
 
+#pragma mark - Static functions
+
+static BOOL _UIViewInstanceImplementsSelector(SEL sel, Class instanceClass)
+{
+    return [UIView instanceMethodForSelector:sel] != [instanceClass instanceMethodForSelector:sel];
+}
+    
 @implementation UIView
 @synthesize layer=_layer, superview=_superview, clearsContextBeforeDrawing=_clearsContextBeforeDrawing, autoresizesSubviews=_autoresizesSubviews;
 @synthesize tag=_tag, userInteractionEnabled=_userInteractionEnabled, contentMode=_contentMode, backgroundColor=_backgroundColor;
 @synthesize multipleTouchEnabled=_multipleTouchEnabled, exclusiveTouch=_exclusiveTouch, autoresizingMask=_autoresizingMask;
+@synthesize subviews=_subviews;
 
 #pragma mark - Life cycle
 
@@ -81,7 +78,7 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 - (id)initWithFrame:(CGRect)theFrame
 {
     if ((self=[super init])) {
-        _implementsDrawRect = _UIViewInstanceImplementsDrawRect([self class]);
+        //_implementsDrawRect = _UIViewInstanceImplementsDrawRect([self class]);
         _clearsContextBeforeDrawing = YES;
         _autoresizesSubviews = YES;
         _userInteractionEnabled = YES;
@@ -89,14 +86,13 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
         _gestureRecognizers = [[NSMutableSet alloc] init];
         _layer = [[[[self class] layerClass] alloc] initWithBounds:CGRectMake(0,0,theFrame.size.width,theFrame.size.height)];
         _layer.delegate = self;
-        _layer.layoutManager = [UIViewLayoutManager layoutManager];
+        _layer->_layoutManager = [[UIViewLayoutManager layoutManager] retain];
         if ([self class] == [UIWindow class]) {
             NSMutableArray *rootLayers = _CALayerGetRootLayers();
+            //DLog(@"rootLayers: %@", rootLayers);
             [rootLayers addObject:_layer];
         }
         self.frame = theFrame;
-        self.alpha = 1;
-        self.opaque = YES;
         [self _updateContent];
     }
     return self;
@@ -104,9 +100,10 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 
 - (void)dealloc
 {
+    //DLog(@"self: %@, _subviews: %@", self, _subviews);
     [_subviews makeObjectsPerformSelector:@selector(_setNilSuperview)];
     [_subviews release];
-    _layer.layoutManager = nil;
+    [_layer->_layoutManager release];
     _layer.delegate = nil;
     [_layer release];
     [_backgroundColor release];
@@ -123,12 +120,12 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 
 - (UIResponder *)nextResponder
 {
-    return (UIResponder *) _viewController ?: (UIResponder *) _superview;
+    return (UIResponder *) _viewController ? : (UIResponder *) _superview;
 }
-
+/*
 - (NSArray *)subviews
 {
-    NSArray *sublayers = _layer.sublayers;
+    NSArray *sublayers = _layer->_sublayers;
     NSMutableArray *subviews = [NSMutableArray arrayWithCapacity:[sublayers count]];
 
     // This builds the results from the layer instead of just using _subviews because I want the results to match
@@ -141,7 +138,7 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
         }
     }
     return subviews;
-}
+}*/
 
 - (CGRect)frame
 {
@@ -150,39 +147,50 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 
 - (void)setFrame:(CGRect)newFrame
 {
-    if (!CGRectEqualToRect(newFrame,_layer.frame)) {
+    //if (!CGRectEqualToRect(newFrame,_layer.frame)) {
         //DLog(@"newFrame: %@", NSStringFromCGRect(newFrame));
         CGRect oldBounds = _layer.bounds;
         _layer.frame = newFrame;
         _UIViewBoundsDidChangeFrom(self, oldBounds, _layer.bounds);
         [[NSNotificationCenter defaultCenter] postNotificationName:UIViewFrameDidChangeNotification object:self];
-    }
+    //}
 }
 
 - (CGRect)bounds
 {
-    return _layer.bounds;
+    return _layer->_bounds;
 }
 
 - (void)setBounds:(CGRect)newBounds
 {
     //if (!CGRectEqualToRect(newBounds,_layer.bounds)) {
-        CGRect oldBounds = _layer.bounds;
-        _layer.bounds = newBounds;
-        _UIViewBoundsDidChangeFrom(self, oldBounds, newBounds);
-        [[NSNotificationCenter defaultCenter] postNotificationName:UIViewBoundsDidChangeNotification object:self];
+    CGRect oldBounds = _layer.bounds;
+    _layer.bounds = newBounds;
+    _UIViewBoundsDidChangeFrom(self, oldBounds, newBounds);
+    [[NSNotificationCenter defaultCenter] postNotificationName:UIViewBoundsDidChangeNotification object:self];
     //}
 }
 
 - (CGPoint)center
 {
-    return _layer.position;
+    return _layer->_position;
 }
 
 - (void)setCenter:(CGPoint)newCenter
 {
     //if (!CGPointEqualToPoint(newCenter,_layer.position)) {
+    //DLog(@"newCenter: %@", NSStringFromCGPoint(newCenter));
     _layer.position = newCenter;
+}
+
+- (CGFloat)contentScaleFactor
+{
+    return _layer->_contentsScale;
+}
+
+- (void)setContentScaleFactor:(CGFloat)scale
+{
+    _layer.contentsScale = scale;
 }
 
 - (CGAffineTransform)transform
@@ -199,12 +207,12 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 
 - (CGFloat)alpha
 {
-    return _layer.opacity;
+    return _layer->_opacity;
 }
 
 - (void)setAlpha:(CGFloat)newAlpha
 {
-    //DLog(@"self: %@, alpha: %f, newAlpha: %f", self, _layer->opacity, newAlpha);
+    //DLog(@"self: %@, alpha: %f, newAlpha: %f", self, _layer->_opacity, newAlpha);
     //if (newAlpha != _layer.opacity) {
         //DLog(@"self: %@", self);
     _layer.opacity = newAlpha;
@@ -213,12 +221,12 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 
 - (BOOL)isOpaque
 {
-    return _layer.opaque;
+    return _layer->_opaque;
 }
 
 - (void)setOpaque:(BOOL)newO
 {
-    if (newO != _layer.opaque) {
+    if (newO != _layer->_opaque) {
         _layer.opaque = newO;
     }
 }
@@ -241,12 +249,12 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 
 - (BOOL)clipsToBounds
 {
-    return _layer.masksToBounds;
+    return _layer->_masksToBounds;
 }
 
 - (void)setClipsToBounds:(BOOL)clips
 {
-    if (clips != _layer.masksToBounds) {
+    if (clips != _layer->_masksToBounds) {
         _layer.masksToBounds = clips;
     }
 }
@@ -260,7 +268,7 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 
 - (CGRect)contentStretch
 {
-    return _layer.contentsRect;
+    return _layer->_contentsRect;
 }
 
 - (void)setHidden:(BOOL)h
@@ -273,7 +281,7 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 
 - (BOOL)isHidden
 {
-    return _layer.hidden;
+    return _layer->_hidden;
 }
 
 - (void)setGestureRecognizers:(NSArray *)newRecognizers
@@ -281,7 +289,6 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
     for (UIGestureRecognizer *gesture in [_gestureRecognizers allObjects]) {
         [self removeGestureRecognizer:gesture];
     }
-    
     for (UIGestureRecognizer *gesture in newRecognizers) {
         [self addGestureRecognizer:gesture];
     }
@@ -294,13 +301,13 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p; frame = %@; hidden = %@; layer = %p>", [self className], self, NSStringFromCGRect(self.frame), (self.hidden ? @"YES" : @"NO"), self.layer];
+    return [NSString stringWithFormat:@"<%@: %p; frame = %@; hidden = %@; layer = %p>", [self className], self, NSStringFromCGRect(self.frame), (self.hidden ? @"YES" : @"NO"), _layer];
 }
-
+/*
 - (BOOL)implementsDrawRect
 {
     return _implementsDrawRect;
-}
+}*/
 
 #pragma mark - Class methods
 
@@ -338,6 +345,7 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
     [UIView setAnimationBeginsFromCurrentState:beginFromCurrentState];
     [UIView setAnimationDelegate:delegate];	// this is retained here
     [UIView setAnimationDidStopSelector:@selector(animationDidStop:finished:)];
+    DLog();
     [UIView setAnimationRepeatCount:(repeatAnimation? FLT_MAX : 0)];
     [UIView setAnimationRepeatAutoreverses:autoreverseRepeat];
     
@@ -371,68 +379,82 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 
 + (void)beginAnimations:(NSString *)animationID context:(void *)context
 {
+    //DLog(@"animationID: %@", animationID);
     [CATransaction begin];
     [_animationGroups addObject:[UIViewAnimationGroup animationGroupWithName:animationID context:context]];
 }
 
-+ (void)commitAnimations
-{
-    [CATransaction commit];
-    //if ([_animationGroups count] > 0) {
-    [[_animationGroups lastObject] commit];
-    [_animationGroups removeLastObject];
-    //}
-}
-
 + (void)setAnimationBeginsFromCurrentState:(BOOL)beginFromCurrentState
 {
-    [[_animationGroups lastObject] setAnimationBeginsFromCurrentState:beginFromCurrentState];
+    [UIViewAnimationGroupGetCurrent() setAnimationBeginsFromCurrentState:beginFromCurrentState];
 }
 
 + (void)setAnimationCurve:(UIViewAnimationCurve)curve
 {
-    [[_animationGroups lastObject] setAnimationCurve:curve];
+    [UIViewAnimationGroupGetCurrent() setAnimationCurve:curve];
 }
 
 + (void)setAnimationDelay:(NSTimeInterval)delay
 {
-    [[_animationGroups lastObject] setAnimationDelay:delay];
+    [UIViewAnimationGroupGetCurrent() setAnimationDelay:delay];
 }
 
 + (void)setAnimationDelegate:(id)delegate
 {
-    [[_animationGroups lastObject] setAnimationDelegate:delegate];
+    [UIViewAnimationGroupGetCurrent() setAnimationDelegate:delegate];
 }
 
 + (void)setAnimationDidStopSelector:(SEL)selector
 {
-    [[_animationGroups lastObject] setAnimationDidStopSelector:selector];
+    [UIViewAnimationGroupGetCurrent() setAnimationDidStopSelector:selector];
 }
 
 + (void)setAnimationDuration:(NSTimeInterval)duration
 {
     //[CATransaction setAnimationDuration:duration];
-    [[_animationGroups lastObject] setAnimationDuration:duration];
+    [UIViewAnimationGroupGetCurrent() setAnimationDuration:duration];
 }
 
 + (void)setAnimationRepeatAutoreverses:(BOOL)repeatAutoreverses
 {
-    [[_animationGroups lastObject] setAnimationRepeatAutoreverses:repeatAutoreverses];
+    [UIViewAnimationGroupGetCurrent() setAnimationRepeatAutoreverses:repeatAutoreverses];
 }
 
 + (void)setAnimationRepeatCount:(float)repeatCount
 {
-    [[_animationGroups lastObject] setAnimationRepeatCount:repeatCount];
+    //char *repeat = &repeatCount;
+    //DLog(@"sizeof(repeat): %d", sizeof(repeat));
+    /*DLog(@"repeat[0]: %d", repeat[0]);
+    DLog(@"repeat[1]: %d", repeat[1]);
+    DLog(@"repeat[2]: %d", repeat[2]);
+    DLog(@"repeat[3]: %d", repeat[3]);*/
+    /*
+    int repeat = 255;
+    int intRepeat = (int)repeatCount;
+    DLog(@"sizeof(repeat): %d", sizeof(repeat));
+    DLog(@"intRepeat d: %d", intRepeat);
+    DLog(@"repeat & intRepeat: %d", (repeat & intRepeat));
+    DLog(@"(repeat << 8) & intRepeat: %d", ((repeat << 8) & intRepeat));
+    DLog(@"(repeat << 16) & intRepeat: %d", ((repeat << 16) & intRepeat));
+    DLog(@"(repeat << 24) & intRepeat: %d", ((repeat << 24) & intRepeat));
+    DLog(@"repeatCount d: %d", (int)repeatCount);*/
+    
+    /*DLog(@"sizeof(repeatCount): %d", sizeof(repeatCount));
+    DLog(@"repeatCount f: %f", repeatCount);
+    DLog(@"repeatCount g: %g", repeatCount);*/
+    UIViewAnimationGroup *animationGroup = UIViewAnimationGroupGetCurrent();
+    //DLog(@"animationGroup: %@", animationGroup);
+    [animationGroup setAnimationRepeatCount:repeatCount];
 }
 
 + (void)setAnimationWillStartSelector:(SEL)selector
 {
-    [[_animationGroups lastObject] setAnimationWillStartSelector:selector];
+    [UIViewAnimationGroupGetCurrent() setAnimationWillStartSelector:selector];
 }
 
 + (void)setAnimationTransition:(UIViewAnimationTransition)transition forView:(UIView *)view cache:(BOOL)cache
 {
-    [[_animationGroups lastObject] setAnimationTransition:transition forView:view cache:cache];
+    [UIViewAnimationGroupGetCurrent() setAnimationTransition:transition forView:view cache:cache];
 }
 
 + (BOOL)areAnimationsEnabled
@@ -448,6 +470,22 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 + (NSSet *)keyPathsForValuesAffectingFrame
 {
     return [NSSet setWithObject:@"center"];
+}
+
++ (void)commitAnimations
+{
+    //DLog();
+    [CATransaction commit];
+    //if ([_animationGroups count] > 0) {
+    [UIViewAnimationGroupGetCurrent() commit];
+    //[_animationGroups removeLastObject];
+    //}
+}
+
+#pragma mark - Overridden methods
+
+- (void)drawRect:(CGRect)rect
+{
 }
 
 #pragma mark - Delegates
@@ -476,35 +514,51 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 {
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (void)setNeedsLayout
 {
+    //DLog();
     [_layer setNeedsLayout];
 }
 
 - (void)layoutIfNeeded
 {
-    [_layer layoutIfNeeded];
+    [self layoutSubviews];
+    //[_layer layoutIfNeeded];
 }
 
 - (void)_updateContent
 {
-    [_layer setNeedsDisplay];
+}
+
+- (void)_setNilSuperview
+{
+    //DLog(@"self: %@; _superview: %@", self, _superview);
+    [self willChangeValueForKey:@"superview"];
+    _superview = nil;
+    [self didChangeValueForKey:@"superview"];
 }
 
 - (void)layoutSubviews
 {
+    //DLog(@"self: %@", self);
 }
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
+    //DLog(@"!self.userInteractionEnabled: %d", !self.userInteractionEnabled);
+    //DLog(@"self.alpha < 0.01: %d", self.alpha < 0.01);
+    //DLog(@"![self pointInside:point withEvent:event]: %d", ![self pointInside:point withEvent:event]);
     if (self.hidden || !self.userInteractionEnabled || self.alpha < 0.01 || ![self pointInside:point withEvent:event]) {
+        //DLog(@"return nil self: %@", self);
         return nil;
     } else {
         for (UIView *subview in [_subviews reverseObjectEnumerator]) {
+            //DLog(@"subview: %@", subview);
             UIView *hitView = [subview hitTest:[subview convertPoint:point fromView:self] withEvent:event];
             if (hitView) {
+                //DLog(@"return hitView hitView: %@", hitView);
                 return hitView;
             }
         }
@@ -513,6 +567,43 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 }
 
 - (void)addSubview:(UIView *)subview
+{
+    //DLog();
+    if (subview && subview->_superview != self) {
+        //DLog();
+        UIWindow *oldWindow = subview.window;
+        UIWindow *newWindow = self.window;
+        subview->_needsDidAppearOrDisappear = _UIViewSubviewControllersNeedAppearAndDisappear(self);
+        if (subview->_viewController && subview->_needsDidAppearOrDisappear) {
+            [subview->_viewController viewWillAppear:NO];
+        }
+        _UIViewWillMoveFromWindow(subview, oldWindow, newWindow);
+        [subview willMoveToSuperview:self];
+        //[subview retain];
+        if (subview->_superview) {
+            //DLog();
+            [subview->_layer removeFromSuperlayer];
+            [subview->_superview->_subviews removeObject:subview];
+        }
+        //DLog();
+        [subview willChangeValueForKey:@"superview"];
+        [_subviews addObject:subview];
+        subview->_superview = self;
+        [_layer addSublayer:subview->_layer];
+        [subview didChangeValueForKey:@"superview"];
+        //[subview release];
+        _UIViewDidMoveFromWindow(subview, oldWindow, newWindow);
+        [subview didMoveToSuperview];
+        [[NSNotificationCenter defaultCenter] postNotificationName:UIViewDidMoveToSuperviewNotification object:subview];
+        [self didAddSubview:subview];
+        if (subview->_viewController && subview->_needsDidAppearOrDisappear) {
+            [subview->_viewController viewDidAppear:NO];
+        }
+        //DLog();
+    }
+}
+
+- (void)insertSubview:(UIView *)subview atIndex:(NSInteger)index
 {
     if (subview && subview->_superview != self) {
         UIWindow *oldWindow = subview.window;
@@ -523,19 +614,68 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
         }
         _UIViewWillMoveFromWindow(subview, oldWindow, newWindow);
         [subview willMoveToSuperview:self];
-        {
-            [subview retain];
-            if (subview->_superview) {
-                [subview->_layer removeFromSuperlayer];
-                [subview->_superview->_subviews removeObject:subview];
-            }
-            [subview willChangeValueForKey:@"superview"];
-            [_subviews addObject:subview];
-            subview->_superview = self;
-            [_layer addSublayer:subview.layer];
-            [subview didChangeValueForKey:@"superview"];
-            [subview release];
+        //[subview retain];
+        if (subview->_superview) {
+            //DLog();
+            [subview->_layer removeFromSuperlayer];
+            [subview->_superview->_subviews removeObject:subview];
         }
+        //DLog();
+        [subview willChangeValueForKey:@"superview"];
+        [_subviews insertObject:subview atIndex:index];
+        //[_subviews addObject:subview];
+        subview->_superview = self;
+        //[_layer addSublayer:subview->_layer];
+        [_layer insertSublayer:subview->_layer atIndex:index];
+        [subview didChangeValueForKey:@"superview"];
+        //[subview release];
+        _UIViewDidMoveFromWindow(subview, oldWindow, newWindow);
+        [subview didMoveToSuperview];
+        [[NSNotificationCenter defaultCenter] postNotificationName:UIViewDidMoveToSuperviewNotification object:subview];
+        [self didAddSubview:subview];
+        if (subview->_viewController && subview->_needsDidAppearOrDisappear) {
+            [subview->_viewController viewDidAppear:NO];
+        }
+    }
+    
+    //[_subviews insertObject:subview atIndex:index];
+    //[self addSubview:subview];
+    //[_layer insertSublayer:subview->_layer atIndex:index];
+}
+
+- (void)insertSubview:(UIView *)subview belowSubview:(UIView *)below
+{
+    if (subview && subview->_superview != self) {
+        UIWindow *oldWindow = subview.window;
+        UIWindow *newWindow = self.window;
+        subview->_needsDidAppearOrDisappear = _UIViewSubviewControllersNeedAppearAndDisappear(self);
+        if (subview->_viewController && subview->_needsDidAppearOrDisappear) {
+            [subview->_viewController viewWillAppear:NO];
+        }
+        _UIViewWillMoveFromWindow(subview, oldWindow, newWindow);
+        [subview willMoveToSuperview:self];
+        //[subview retain];
+        if (subview->_superview) {
+            //DLog();
+            [subview->_layer removeFromSuperlayer];
+            [subview->_superview->_subviews removeObject:subview];
+        }
+        //DLog();
+        [subview willChangeValueForKey:@"superview"];
+        //[_subviews insertObject:subview atIndex:index];
+        
+        CFIndex belowIndex = [_layer indexOfLayer:below->_layer];
+        if (belowIndex != -1) { // sibling found
+            [_subviews insertObject:subview atIndex:belowIndex];
+            //CFArrayInsertValueAtIndex(_sublayers, siblingIndex, layer);
+        }
+        //[_subviews addObject:subview];
+        subview->_superview = self;
+        //[_layer addSublayer:subview->_layer];
+        //[_layer insertSublayer:subview->_layer atIndex:index];
+        [_layer insertSublayer:subview->_layer below:below->_layer];
+        [subview didChangeValueForKey:@"superview"];
+        //[subview release];
         _UIViewDidMoveFromWindow(subview, oldWindow, newWindow);
         [subview didMoveToSuperview];
         [[NSNotificationCenter defaultCenter] postNotificationName:UIViewDidMoveToSuperviewNotification object:subview];
@@ -546,35 +686,66 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
     }
 }
 
-- (void)insertSubview:(UIView *)subview atIndex:(NSInteger)index
-{
-    [self addSubview:subview];
-    [_layer insertSublayer:subview.layer atIndex:index];
-}
-
-- (void)insertSubview:(UIView *)subview belowSubview:(UIView *)below
-{
-    [self addSubview:subview];
-    [_layer insertSublayer:subview.layer below:below.layer];
-}
-
 - (void)insertSubview:(UIView *)subview aboveSubview:(UIView *)above
 {
-    [self addSubview:subview];
-    [_layer insertSublayer:subview.layer above:above.layer];
+    if (subview && subview->_superview != self) {
+        UIWindow *oldWindow = subview.window;
+        UIWindow *newWindow = self.window;
+        subview->_needsDidAppearOrDisappear = _UIViewSubviewControllersNeedAppearAndDisappear(self);
+        if (subview->_viewController && subview->_needsDidAppearOrDisappear) {
+            [subview->_viewController viewWillAppear:NO];
+        }
+        _UIViewWillMoveFromWindow(subview, oldWindow, newWindow);
+        [subview willMoveToSuperview:self];
+        //[subview retain];
+        if (subview->_superview) {
+            //DLog();
+            [subview->_layer removeFromSuperlayer];
+            [subview->_superview->_subviews removeObject:subview];
+        } 
+        //DLog();
+        [subview willChangeValueForKey:@"superview"];
+        //[_subviews insertObject:subview atIndex:index];
+        
+        CFIndex aboveIndex = [_layer indexOfLayer:above->_layer];
+        if (aboveIndex != -1) { // sibling found
+            [_subviews insertObject:subview atIndex:aboveIndex+1];
+            //CFArrayInsertValueAtIndex(_sublayers, siblingIndex, layer);
+        }
+        //[_subviews addObject:subview];
+        subview->_superview = self;
+        //[_layer addSublayer:subview->_layer];
+        //[_layer insertSublayer:subview->_layer atIndex:index];
+        [_layer insertSublayer:subview->_layer above:above->_layer];
+        [subview didChangeValueForKey:@"superview"];
+        //[subview release];
+        _UIViewDidMoveFromWindow(subview, oldWindow, newWindow);
+        [subview didMoveToSuperview];
+        [[NSNotificationCenter defaultCenter] postNotificationName:UIViewDidMoveToSuperviewNotification object:subview];
+        [self didAddSubview:subview];
+        if (subview->_viewController && subview->_needsDidAppearOrDisappear) {
+            [subview->_viewController viewDidAppear:NO];
+        }
+    }
 }
 
 - (void)bringSubviewToFront:(UIView *)subview
 {
-    if (subview.superview == self) {
-        [_layer insertSublayer:subview.layer above:[[_layer sublayers] lastObject]];
+    //DLog();
+    if (subview->_superview == self) {
+        [_subviews moveObjectToTop:subview];
+        //DLog();
+        [_layer moveLayerToTop:subview->_layer];
+        //DLog();
     }
 }
 
 - (void)sendSubviewToBack:(UIView *)subview
 {
+    //DLog(@"self: %@, subview: %p", self, subview);
     if (subview.superview == self) {
-        [_layer insertSublayer:subview.layer atIndex:0];
+        [_subviews moveObject:subview toIndex:0];
+        [_layer insertSublayer:subview->_layer atIndex:0];
     }
 }
 
@@ -605,7 +776,6 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
     }
 }
 
-
 - (CGPoint)convertPoint:(CGPoint)toConvert fromView:(UIView *)fromView
 {
     // NOTE: this is a lot more complex than it needs to be - I just noticed the docs say this method requires fromView and self to
@@ -616,10 +786,10 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
         // If the screens are the same, then we know they share a common parent CALayer, so we can convert directly with the layer's
         // conversion method. If not, though, we need to do something a bit more complicated.
         if (fromView && (self.window.screen == fromView.window.screen)) {
-            return [fromView.layer convertPoint:toConvert toLayer:self.layer];
+            return [fromView->_layer convertPoint:toConvert toLayer:self->_layer];
         } else {
             // Convert coordinate to fromView's window base coordinates.
-            toConvert = [fromView.layer convertPoint:toConvert toLayer:fromView.window.layer];
+            toConvert = [fromView->_layer convertPoint:toConvert toLayer:fromView.window->_layer];
             
             // Now convert from fromView's window to our own window.
             toConvert = [fromView.window convertPoint:toConvert toWindow:self.window];
@@ -627,7 +797,7 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
     }
     
     // Convert from our window coordinate space into our own coordinate space.
-    return [self.window.layer convertPoint:toConvert toLayer:self.layer];
+    return [self.window->_layer convertPoint:toConvert toLayer:self->_layer];
 }
 
 - (CGPoint)convertPoint:(CGPoint)toConvert toView:(UIView *)toView
@@ -638,17 +808,17 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
     
     // See note in convertPoint:fromView: for some explaination about why this is done... :/
     if (toView && (self.window.screen == toView.window.screen)) {
-        return [self.layer convertPoint:toConvert toLayer:toView.layer];
+        return [self->_layer convertPoint:toConvert toLayer:toView->_layer];
     } else {
         // Convert to our window's coordinate space.
-        toConvert = [self.layer convertPoint:toConvert toLayer:self.window.layer];
+        toConvert = [self->_layer convertPoint:toConvert toLayer:self.window->_layer];
         
         if (toView) {
             // Convert from one window's coordinate space to another.
             toConvert = [self.window convertPoint:toConvert toWindow:toView.window];
             
             // Convert from toView's window down to toView's coordinate space.
-            toConvert = [toView.window.layer convertPoint:toConvert toLayer:toView.layer];
+            toConvert = [toView.window->_layer convertPoint:toConvert toLayer:toView->_layer];
         }
         
         return toConvert;
@@ -715,7 +885,8 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 
 - (void)setNeedsDisplay
 {
-    [self _updateContent];
+    _CALayerSetNeedsDisplay(_layer);
+    //[_layer setNeedsDisplay];
 }
 
 - (void)setNeedsDisplayInRect:(CGRect)invalidRect
@@ -723,10 +894,12 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
     [_layer setNeedsDisplayInRect:invalidRect];
 }
 
-
-- (void)drawRect:(CGRect)rect
+- (void)layoutSublayersOfLayer:(CALayer *)layer
 {
+    //DLog();
+    [self layoutSubviews];
 }
+
 /*
 - (void)displayLayer:(CALayer *)theLayer
 {
@@ -760,9 +933,12 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 
 - (BOOL)respondsToSelector:(SEL)aSelector
 {
+    //DLog(@"NSStringFromSelector(aSelector) : %@", NSStringFromSelector(aSelector) );
     // For notes about why this is done, see displayLayer: above.
     if ([NSStringFromSelector(aSelector) isEqualToString:@"drawLayer:inContext:"]) {
-        return _implementsDrawRect;
+        return _UIViewInstanceImplementsSelector(@selector(drawRect:), [self class]);//_implementsDrawRect;
+    } else if ([NSStringFromSelector(aSelector) isEqualToString:@"layoutSublayersOfLayer:"]) {
+        return _UIViewInstanceImplementsSelector(@selector(layoutSubviews), [self class]);
     } else {
         return [super respondsToSelector:aSelector];
     }
@@ -773,9 +949,9 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
     // We only get here if the UIView subclass implements drawRect:. To do this without a drawRect: is a huge waste of memory.
     // See the discussion in drawLayer: above.
     
-    const CGRect bounds = _layer->bounds;//CGContextGetClipBoundingBox(ctx);
-    
-    //DLog(@"ctx: %@", ctx); 
+    const CGRect bounds = _layer->_bounds;//CGContextGetClipBoundingBox(ctx);
+    //DLog(@"self: %@", self);
+    //DLog(@"ctx: %@", ctx);
     UIGraphicsPushContext(ctx);
     CGContextSaveGState(ctx);
     
@@ -827,16 +1003,6 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
     CGContextRestoreGState(ctx);
     UIGraphicsPopContext();
 }
-
-/*
-- (id)actionForLayer:(CALayer *)theLayer forKey:(NSString *)event
-{
-    if (_animationsEnabled && [_animationGroups lastObject]) {
-        return [[_animationGroups lastObject] actionForLayer:theLayer forKey:event] ?: (id)[NSNull null];
-    } else {
-        return [NSNull null];
-    }
-}*/
 
 - (void)setContentMode:(UIViewContentMode)mode
 {
@@ -912,9 +1078,12 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 
 - (void)addGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
 {
+    //DLog(@"self: %@", self);
     if (![_gestureRecognizers containsObject:gestureRecognizer]) {
-        [gestureRecognizer.view removeGestureRecognizer:gestureRecognizer];
+        //DLog();
+        //[gestureRecognizer.view removeGestureRecognizer:gestureRecognizer];
         [_gestureRecognizers addObject:gestureRecognizer];
+        //DLog(@"gestureRecognizer.retainCount: %d", gestureRecognizer.retainCount);
         _UIGestureRecognizerSetView(gestureRecognizer, self);
     }
 }
@@ -934,12 +1103,7 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
 
 @end
 
-#pragma mark - Private C functions
-
-BOOL _UIViewInstanceImplementsDrawRect(Class c)
-{
-    return [UIView instanceMethodForSelector:@selector(drawRect:)] != [c instanceMethodForSelector:@selector(drawRect:)];
-}
+#pragma mark - Shared functions
 
 void _UIViewWillMoveFromWindow(UIView* view, UIWindow* fromWindow, UIWindow* toWindow)
 {
@@ -947,6 +1111,7 @@ void _UIViewWillMoveFromWindow(UIView* view, UIWindow* fromWindow, UIWindow* toW
         // need to manage the responder chain. apparently UIKit (at least by version 4.2) seems to make sure that if a view was first responder
         // and it or it's parent views are disconnected from their window, the first responder gets reset to nil. Honestly, I don't think this
         // was always true - but it's certainly a much better and less-crashy design. Hopefully this check here replicates the behavior properly.
+        //DLog(@"view: %@", view);
         if ([view isFirstResponder]) {
             [view resignFirstResponder];
         }
@@ -978,13 +1143,6 @@ BOOL _UIViewSubviewControllersNeedAppearAndDisappear(UIView* view)
         }
     }
     return YES;
-}
-
-void _UIViewSetNilSuperview(UIView* view)
-{
-    [view willChangeValueForKey:@"superview"];
-    view->_superview = nil;
-    [view didChangeValueForKey:@"superview"];
 }
 
 void _UIViewSuperviewSizeDidChange(UIView* view, CGSize oldSize, CGSize newSize)
@@ -1054,7 +1212,7 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
         // setNeedsLayout doesn't seem like it should be necessary, however there was a rendering bug in a table in Flamingo that
         // went away when this was placed here. There must be some strange ordering issue with how that layout manager stuff works.
         // I never quite narrowed it down. This was an easy fix, if perhaps not ideal.
-        [view setNeedsLayout];
+        //[view setNeedsLayout];
         if (!CGSizeEqualToSize(oldBounds.size, newBounds.size)) {
             if (view->_autoresizesSubviews) {
                 for (UIView *subview in view->_subviews) {
@@ -1064,5 +1222,3 @@ void _UIViewBoundsDidChangeFrom(UIView* view, CGRect oldBounds, CGRect newBounds
         }
     }
 }
-
-

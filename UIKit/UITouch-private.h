@@ -32,14 +32,8 @@
 @class UIView;
 
 void _UITouchSetPhase(UITouch *touch, UITouchPhase phase, CGPoint screenLocation, NSUInteger tapCount, CGPoint delta, NSTimeInterval timestamp);
-//void _UITouchSetView(UITouch* touch, UIView* view);
 
 void _UITouchUpdatePhase(UITouch *touch, UITouchPhase phase, CGPoint screenLocation, NSTimeInterval timestamp);
-void _UITouchUpdateGesture(UITouch *touch, _UITouchGesture gesture, CGPoint screenLocation, CGPoint delta, CGFloat rotation, CGFloat magnification, NSTimeInterval timestamp);
-void _UITouchSetDiscreteGesture(UITouch *touch, _UITouchGesture gesture, CGPoint screenLocation, NSUInteger tapCount, CGPoint delta, NSTimeInterval timestamp);
 void _UITouchSetTouchedView(UITouch *touch, UIView* view); // sets up the window and gesture recognizers as well
-void _UITouchRemoveFromView(UITouch *touch);                // sets the initial view to nil, but leaves window and gesture recognizers alone - used when a view is removed while touch is active
-//void _UITouchSetTouchPhaseCancelled(UITouch* touch);
-UIView* _UITouchPreviousView(UITouch *touch);
-
-
+void _UITouchRemoveFromView(UITouch *touch);               // sets the initial view to nil, but leaves window and gesture recognizers alone - used when a view is removed while touch is active
+UIView *_UITouchPreviousView(UITouch *touch);

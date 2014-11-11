@@ -69,11 +69,11 @@ static UIEdgeInsets UIToolbarButtonInset = {0,4,0,4};
             title = item.title;
 
             if (item.style == UIBarButtonItemStyleBordered) {
-                self.titleLabel.font = [UIFont systemFontOfSize:11];
-                [self setBackgroundImage:[UIImage _toolbarButtonImage] forState:UIControlStateNormal];
-                [self setBackgroundImage:[UIImage _highlightedToolbarButtonImage] forState:UIControlStateHighlighted];
-                self.contentEdgeInsets = UIEdgeInsetsMake(0,7,0,7);
-                self.titleEdgeInsets = UIEdgeInsetsMake(4,0,0,0);
+                _titleLabel.font = [UIFont systemFontOfSize:11];
+                [self setBackgroundImage:_UIImageToolbarButtonImage() forState:UIControlStateNormal];
+                [self setBackgroundImage:_UIImageHighlightedToolbarButtonImage() forState:UIControlStateHighlighted];
+                _contentEdgeInsets = UIEdgeInsetsMake(0,7,0,7);
+                _titleEdgeInsets = UIEdgeInsetsMake(4,0,0,0);
                 self.clipsToBounds = YES;
                 self.contentVerticalAlignment = UIControlContentVerticalAlignmentTop;
             }
@@ -92,7 +92,6 @@ static UIEdgeInsets UIToolbarButtonInset = {0,4,0,4};
         } else {
             frame.size.width = [self sizeThatFits:fitToSize].width;
         }
-        
         self.frame = frame;
     }
     return self;

@@ -77,10 +77,15 @@ static NSArray *CGImagesWithUIImages(NSArray *images)
 
 - (void)dealloc
 {
+    //DLog();
     [_animationImages release];
+    //DLog();
     [_image release];
+    //DLog();
     [_highlightedImage release];
+    //DLog();
     [_highlightedAnimationImages release];
+    //DLog();
     [super dealloc];
 }
 
@@ -108,7 +113,6 @@ static NSArray *CGImagesWithUIImages(NSArray *images)
     if (_image != newImage) {
         [_image release];
         _image = [newImage retain];
-
         if (!_highlighted || !_highlightedImage) {
             [self _updateContent];
         }
@@ -144,7 +148,7 @@ static NSArray *CGImagesWithUIImages(NSArray *images)
     [super setBounds:newBounds];
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 /*
 - (void)displayLayer:(CALayer *)theLayer
@@ -207,7 +211,7 @@ static NSArray *CGImagesWithUIImages(NSArray *images)
 
 @end
 
-BOOL _UIImageViewHasResizableImage(UIImageView* imageView)
+BOOL _UIImageViewHasResizableImage(UIImageView *imageView)
 {
     return (imageView->_image.topCapHeight > 0 || imageView->_image.leftCapWidth > 0);
 }
@@ -223,7 +227,7 @@ void _UIImageViewSetDrawMode(UIImageView *imageView, NSInteger drawMode)
     }
 }
 
-void _UIImageViewDisplayIfNeededChangingFromOldSize(UIImageView* imageView, CGSize oldSize, CGSize newSize)
+void _UIImageViewDisplayIfNeededChangingFromOldSize(UIImageView *imageView, CGSize oldSize, CGSize newSize)
 {
     if (!CGSizeEqualToSize(newSize,oldSize) && _UIImageViewHasResizableImage(imageView)) {
         [imageView _updateContent];
@@ -232,8 +236,9 @@ void _UIImageViewDisplayIfNeededChangingFromOldSize(UIImageView* imageView, CGSi
 
 void _UIImageViewUpdateContent(UIImageView *imageView)
 {
-    UIImage * contentImage = imageView->_highlighted ? imageView->_highlightedImage : imageView->_image;
+    UIImage *contentImage = imageView->_highlighted ? imageView->_highlightedImage : imageView->_image;
     if (contentImage) {
+        //DLog();
         CGRect rect = CGRectZero;
         rect.size = contentImage.size;
         CGContextRef ctx = _CGBitmapContextCreateWithOptions(rect.size, true, 1);
@@ -245,6 +250,8 @@ void _UIImageViewUpdateContent(UIImageView *imageView)
         CGContextRestoreGState(ctx);
         
         imageView->_layer.contents = CGBitmapContextCreateImage(ctx);
+        [imageView->_layer->_contents release];
+        CGContextRelease(ctx);
     }
 }
 

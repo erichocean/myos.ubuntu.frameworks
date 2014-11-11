@@ -30,21 +30,20 @@
  * Specifies a custom mapping from a sequence of Unicode characters to a 
  * single glyph.
  */
-@interface CTGlyphInfo : NSObject
-{
-  /**
-   * The sequence of Unicode characters to map from
-   */
-  NSString *_baseString;
-  /**
-   * The glpyh name to map to
-   */
-  NSString *_glpyhName;
-  /**
-   * Alternative representation of the glpyh to map to
-   */
-  CTCharacterCollection _characterCollection;  
-  CGFontIndex _characterIdentifier;
+@interface CTGlyphInfo : NSObject {
+    /**
+     * The sequence of Unicode characters to map from
+     */
+    NSString *_baseString;
+    /**
+     * The glpyh name to map to
+     */
+    NSString *_glpyhName;
+    /**
+     * Alternative representation of the glpyh to map to
+     */
+    CTCharacterCollection _characterCollection;
+    CGFontIndex _characterIdentifier;
 }
 
 - (CTGlyphInfoRef) initWithGlyphName: (NSString*)glyphName

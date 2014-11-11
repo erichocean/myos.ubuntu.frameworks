@@ -29,4 +29,6 @@
 
 #import <UIKit/UIScrollView.h>
 
-void _UIScreenViewQuickFlashScrollIndicators(UIScrollView* scrollView);
+//void _UIScreenViewQuickFlashScrollIndicators(UIScrollView *scrollView);
+CGPoint _UIScrollViewConfinedContentOffset(UIScrollView *scrollView, CGPoint contentOffset);
+void _UIScrollViewSetRestrainedContentOffset(UIScrollView *scrollView, CGPoint offset);

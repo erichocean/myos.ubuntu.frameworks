@@ -32,7 +32,8 @@
 
 @implementation UIEvent
 
-@synthesize timestamp=_timestamp, type=_type;
+@synthesize timestamp=_timestamp;
+@synthesize type=_type;
 
 #pragma mark - Life cycle
 
@@ -40,7 +41,6 @@
 {
     if ((self=[super init])) {
         _type = type;
-        //_unhandledKeyPressEvent = NO;
     }
     return self;
 }
@@ -55,6 +55,7 @@
 
 - (NSSet *)allTouches
 {
+    //DLog(@"_touch: %@", _touch);
     return [NSSet setWithObject:_touch];
 }
 
@@ -98,12 +99,12 @@
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p; touch: %p; timestamp = %f>", [self className], self, self->_touch, self.timestamp];
+    return [NSString stringWithFormat:@"<%@: %p; touch: <%@>; timestamp = %f>", [self className], self, self->_touch, self.timestamp];
 }
 
 @end
 
-#pragma mark - Private C functions
+#pragma mark - Shared functions
 
 void _UIEventSetTouch(UIEvent *event, UITouch *t)
 {
@@ -112,5 +113,3 @@ void _UIEventSetTouch(UIEvent *event, UITouch *t)
         event->_touch = [t retain];
     }
 }
-
-

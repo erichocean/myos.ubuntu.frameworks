@@ -36,7 +36,7 @@
 @class CTRun;
 typedef CTRun* CTRunRef;
 #else
-typedef struct CTRun* CTRunRef;
+typedef struct CTRun *CTRunRef;
 #endif
 
 /* Constants */

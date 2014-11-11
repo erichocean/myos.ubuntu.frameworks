@@ -1,40 +1,58 @@
 /*
- * Copyright (c) 2012-2013. All rights reserved.
- *
+ Copyright © 2014 myOS Group.
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ Lesser General Public License for more details.
+ 
+ Contributor(s):
+ Amr Aboelela <amraboelela@gmail.com>
  */
 
-#import "CAMediaTiming.h"
+#import <CoreAnimation/CAMediaTiming.h>
 
-@class CAMediaTimingFunction;
+@class CAMediaTimingFunction, CAAnimationGroup;
 
-@interface CAAnimation : NSObject <CAMediaTiming, CAAction>
-{
+@interface CAAnimation : NSObject <CAMediaTiming, CAAction> {
 @package
-    id delegate;
-    CAMediaTimingFunction *timingFunction;
-    BOOL removedOnCompletion;
+    id _delegate;
+    CAMediaTimingFunction *_timingFunction;
+    BOOL _removedOnCompletion;
     CFTimeInterval _startTime;
-    CFTimeInterval beginTime;
-    CFTimeInterval timeOffset;
-    CFTimeInterval duration;
-    float repeatCount;
-    CFTimeInterval repeatDuration;
-    BOOL autoreverses;
-    NSString *fillMode;
-    float speed;
+    CFTimeInterval _beginTime;
+    CFTimeInterval _timeOffset;
+    CFTimeInterval _duration;
+    float _repeatCount;
+    CFTimeInterval _repeatDuration;
+    BOOL _autoreverses;
+    NSString *_fillMode;
+    float _speed;
     BOOL _remove;
+    CAAnimationGroup *_animationGroup;
 }
-
-+ (id)animation;
 
 @property (retain) id delegate;
 @property (retain) CAMediaTimingFunction *timingFunction;
 @property BOOL removedOnCompletion;
 
++ (id)animation;
+
 @end
 
-@interface CAPropertyAnimation : CAAnimation
-{
+@protocol CAAnimationDelegate <NSObject>
+@optional
+- (void)animationDidStart:(CAAnimation *)animation;
+- (void)animationDidStop:(CAAnimation *)animation finished:(BOOL)finished;
+
+@end
+
+@interface CAPropertyAnimation : CAAnimation {
 @package
     NSString *keyPath;
     BOOL additive;
@@ -49,8 +67,7 @@
 
 @end
 
-@interface CABasicAnimation : CAPropertyAnimation
-{
+@interface CABasicAnimation : CAPropertyAnimation {
 @package
     id fromValue;
     id toValue;
@@ -63,11 +80,10 @@
 
 @end
 
-@interface CAKeyframeAnimation : CAPropertyAnimation
-{
+@interface CAKeyframeAnimation : CAPropertyAnimation {
 @package
-    NSString *calculationMode;
-    NSArray *values;
+    NSString *_calculationMode;
+    NSArray *_values;
 }
 
 @property(copy) NSString *calculationMode;
@@ -87,8 +103,7 @@ extern NSString *const kCATransitionFromBottom;
 extern NSString *const kCATransitionFromLeft;
 extern NSString *const kCATransitionFromRight;
 
-@interface CATransition : CAAnimation
-{
+@interface CATransition : CAAnimation {
 @package
     NSString *type;
     NSString *subtype;
@@ -103,10 +118,9 @@ extern NSString *const kCATransitionFromRight;
 
 @end
 
-@interface CAAnimationGroup : CAAnimation
-{
-@package
-    NSMutableArray *animations;
+@interface CAAnimationGroup : CAAnimation {
+@public
+    NSMutableArray *_animations;
     BOOL _committed;
 }
 

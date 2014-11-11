@@ -28,7 +28,6 @@
  */
 
 #import <CoreGraphics/CoreGraphics.h>
-#import <Foundation/Foundation.h>
 
 typedef enum {
     UIGestureRecognizerStatePossible,
@@ -60,10 +59,7 @@ typedef enum {
     UIView *_view;
     NSMutableArray *_registeredActions;
     NSMutableArray *_trackingTouches;
-    //UIGestureRecognizer *_requiresToFail;
     NSMutableSet *_failureRequirements;
-    //NSMutableArray *_didFailFlags;
-    //NSMutableSet *_failureDependents;
     int _failureCount;
     struct {
         BOOL shouldBegin : 1;
@@ -72,14 +68,6 @@ typedef enum {
     } _delegateHas;	
 }
 
-- (id)initWithTarget:(id)target action:(SEL)action;
-- (void)addTarget:(id)target action:(SEL)action;
-- (void)removeTarget:(id)target action:(SEL)action;
-- (void)requireGestureRecognizerToFail:(UIGestureRecognizer *)otherGestureRecognizer;
-- (CGPoint)locationInView:(UIView *)view;
-- (NSUInteger)numberOfTouches;
-- (void)reset;
-
 @property (nonatomic, assign) id<UIGestureRecognizerDelegate> delegate;
 @property (nonatomic) BOOL delaysTouchesBegan;
 @property (nonatomic) BOOL delaysTouchesEnded;
@@ -87,5 +75,13 @@ typedef enum {
 @property (nonatomic, getter=isEnabled) BOOL enabled;
 @property (nonatomic, readonly) UIGestureRecognizerState state;
 @property (nonatomic, readonly) UIView *view;
+
+- (id)initWithTarget:(id)target action:(SEL)action;
+- (void)addTarget:(id)target action:(SEL)action;
+- (void)removeTarget:(id)target action:(SEL)action;
+- (void)requireGestureRecognizerToFail:(UIGestureRecognizer *)otherGestureRecognizer;
+- (CGPoint)locationInView:(UIView *)view;
+- (NSUInteger)numberOfTouches;
+- (void)reset;
 
 @end

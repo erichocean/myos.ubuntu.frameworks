@@ -93,8 +93,7 @@ typedef union _OPAffineTransform
  * (often 2048 units per EM square) are divided by unitsPerEM, then transformed by
  * the PostScript matrix (textTransform scaled by pointSize).
  */
-@interface CTNSFont : NSObject
-{
+@interface CTNSFont : NSObject {
   CTNSFontDescriptor *_descriptor;
   OPAffineTransform _matrix;
   BOOL isFixedPitch;

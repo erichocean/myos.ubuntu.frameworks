@@ -91,6 +91,8 @@ static UIColor *ClearColor = nil;
 
 @implementation UIColor
 
+#pragma mark - Life cycle
+
 - (id)initWithRed:(CGFloat)red green:(CGFloat)green blue:(CGFloat)blue alpha:(CGFloat)alpha
 {
     self = [super init];
@@ -100,11 +102,66 @@ static UIColor *ClearColor = nil;
     return self;
 }
 
+- (id)initWithWhite:(CGFloat)white alpha:(CGFloat)alpha
+{
+    return [self initWithRed:white green:white blue:white alpha:alpha];
+}
+
+- (id)initWithHue:(CGFloat)hue saturation:(CGFloat)saturation brightness:(CGFloat)brightness alpha:(CGFloat)alpha
+{
+    int I = (int)(hue * 6);
+    double V = brightness;
+    double S = saturation;
+    double F = (hue * 6) - I;
+    double M = V * (1 - S);
+    double N = V * (1 - S * F);
+    double K = M - N + V;
+    double R, G, B;
+    switch (I) {
+        case 1: R = N; G = V; B = M; break;
+        case 2: R = M; G = V; B = K; break;
+        case 3: R = M; G = N; B = V; break;
+        case 4: R = K; G = M; B = V; break;
+        case 5: R = V; G = M; B = N; break;
+        default: R = V; G = K; B = M; break;
+    }
+    CGFloat _red_component = (CGFloat)R;
+    CGFloat _green_component = (CGFloat)G;
+    CGFloat _blue_component = (CGFloat)B;
+    return [self initWithRed:_red_component green:_green_component blue:_blue_component alpha:alpha];
+}
+
+- (id)initWithCGColor:(CGColorRef)ref
+{
+    self = [super init];
+    if (self) {
+        _color = CGColorRetain(ref);
+    }
+    return self;
+}
+
+- (id)initWithPatternImage:(UIImage *)patternImage
+{
+    if (!patternImage) {
+        [self release];
+        self = nil;
+    }
+    else {
+        self = [super init];
+    }
+    if (self) {
+        _color = CreatePatternColor(patternImage.CGImage);
+    }
+    return self;
+}
+
 - (void)dealloc
 {
     CGColorRelease(_color);
     [super dealloc];
 }
+
+#pragma mark - Class methods
 
 + (UIColor *)colorWithWhite:(CGFloat)white alpha:(CGFloat)alpha
 {
@@ -206,58 +263,7 @@ static UIColor *ClearColor = nil;
     return ClearColor ?: (ClearColor = [[self alloc] initWithRed:0.0 green:0.0 blue:0.0 alpha:0.0]);
 }
 
-- (id)initWithWhite:(CGFloat)white alpha:(CGFloat)alpha
-{
-    return [self initWithRed:white green:white blue:white alpha:alpha];
-}
-
-- (id)initWithHue:(CGFloat)hue saturation:(CGFloat)saturation brightness:(CGFloat)brightness alpha:(CGFloat)alpha
-{
-    int I = (int)(hue * 6);
-    double V = brightness;
-    double S = saturation;
-    double F = (hue * 6) - I;
-    double M = V * (1 - S);
-    double N = V * (1 - S * F);
-    double K = M - N + V;
-    double R, G, B;
-    switch (I) {
-        case 1: R = N; G = V; B = M; break;
-        case 2: R = M; G = V; B = K; break;
-        case 3: R = M; G = N; B = V; break;
-        case 4: R = K; G = M; B = V; break;
-        case 5: R = V; G = M; B = N; break;
-        default: R = V; G = K; B = M; break;
-    }
-    CGFloat _red_component = (CGFloat)R;
-    CGFloat _green_component = (CGFloat)G;
-    CGFloat _blue_component = (CGFloat)B;
-    return [self initWithRed:_red_component green:_green_component blue:_blue_component alpha:alpha];
-}
-
-- (id)initWithCGColor:(CGColorRef)ref
-{
-    self = [super init];
-    if (self) {
-        _color = ref;
-    }
-    return self;
-}
-
-- (id)initWithPatternImage:(UIImage *)patternImage
-{
-    if (!patternImage) {
-        [self release];
-        self = nil;
-    } 
-    else {
-        self = [super init];
-    }
-    if (self) {
-        _color = CreatePatternColor(patternImage.CGImage);
-    }
-    return self;
-}
+#pragma mark - Accessors
 
 - (void)set
 {
@@ -267,13 +273,14 @@ static UIColor *ClearColor = nil;
 
 - (void)setFill
 {
-    //DLog(@"");
+    //DLog(@"self: %@", self);
+    //DLog(@"_color: %@", _color);
     CGContextSetFillColorWithColor(UIGraphicsGetCurrentContext(), _color);
+    //DLog();
 }
 
 - (void)setStroke
 {
-    //DLog(@"");
     CGContextSetStrokeColorWithColor(UIGraphicsGetCurrentContext(), _color);
 }
 
@@ -284,9 +291,12 @@ static UIColor *ClearColor = nil;
 
 - (UIColor *)colorWithAlphaComponent:(CGFloat)alpha
 {
+    //DLog();
     CGColorRef newColor = CGColorCreateCopyWithAlpha(_color, alpha);
     UIColor *resultingUIColor = [UIColor colorWithCGColor:newColor];
+    //DLog(@"newColor: %@", newColor);
     CGColorRelease(newColor);
+    //DLog(@"resultingUIColor: %@", resultingUIColor);
     return resultingUIColor;
 }
 
@@ -297,20 +307,21 @@ static UIColor *ClearColor = nil;
     // This implementation returns kCGColorSpaceDeviceRGB instead.
     // Apple doesn't actually define UIDeviceRGBColorSpace or any of the other responses anywhere public,
     // so there isn't any easy way to emulate it.
-    CGColorSpaceRef colorSpaceRef = CGColorGetColorSpace(self.CGColor);
+    /*CGColorSpaceRef colorSpaceRef = CGColorGetColorSpace(self.CGColor);
     NSString *colorSpace = [NSString stringWithFormat:@"%@", [(NSString *)CGColorSpaceCopyName(colorSpaceRef) autorelease]];
 
     const size_t numberOfComponents = CGColorGetNumberOfComponents(self.CGColor);
+    //DLog(@"numberOfComponents: %d", numberOfComponents);*/
     const CGFloat *components = CGColorGetComponents(self.CGColor);
     NSMutableString *componentsString = [NSMutableString stringWithString:@"{"];
-    
-    for (NSInteger index = 0; index < numberOfComponents; index++) {
-        if (index) [componentsString appendString:@", "];
-        [componentsString appendFormat:@"%.0f", components[index]];
+    for (NSInteger index = 0; index < 4; index++) {
+        if (index) {
+            [componentsString appendString:@", "];
+        }
+        [componentsString appendFormat:@"%.2f", components[index]];
     }
     [componentsString appendString:@"}"];
-
-    return [NSString stringWithFormat:@"<%@: %p; colorSpace = %@; components = %@>", [self className], self, colorSpace, componentsString];
+    return [NSString stringWithFormat:@"<%@: %p; components = %@>", [self className], self, componentsString];
 }
 
 @end

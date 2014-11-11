@@ -34,4 +34,4 @@
 
 #import <UIKit/UINavigationBar.h>
 
-void _UINavigationBarUpdateNavigationItem(UINavigationBar* navBar, UINavigationItem* item, BOOL animated);
+void _UINavigationBarUpdateNavigationItem(UINavigationBar *navBar, UINavigationItem* item, BOOL animated);

@@ -25,7 +25,7 @@
  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
  * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+ */ 
 
 #import <UIKit/UIGestureRecognizer.h>
 
@@ -38,14 +38,19 @@
 // for UIScrollView but it certainly might make using the gesture recognizer in
 // a standalone setting somewhat more annoying. We'll have to see how it plays out.
 
-@interface UIPanGestureRecognizer : UIGestureRecognizer 
-{
+@interface UIPanGestureRecognizer : UIGestureRecognizer {
 @package
     NSUInteger _maximumNumberOfTouches;
     NSUInteger _minimumNumberOfTouches;
     CGPoint _translation;
     CGPoint _velocity;
+    CGPoint _displacement;
+    float _movementDuration;
+    //int _velocityCountX;
+    //int _velocityCountY;
     NSTimeInterval _lastMovementTime;
+    CGPoint _startLocation;
+    NSTimeInterval _startTime;
 }
 
 - (CGPoint)translationInView:(UIView *)view;

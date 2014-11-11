@@ -35,6 +35,7 @@
     CGFloat _allowableMovement;
     NSUInteger _numberOfTapsRequired;
     NSInteger _numberOfTouchesRequired;
+    BOOL _timePassed;
 }
 
 @property (nonatomic) CFTimeInterval minimumPressDuration;

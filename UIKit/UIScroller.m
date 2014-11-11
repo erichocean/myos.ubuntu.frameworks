@@ -27,26 +27,33 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIScroller.h>
-#import <UIKit/UITouch.h>
-#import <UIKit/UIBezierPath.h>
-#import <UIKit/UIColor.h>
-
+#import <UIKit/UIKit-private.h>
+#import <CoreAnimation/CoreAnimation-private.h>
 
 static const BOOL _UIScrollerGutterEnabled = NO;
 static const BOOL _UIScrollerJumpToSpotThatIsClicked = NO;	// _UIScrollerGutterEnabled must be YES for this to have any meaning
 static const CGFloat _UIScrollerMinimumAlpha = 0;
 
+#pragma mark - Static functions
 
-CGFloat UIScrollerWidthForBoundsSize(CGSize boundsSize)
+static void _UIScrollerFadeOutAfterDelay(UIScroller *scroller, NSTimeInterval time)
 {
-    const CGFloat minViewSize = 50;
+    [scroller->_fadeTimer invalidate];
+    scroller->_fadeTimer = [NSTimer scheduledTimerWithTimeInterval:time target:scroller selector:@selector(_fadeOut) userInfo:nil repeats:NO];
+}
+
+static void _UIScrollerFadeIn(UIScroller *scroller)
+{
+    [scroller->_fadeTimer invalidate];
+    scroller->_fadeTimer = nil;
     
-    if (boundsSize.width <= minViewSize || boundsSize.height <= minViewSize) {
-        return 6;
-    } else {
-        return 10;
-    }
+    [UIView animateWithDuration:0.33
+                          delay:0
+                        options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionTransitionNone | UIViewAnimationOptionAllowUserInteraction
+                     animations:^(void) {
+                         scroller.alpha = 1;
+                     }
+                     completion:NULL];
 }
 
 @implementation UIScroller
@@ -59,9 +66,12 @@ CGFloat UIScrollerWidthForBoundsSize(CGSize boundsSize)
 - (id)initWithFrame:(CGRect)frame
 {
     if ((self=[super initWithFrame:frame])) {
+        //DLog();
         self.opaque = NO;
         self.alpha = _UIScrollerMinimumAlpha;
+        //DLog();
         self.indicatorStyle = UIScrollViewIndicatorStyleDefault;
+        //DLog();
     }
     return self;
 }
@@ -124,15 +134,14 @@ CGFloat UIScrollerWidthForBoundsSize(CGSize boundsSize)
             _dragOffset = _lastTouchLocation.x - knobRect.origin.x;
         }
         _draggingKnob = YES;
-        [_delegate _UIScrollerDidBeginDragging:self withEvent:event];
+        [_delegate UIScrollerDidBeginDragging:self withEvent:event];
     } else if (_UIScrollerGutterEnabled) {
-        [_delegate _UIScrollerDidBeginDragging:self withEvent:event];
-
+        [_delegate UIScrollerDidBeginDragging:self withEvent:event];
         if (_UIScrollerJumpToSpotThatIsClicked) {
             _dragOffset = [self knobSize] / 2.f;
             _draggingKnob = YES;
             [self setContentOffsetWithLastTouch];
-            [_delegate _UIScroller:self contentOffsetDidChange:_contentOffset];
+            [_delegate UIScroller:self contentOffsetDidChange:_contentOffset];
         } else {
             [self autoPageContent];
             _holdTimer = [NSTimer scheduledTimerWithTimeInterval:0.33
@@ -150,7 +159,7 @@ CGFloat UIScrollerWidthForBoundsSize(CGSize boundsSize)
 
     if (_draggingKnob) {
         [self setContentOffsetWithLastTouch];
-        [_delegate _UIScroller:self contentOffsetDidChange:_contentOffset];
+        [_delegate UIScroller:self contentOffsetDidChange:_contentOffset];
     }
 }
 
@@ -158,9 +167,9 @@ CGFloat UIScrollerWidthForBoundsSize(CGSize boundsSize)
 {
     if (_draggingKnob) {
         _draggingKnob = NO;
-        [_delegate _UIScrollerDidEndDragging:self withEvent:event];
+        [_delegate UIScrollerDidEndDragging:self withEvent:event];
     } else if (_holdTimer) {
-        [_delegate _UIScrollerDidEndDragging:self withEvent:event];
+        [_delegate UIScrollerDidEndDragging:self withEvent:event];
         [_holdTimer invalidate];
         _holdTimer = nil;
     }
@@ -179,7 +188,23 @@ CGFloat UIScrollerWidthForBoundsSize(CGSize boundsSize)
     return hit;
 }
 
-#pragma mark - Helpers
+#pragma mark - Actions
+
+- (void)_fadeOut
+{
+    [_fadeTimer invalidate];
+    _fadeTimer = nil;
+    
+    [UIView animateWithDuration:0.33
+                          delay:0
+                        options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionTransitionNone | UIViewAnimationOptionAllowUserInteraction
+                     animations:^(void) {
+                         self.alpha = _UIScrollerMinimumAlpha;
+                     }
+                     completion:NULL];
+}
+
+#pragma mark - Public methods
 
 - (void)flash
 {
@@ -205,14 +230,16 @@ CGFloat UIScrollerWidthForBoundsSize(CGSize boundsSize)
     if (_alwaysVisible) {
         _UIScrollerFadeIn(self);
     } else if (self.alpha > _UIScrollerMinimumAlpha && !_fadeTimer) {
-        _UIScrollerFadeOut(self);
+        [self _fadeOut];
+        //_UIScrollerFadeOut(self);
     }
 }
 
 - (void)setIndicatorStyle:(UIScrollViewIndicatorStyle)style
 {
     _indicatorStyle = style;
-    [self setNeedsDisplay];
+    _CALayerSetNeedsDisplay(_layer);
+    //[self setNeedsDisplay];
 }
 
 - (CGFloat)knobSize
@@ -242,13 +269,15 @@ CGFloat UIScrollerWidthForBoundsSize(CGSize boundsSize)
 - (void)setContentOffset:(CGFloat)newOffset
 {
     _contentOffset = MIN(MAX(0,newOffset),_contentSize);
-    [self setNeedsDisplay];
+    _CALayerSetNeedsDisplay(_layer);
+    //[self setNeedsDisplay];
 }
 
 - (void)setContentSize:(CGFloat)newContentSize
 {
     _contentSize = newContentSize;
-    [self setNeedsDisplay];
+    _CALayerSetNeedsDisplay(_layer);
+    //[self setNeedsDisplay];
 }
 
 - (void)setContentOffsetWithLastTouch
@@ -317,39 +346,15 @@ CGFloat UIScrollerWidthForBoundsSize(CGSize boundsSize)
 
 @end
 
-#pragma mark - Private C functions
+#pragma mark - Shared functions
 
-void _UIScrollerFadeOut(UIScroller* scroller)
+CGFloat UIScrollerWidthForBoundsSize(CGSize boundsSize)
 {
-    [_fadeTimer invalidate];
-    _fadeTimer = nil;
-
-    [UIView animateWithDuration:0.33
-                          delay:0
-                        options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionTransitionNone | UIViewAnimationOptionAllowUserInteraction
-                     animations:^(void) {
-                         self.alpha = _UIScrollerMinimumAlpha;
-                     }
-                     completion:NULL];
+    const CGFloat minViewSize = 50;
+    
+    if (boundsSize.width <= minViewSize || boundsSize.height <= minViewSize) {
+        return 6;
+    } else {
+        return 10;
+    }
 }
-
-void _UIScrollerFadeOutAfterDelay(UIScroller* scroller, NSTimeInterval time)
-{
-    [_fadeTimer invalidate];
-    _fadeTimer = [NSTimer scheduledTimerWithTimeInterval:time target:self selector:@selector(_fadeOut) userInfo:nil repeats:NO];
-}
-
-void _UIScrollerFadeIn(UIScroller* scroller)
-{
-    [_fadeTimer invalidate];
-    _fadeTimer = nil;
-
-    [UIView animateWithDuration:0.33
-                          delay:0
-                        options:UIViewAnimationOptionCurveEaseOut | UIViewAnimationOptionTransitionNone | UIViewAnimationOptionAllowUserInteraction
-                     animations:^(void) {
-                         self.alpha = 1;
-                     }
-                     completion:NULL];
-}
-

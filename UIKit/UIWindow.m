@@ -28,11 +28,9 @@
  */
 
 #import <UIKit/UIKit-private.h>
-//#import <UIKit/UIEvent.h>
 #import <UIKit/UIScreenMode.h>
 #import <UIKit/UIViewController.h>
-#import <UIKit/UIGestureRecognizerSubclass.h>
-#import <CoreAnimation/CALayer+CFunctions.h>
+//#import <UIKit/UIGestureRecognizerSubclass.h>
 
 const UIWindowLevel UIWindowLevelNormal = 0;
 const UIWindowLevel UIWindowLevelStatusBar = 1000;
@@ -161,13 +159,13 @@ NSString *const _CARootLayersModifiedNotification = @"CARootLayersModifiedNotifi
 - (void) _screenModeChangedNotification:(NSNotification *)notification
 {
     UIScreenMode *previousMode = [[notification userInfo] objectForKey:@"_previousMode"];
-    UIScreenMode *newMode = _screen->currentMode;
+    UIScreenMode *newMode = _screen->_currentMode;
     if (!CGSizeEqualToSize(previousMode->_size,newMode->_size)) {
         _UIViewSuperviewSizeDidChange((UIView*)self, previousMode->_size, newMode->_size);
     }
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (void)removeFromSuperview
 {
@@ -306,10 +304,13 @@ NSString *const _CARootLayersModifiedNotification = @"CARootLayersModifiedNotifi
         NSSet *touches = [event touchesForWindow:self];
         NSMutableSet *gestureRecognizers = [NSMutableSet setWithCapacity:1];
         for (UITouch *touch in touches) {
+            //DLog(@"touch: %@", touch);
+            //DLog(@"touch->_gestureRecognizers: %@", touch->_gestureRecognizers);
             [gestureRecognizers addObjectsFromArray:touch->_gestureRecognizers];
         }
-        //DLog(@"touches: %@", touches);
+        //DLog();
         for (UIGestureRecognizer *recognizer in gestureRecognizers) {
+            //DLog(@"recognizer: %@", recognizer);
             _UIGestureRecognizerRecognizeTouches(recognizer, touches, event);
         }
         for (UITouch *touch in touches) {
@@ -334,8 +335,8 @@ NSString *const _CARootLayersModifiedNotification = @"CARootLayersModifiedNotifi
             // aware that this is here for a reason and that the problem it prevents is very rare and somewhat contrived.
             UIView *view = [touch.view retain];
 
+            //DLog(@"view: %@", view);
             const UITouchPhase phase = touch.phase;
-            //const _UITouchGesture gesture = touch->_gesture;
             
             if (phase == UITouchPhaseBegan) {
                 [view touchesBegan:touches withEvent:event];
@@ -345,63 +346,10 @@ NSString *const _CARootLayersModifiedNotification = @"CARootLayersModifiedNotifi
                 [view touchesEnded:touches withEvent:event];
             } else if (phase == UITouchPhaseCancelled) {
                 [view touchesCancelled:touches withEvent:event];
-            }/* 
-            else if (phase == _UITouchPhaseDiscreteGesture && gesture == _UITouchDiscreteGestureMouseMove) {
-                if ([view hitTest:[touch locationInView:view] withEvent:event]) {
-                    [view mouseMoved:touch->_delta withEvent:event];
-                }
-            } 
-            else if (phase == _UITouchPhaseDiscreteGesture && gesture == _UITouchDiscreteGestureRightClick) {
-                [view rightClick:touch withEvent:event];
-            } 
-            else if ((phase == _UITouchPhaseDiscreteGesture && gesture == _UITouchDiscreteGestureScrollWheel) ||
-                       (phase == _UITouchPhaseGestureChanged && gesture == _UITouchGesturePan)) {
-                [view scrollWheelMoved:touch->_delta withEvent:event];
-            }*/
+            }
             [view release];
         }
-        //DLog(@"gestureRecognizers: %@", gestureRecognizers);
     }
 }
 
 @end
-/*
-void _UIWindowScreenModeChangedNotification(UIWindow* window, NSNotification* notification)
-{
-    UIScreenMode *previousMode = [[notification userInfo] objectForKey:@"_previousMode"];
-    UIScreenMode *newMode = window->_screen->currentMode;
-
-    if (!CGSizeEqualToSize(previousMode->_size,newMode->_size)) {
-        _UIViewSuperviewSizeDidChange((UIView*)window, previousMode->_size, newMode->_size);
-    }
-}*/
-/*
-void _UIWindowMakeHidden(UIWindow* window)
-{
-    if (!window->_layer.hidden) {
-        _NSObjectSuperMessageWithBoolean(window, @selector(setHidden:), YES);
-        if (window->_screen) {
-            _UIApplicationWindowDidBecomeHidden([UIApplication sharedApplication], window);
-            [[NSNotificationCenter defaultCenter] postNotificationName:UIWindowDidBecomeHiddenNotification object:window];
-        }
-    }
-}
-
-void _UIWindowMakeVisible(UIWindow* window)
-{
-    if (window->_layer.hidden) {
-        _NSObjectSuperMessageWithBoolean(window, @selector(setHidden:), NO);
-        if (window->screen) {
-            _UIApplicationWindowDidBecomeVisible([UIApplication sharedApplication], window);
-            [[NSNotificationCenter defaultCenter] postNotificationName:UIWindowDidBecomeVisibleNotification object:window];
-        }
-    }
-}*/
-/*
-id _NSObjectSuperMessageWithBoolean(id anObject, SEL selector, BOOL flag)
-{
-    Class parent_class = class_getSuperclass(object_getClass(anObject));
-    struct objc_super super_data = {anObject, parent_class};
-    return objc_msgSendSuper(&super_data, selector, flag);
-}*/
-

@@ -28,13 +28,12 @@
 /**
  * Container of CTLine objects
  */
-@interface CTFrame : NSObject
-{
+@interface CTFrame : NSObject {
 	CGPathRef _path;
 	NSMutableArray *_lines;
 	NSRange _stringRange;
 	NSRange _visibleStringRange;
-  NSDictionary *_attributes;
+    NSDictionary *_attributes;
 }
 
 - (id) initWithPath: (CGPathRef)aPath

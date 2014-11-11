@@ -27,8 +27,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIViewAnimationGroup.h>
-#import <UIKit/UIColor.h>
+#import <UIKit/UIKit-private.h>
 #import <CoreAnimation/CoreAnimation-private.h>
 
 static CAMediaTimingFunction *CAMediaTimingFunctionFromUIViewAnimationCurve(UIViewAnimationCurve curve)
@@ -53,6 +52,7 @@ static CAMediaTimingFunction *CAMediaTimingFunctionFromUIViewAnimationCurve(UIVi
 
 - (id)initWithGroupName:(NSString *)theName context:(void *)theContext
 {
+    //DLog();
     if ((self=[super init])) {
         _name = [theName copy];
         _context = theContext;
@@ -60,7 +60,8 @@ static CAMediaTimingFunction *CAMediaTimingFunctionFromUIViewAnimationCurve(UIVi
         _animationCurve = UIViewAnimationCurveEaseInOut;
         _animationBeginsFromCurrentState = NO;
         _animatingViews = [[NSMutableSet alloc] initWithCapacity:0];
-        _animationGroup = [_CAAnimationNewAnimationGroup() retain];
+        _animationGroup = _CAAnimationGroupNew();
+        _animationGroup.delegate = self;
     }
     return self;
 }
@@ -117,6 +118,7 @@ static CAMediaTimingFunction *CAMediaTimingFunctionFromUIViewAnimationCurve(UIVi
 
 - (void)setAnimationDuration:(NSTimeInterval)newDuration
 {
+    //DLog();
     [_animationGroup setDuration:newDuration];
 }
 
@@ -127,6 +129,23 @@ static CAMediaTimingFunction *CAMediaTimingFunctionFromUIViewAnimationCurve(UIVi
 
 - (void)setAnimationRepeatCount:(float)repeatCount
 {
+    //repeatCount = 2.0;
+    //DLog(@"self: %@", self);
+    //int repeat = 255;
+    /*char *repeat = &repeatCount;
+    //DLog(@"sizeof(repeat): %d", sizeof(repeat));
+    DLog(@"repeat[0]: %d", repeat[0]);
+    DLog(@"repeat[1]: %d", repeat[1]);
+    DLog(@"repeat[2]: %d", repeat[2]);
+    DLog(@"repeat[3]: %d", repeat[3]);*/
+    
+    /*DLog(@"repeat & intRepeat[0]: %d", repeat & intRepeat[0];
+    DLog(@"repeat & intRepeat[1]: %d", repeat & intRepeat[1];
+    DLog(@"repeat & intRepeat[2]: %d", repeat & intRepeat[2];
+    DLog(@"repeat & intRepeat[3]: %d", repeat & intRepeat[3];
+    DLog(@"repeatCount d: %d", (int)repeatCount);
+    DLog(@"repeatCount f: %f", repeatCount);
+    DLog(@"repeatCount g: %g", repeatCount);*/
     [_animationGroup setRepeatCount:repeatCount];
 }
 
@@ -142,6 +161,11 @@ static CAMediaTimingFunction *CAMediaTimingFunctionFromUIViewAnimationCurve(UIVi
     _animationWillStartSelector = selector;
 }
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<%@: %p; _animationGroup = %@>", [self className], self, _animationGroup];
+}
+
 #pragma mark - Delegates
 
 - (void)animationDidStart:(CAAnimation *)theAnimation
@@ -152,29 +176,62 @@ static CAMediaTimingFunction *CAMediaTimingFunctionFromUIViewAnimationCurve(UIVi
             NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
             [invocation setSelector:_animationWillStartSelector];
             NSInteger remaining = [signature numberOfArguments] - 2;
-            
             if (remaining > 0) {
                 [invocation setArgument:&_name atIndex:2];
                 remaining--;
             }
-            
             if (remaining > 0) {
                 [invocation setArgument:&_context atIndex:3];
             }
-            
             [invocation invokeWithTarget:_animationDelegate];
         }
         _didSendStartMessage = YES;
     }
 }
 
-- (void)animationDidStop:(CAAnimation *)theAnimation finished:(BOOL)flag
+- (void)animationDidStop:(CAAnimationGroup *)animationGroup finished:(BOOL)finished
 {
+    //DLog();
     _waitingAnimations--;
-    [self notifyAnimationsDidStopIfNeededUsingStatus:flag];
+    //[self notifyAnimationsDidStopIfNeededUsingStatus:flag];
+    
+    //DLog(@"animationDidStop: %d", finished);
+    if (_waitingAnimations == 0) {
+        if ([_animationDelegate respondsToSelector:_animationDidStopSelector]) {
+            NSMethodSignature *signature = [_animationDelegate methodSignatureForSelector:_animationDidStopSelector];
+            NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
+            [invocation setSelector:_animationDidStopSelector];
+            NSInteger remaining = [signature numberOfArguments] - 2;
+            NSNumber *finishedArgument = [NSNumber numberWithBool:finished];
+            if (remaining > 0) {
+                [invocation setArgument:&_name atIndex:2];
+                remaining--;
+            }
+            if (remaining > 0) {
+                [invocation setArgument:&finishedArgument atIndex:3];
+                remaining--;
+            }
+            if (remaining > 0) {
+                [invocation setArgument:&_context atIndex:4];
+            }
+            [invocation invokeWithTarget:_animationDelegate];
+        }
+        [_animatingViews removeAllObjects];
+    }
+    
+    /*UIViewAnimationGroup *viewAnimationGroup = nil;
+    for (UIViewAnimationGroup *aViewAnimationGroup in _animationGroups) {
+        if (aViewAnimationGroup->_animationGroup == animationGroup) {
+            viewAnimationGroup = aViewAnimationGroup;
+            break;
+        }
+    }*/
+    //DLog(@"_animationGroups: %@", _animationGroups);
+    [_animationGroups removeObject:animationGroup.delegate];
+    //DLog(@"_animationGroups2: %@", _animationGroups);
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (CAAnimation *)addAnimation:(CAAnimation *)animation
 {
@@ -190,44 +247,19 @@ static CAMediaTimingFunction *CAMediaTimingFunctionFromUIViewAnimationCurve(UIVi
     DLog(@"animation: %@", animation);
     return animation;
 }
-
+/*
 - (void)notifyAnimationsDidStopIfNeededUsingStatus:(BOOL)animationsDidFinish
 {
-    if (_waitingAnimations == 0) {
-        if ([_animationDelegate respondsToSelector:_animationDidStopSelector]) {
-            NSMethodSignature *signature = [_animationDelegate methodSignatureForSelector:_animationDidStopSelector];
-            NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:signature];
-            [invocation setSelector:_animationDidStopSelector];
-            NSInteger remaining = [signature numberOfArguments] - 2;
-            
-            NSNumber *finishedArgument = [NSNumber numberWithBool:animationsDidFinish];
-            
-            if (remaining > 0) {
-                [invocation setArgument:&_name atIndex:2];
-                remaining--;
-            }
-            
-            if (remaining > 0) {
-                [invocation setArgument:&finishedArgument atIndex:3];
-                remaining--;
-            }
-            
-            if (remaining > 0) {
-                [invocation setArgument:&_context atIndex:4];
-            }
-            
-            [invocation invokeWithTarget:_animationDelegate];
-        }
-        [_animatingViews removeAllObjects];
-    }
-}
+
+}*/
 
 - (void)commit
 {
+    //DLog();
     if (_transitionLayer) {
+        //DLog(@"_transitionLayer: %@", _transitionLayer);
         CATransition *trans = [CATransition animation];
         trans.type = kCATransitionMoveIn;
-        
         switch (_transitionType) {
             case UIViewAnimationTransitionNone:	
                 trans.subtype = nil;						
@@ -245,13 +277,30 @@ static CAMediaTimingFunction *CAMediaTimingFunctionFromUIViewAnimationCurve(UIVi
                 trans.subtype = kCATransitionFromRight;
                 break;
         }
-        
         [_transitionLayer addAnimation:[self addAnimation:trans] forKey:kCATransition];
     }
-    
-    _waitingAnimations--;
-    [self notifyAnimationsDidStopIfNeededUsingStatus:YES];
-    _CAAnimationCommitAnimationGroup();
+    //[self animationDidStop:nil finished:YES];
+    //_waitingAnimations--;
+    //[self notifyAnimationsDidStopIfNeededUsingStatus:YES];
+    _CAAnimationGroupCommit();
 }
 
 @end
+
+#pragma mark - shared functions
+
+UIViewAnimationGroup *UIViewAnimationGroupGetCurrent()
+{
+    //DLog();
+    for (UIViewAnimationGroup *viewAnimationGroup in [_animationGroups reverseObjectEnumerator]) {
+        if (!viewAnimationGroup->_animationGroup->_committed) {
+            return viewAnimationGroup;
+        }
+    }
+    /*
+     int arrayCount = CFArrayGetCount(_animationGroups);
+     if (arrayCount) {
+     return CFArrayGetValueAtIndex(_animationGroups, arrayCount-1);
+     }*/
+    return nil;
+}

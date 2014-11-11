@@ -1,9 +1,22 @@
 /*
- * Copyright (c) 2012-2013. All rights reserved.
- *
+ Copyright © 2014 myOS Group.
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ Lesser General Public License for more details.
+ 
+ Contributor(s):
+ Amr Aboelela <amraboelela@gmail.com>
  */
 
 #import <CoreAnimation/CoreAnimation-private.h>
+#import <CoreFoundation/CoreFoundation-private.h>
 
 NSString *const kCAGravityResize = @"CAGravityResize";
 NSString *const kCAGravityResizeAspect = @"CAGravityResizeAspect";
@@ -19,25 +32,29 @@ NSString *const kCAGravityBottomLeft = @"CAGravityBottomLeft";
 NSString *const kCAGravityBottomRight = @"CAGravityBottomRight";
 NSString *const kCATransition = @"CATransition";
 
-//static CFMutableArrayRef _rootLayers;
 static NSString *const _kCAStyle = @"style";
 static NSArray *_CALayerAnimatableKeys = nil;
 static NSMutableDictionary *_needDisplayKeys;
 
+#pragma mark - Static functions
+
+static NSString *_NSStringFromCGPoint(CGPoint p)
+{
+    return NSStringFromPoint(NSPointFromCGPoint(p));
+}
+
 @implementation CALayer
 
 @synthesize delegate;
-@synthesize layoutManager;
-//@synthesize anchorPoint;
-@synthesize cornerRadius;
-@synthesize borderWidth;
-@synthesize borderColor;
-@synthesize contentsRect;
-@synthesize contentsCenter;
-@synthesize contentsGravity;
-@synthesize needsDisplayOnBoundsChange;
-@synthesize actions;
-@synthesize style;
+@synthesize cornerRadius=_cornerRadius;
+@synthesize borderWidth=_borderWidth;
+@synthesize borderColor=_borderColor;
+@synthesize contentsRect=_contentsRect;
+@synthesize contentsCenter=_contentsCenter;
+@synthesize contentsGravity=_contentsGravity;
+@synthesize needsDisplayOnBoundsChange=_needsDisplayOnBoundsChange;
+@synthesize actions=_actions;
+@synthesize style=_style;
 
 #pragma mark - Life cycle
 
@@ -45,6 +62,7 @@ static NSMutableDictionary *_needDisplayKeys;
 {
     if (self == [CALayer class]) {
         _rootLayers = CFArrayCreateMutable(kCFAllocatorDefault, 5, &kCFTypeArrayCallBacks);
+        //DLog(@"_rootLayers: %@", _rootLayers);
         _CALayerAnimatableKeys = [[NSArray alloc] initWithObjects:@"position", @"opacity", @"bounds", @"anchorPoint", @"contentsRect", @"contents", @"contentsScale", @"contentCenter", @"backgroundColor", @"cornerRadius", @"borderWidth", @"borderColor", @"shadowColor", @"shadowOpacity", @"shadowOffset", @"shadowRadius", nil];
         _needDisplayKeys = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                                @"YES", @"contents",
@@ -55,8 +73,8 @@ static NSMutableDictionary *_needDisplayKeys;
                                @"YES", @"shadowColor",
                                @"YES", @"shadowOpacity",
                                @"YES", @"shadowOffset",
-                               @"YES", @"shadowRadius", nil];
-        _CAAnimatorInitialize();
+                               @"YES", @"shadowRadius",
+                               @"YES", @"contentsScale", nil];
         _CATransactionInitialize();
         _CALayerObserverInitialize();
         //DLog(@"[NSThread currentThread]: %@", [NSThread currentThread]);
@@ -72,7 +90,7 @@ static NSMutableDictionary *_needDisplayKeys;
 {
     self = [super init];
     if (self) {
-        sublayers = CFArrayCreateMutable(kCFAllocatorDefault, 20, &kCFTypeArrayCallBacks);
+        _sublayers = CFArrayCreateMutable(kCFAllocatorDefault, 20, &kCFTypeArrayCallBacks);
         if (![self isKindOfClass:[CARenderLayer class]]) {
             CALayerObserver *layerObserver = _CALayerObserverGetSharedObserver();
             for (NSString *key in _CALayerAnimatableKeys) {
@@ -97,61 +115,82 @@ static NSMutableDictionary *_needDisplayKeys;
 {
     self = [self init];
     if (self) {
-        modelLayer = self;
-        bounds = theBounds;
-        contentsScale = 1.0;
-        needsLayout = NO;
-        needsDisplay = YES;
+        _modelLayer = self;
+        _bounds = theBounds;
+        _contentsScale = 1.0;
+        //DLog(@"_contentsScale: %0.2f", _contentsScale);
+        _CALayerSetNeedsLayout(self);
+        //_needsLayout = YES;
+        _needsDisplay = YES;
         _needsComposite = YES;
-        position = CGPointZero;
-        anchorPoint = CGPointMake(0.5, 0.5);
-        opacity = 1.0;
-        shadowOpacity = 0;
-        shadowOffset = CGSizeMake(0, 3);
-        shadowRadius = 3;
-        shadowPath = NULL;
-        opaque = NO;
-        masksToBounds = NO;
+        _position = CGPointZero;
+        _anchorPoint = CGPointMake(0.5, 0.5);
+        _opacity = 1.0;
+        _shadowOpacity = 0;
+        _shadowOffset = CGSizeMake(0, 3);
+        _shadowRadius = 3;
+        _shadowPath = NULL;
+        _opaque = NO;
+        _masksToBounds = NO;
         _oldContents = nil;
-        contents = nil;
+        _contents = nil;
+        //DLog(@"_contentsWasSet: %d", _contentsWasSet);
+        //_contentsWasSet = NO;
         _displayContents = nil;
-        contentsRect = CGRectMake(0.0, 0.0, 1.0, 1.0);
+        _keyframesContents = nil;
+        _contentsRect = CGRectMake(0.0, 0.0, 1.0, 1.0);
         _animations = [[NSMutableDictionary alloc] initWithCapacity:10];//CFDictionaryCreateMutable(kCFAllocatorDefault, 10, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-        actions = CFDictionaryCreateMutable(kCFAllocatorDefault, 10, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-        style = CFDictionaryCreateMutable(kCFAllocatorDefault, 10, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-        presentationLayer = [[[self class] alloc] initWithModelLayer:self];
-        _renderLayer = [[CARenderLayer alloc] initWithPresentationLayer:presentationLayer];
-        presentationLayer->_renderLayer = _renderLayer;
+        _actions = CFDictionaryCreateMutable(kCFAllocatorDefault, 10, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        _style = CFDictionaryCreateMutable(kCFAllocatorDefault, 10, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
+        _presentationLayer = [[[self class] alloc] initWithModelLayer:self];
+        _renderLayer = [[CARenderLayer alloc] init];//WithPresentationLayer:_presentationLayer];
+        _presentationLayer->_renderLayer = [_renderLayer retain];
         _CALayerSetNeedsDisplay(self);
-        backgroundColor = nil;
+        _backgroundColor = nil;
         _needsUnload = NO;
         _contentsTransitionProgress = 1.0;
-        beginTime = 0;
-        duration = 0;
-        repeatCount = 0;
-        repeatDuration = 0;
-        autoreverses = NO;
-        fillMode = nil;
-        speed = 1;
-        timeOffset = 0;
+        _keyframesProgress = -1;
+        _beginTime = 0;
+        _duration = 0;
+        _repeatCount = 0;
+        _repeatDuration = 0;
+        _autoreverses = NO;
+        _fillMode = nil;
+        _speed = 1;
+        _timeOffset = 0;
     }
     return self;
 }
 
 - (void)dealloc
 {
-    [presentationLayer release];
-    [contentsGravity release];
-    CFRelease(actions);
+    //DLog(@"self: %@", self);
+    [_presentationLayer release];
+    //DLog(@"_renderLayer: %@, _renderLayer.retainCount: %d", _renderLayer, _renderLayer.retainCount);
+    [_renderLayer release];
+    [_contentsGravity release];
+    if (_actions) {
+        CFRelease(_actions);
+    }
+    //DLog();
     [_animations release];
-    CFRelease(style);
-    CFRelease(sublayers);
-    CGColorRelease(backgroundColor);
-    CGColorRelease(shadowColor);
+    //DLog();
+    if (_actions) {
+        CFRelease(_style);
+    }
+    //DLog();
+    CFRelease(_sublayers);
+    //DLog();
+    CGColorRelease(_backgroundColor);
+    //DLog();
+    CGColorRelease(_shadowColor);
     [_oldContents release];
-    [contents release];
-    [fillMode release];
+    [_contents release];
+    [_keyframesContents release];
+    [_fillMode release];
+    //DLog();
     CGImageRelease(_displayContents);
+    //DLog();
     CALayerObserver *layerObserver = _CALayerObserverGetSharedObserver();
     for (NSString *key in _CALayerAnimatableKeys) {
         [self removeObserver:layerObserver forKeyPath:key]; 
@@ -195,46 +234,56 @@ static NSMutableDictionary *_needDisplayKeys;
 
 - (BOOL)isOpaque
 {
-    return opaque;
+    return _opaque;
 }
 
 - (void)setOpaque:(BOOL)newValue
 {
-    opaque = newValue;
+    _opaque = newValue;
     _CALayerSetNeedsComposite(self);
 }
 
 - (BOOL)isGeometryFlipped
 {
-    return geometryFlipped;
+    return _geometryFlipped;
 }
 
 - (void)setGeometryFlipped:(BOOL)newValue
 {
-    geometryFlipped = newValue;
+    _geometryFlipped = newValue;
 }
 
 - (BOOL)isHidden
 {
-    return hidden;
+    return _hidden;
 }
 
 - (void)setHidden:(BOOL)newValue
 {
-    hidden = newValue;
+    //DLog(@"self: %@", self);
+    BOOL oldValue = _hidden;
+    _hidden = newValue;
     if (newValue == YES) {
+        //DLog(@"newValue == YES");
         self.opacity = 0;
-        _CALayerSetNeedsUnload(self);
+        //_CALayerSetNeedsUnload(self);
+        /*if (_superlayer == nil || _superlayer->_superlayer == nil) {
+            _CALayerSetNeedsUnload(self);
+        }*/
     } else {
         self.opacity = 1;
-        _CALayerSetNeedsDisplayWithRoot(self);
+        /*if (oldValue && (_superlayer == nil || _superlayer->_superlayer == nil)) {
+            //DLog(@"_hidden && (_superlayer== nil || _superlayer->_superlayer == nil)");
+            _CALayerSetNeedsDisplayWithRoot(self);
+        } else {*/
+        _CALayerSetNeedsComposite(self);
+        //}
     }
-    _CALayerSetNeedsComposite(self);
 }
 
 - (id)presentationLayer
 {
-    if (modelLayer == self) {
+    if (_modelLayer == self) {
         CALayer *result = [[[[self class] alloc] initWithModelLayer:self] autorelease];
         _CALayerApplyAnimations(result);
         return result;
@@ -245,25 +294,25 @@ static NSMutableDictionary *_needDisplayKeys;
 
 - (id)modelLayer
 {
-    return modelLayer;
+    return _modelLayer;
 }
 
 - (CALayer *)superlayer
 {
-    if (modelLayer == self) {
-        return superlayer;
+    if (_modelLayer == self) {
+        return _superlayer;
     } else {
-        return [modelLayer->superlayer presentationLayer];
+        return [_modelLayer->_superlayer presentationLayer];
     }
 }
 
 - (NSArray *)sublayers
 {
-    if (modelLayer == self) {
-        return CFArrayCreateMutableCopy(kCFAllocatorDefault, 10, sublayers);
+    if (_modelLayer == self) {
+        return CFArrayCreateMutableCopy(kCFAllocatorDefault, 10, _sublayers);
     } else {
       CFMutableArrayRef subPresentationLayers = CFArrayCreateMutable(kCFAllocatorDefault, 20, &kCFTypeArrayCallBacks);
-      for (CALayer *modelSubLayer in modelLayer->sublayers) {
+      for (CALayer *modelSubLayer in _modelLayer->_sublayers) {
           CFArrayAppendValue(subPresentationLayers, [modelSubLayer presentationLayer]);
       }
       return subPresentationLayers;
@@ -272,223 +321,267 @@ static NSMutableDictionary *_needDisplayKeys;
 
 - (void)setSublayers:(NSArray *)theSublayers
 {
-    if (modelLayer == self) {
-        if (sublayers) {
-            CFRelease(sublayers);
+    if (_modelLayer == self) {
+        if (_sublayers) {
+            CFRelease(_sublayers);
         }
-        sublayers = CFArrayCreateMutableCopy(kCFAllocatorDefault, 10, theSublayers);
+        _sublayers = CFArrayCreateMutableCopy(kCFAllocatorDefault, 10, theSublayers);
     }
 }
 
 - (id)contents
 {
-    return contents;
+    return _contents;
 }
 
 - (void)setContents:(id)newContents
 {
     //DLog(@"newContents: %@", newContents);
     [self willChangeValueForKey:@"contents"];
-    //if (contents) {
-    [contents release];
+    //if (_bounds.size.height > 500) {
+        //DLog(@"_contents: %@", _contents);
     //}
-    contents = [newContents retain];
+    [_contents release];
+    _contents = [newContents retain];
+    //_contentsWasSet = NO;
     [self didChangeValueForKey:@"contents"];
 }
 
 - (float)opacity
 {
-    return opacity;
+    return _opacity;
 }
 
 - (void)setOpacity:(float)newOpacity
 {
     [self willChangeValueForKey:@"opacity"];
-    opacity = newOpacity;
+    _opacity = newOpacity;
     [self didChangeValueForKey:@"opacity"];
-    if (opacity < 1.0) {
-        opaque = NO;
+    if (_opacity < 1.0) {
+        _opaque = NO;
     }
 }
 
 - (CGColorRef)backgroundColor
 {
-    return backgroundColor;
+    return _backgroundColor;
 }
 
 - (void)setBackgroundColor:(CGColorRef)newBackgroundColor
 {
     [self willChangeValueForKey:@"backgroundColor"];
-    CGColorRelease(backgroundColor);
-    backgroundColor = CGColorRetain(newBackgroundColor);
+    CGColorRelease(_backgroundColor);
+    _backgroundColor = CGColorRetain(newBackgroundColor);
     [self didChangeValueForKey:@"backgroundColor"];
 }
 
 - (CGPoint)position
 {
-    return position;
+    return _position;
 }
 
 - (void)setPosition:(CGPoint)newPosition
 {
     [self willChangeValueForKey:@"position"];
-    position = newPosition;
+    _position = newPosition;
+    //DLog(@"self: %@, newPosition: %@", self, _NSStringFromCGPoint(newPosition));
+    if (_superlayer) {
+        //DLog(@"self: %@", self);
+        _CALayerSetNeedsLayout(_superlayer);
+    }
     [self didChangeValueForKey:@"position"];
 }
 
 - (CGFloat)zPosition
 {
-    return zPosition;
+    return _zPosition;
 }
 
 - (void)setZPosition:(CGFloat)newZPosition
 {
-    zPosition = newZPosition;
+    _zPosition = newZPosition;
     _CALayerSetNeedsComposite(self);
 }
 
 - (CGRect)bounds
 {
-    return bounds;
+    return _bounds;
 }
 
 - (void)setBounds:(CGRect)newBounds
 {
+    //DLog(@"self: %@", self);
     [self willChangeValueForKey:@"bounds"];
-    bounds = newBounds;
+    _bounds = newBounds;
     [self didChangeValueForKey:@"bounds"];
-    if (needsDisplayOnBoundsChange) {
+    //DLog(@"self: %@", self);
+    _CALayerSetNeedsLayout(self);
+    if (_needsDisplayOnBoundsChange) {
         _CALayerSetNeedsDisplay(self);
     }
 }
 
 - (CGPoint)anchorPoint
 {
-    return anchorPoint;
+    return _anchorPoint;
 }
 
 - (void)setAnchorPoint:(CGPoint)newAnchorPoint
 {
     [self willChangeValueForKey:@"anchorPoint"];
-    anchorPoint = newAnchorPoint;
+    _anchorPoint = newAnchorPoint;
     [self didChangeValueForKey:@"anchorPoint"];
-    //_CALayerSetNeedsComposite(self);
 }
 
 - (CGRect)frame
 {
-    return CGRectMake(position.x - bounds.size.width * anchorPoint.x,
-                      position.y - bounds.size.height * (1 - anchorPoint.y),
-                      bounds.size.width, bounds.size.height);
+    return CGRectMake(_position.x - _bounds.size.width * _anchorPoint.x,
+                      _position.y - _bounds.size.height * (1 - _anchorPoint.y),
+                      _bounds.size.width, _bounds.size.height);
 }
 
 - (void)setFrame:(CGRect)newFrame
 {
-    [self setPosition:CGPointMake(newFrame.origin.x + newFrame.size.width * anchorPoint.x,
-                                  newFrame.origin.y + newFrame.size.height * (1 - anchorPoint.y))];
+    [self setPosition:CGPointMake(newFrame.origin.x + newFrame.size.width * _anchorPoint.x,
+                                  newFrame.origin.y + newFrame.size.height * (1 - _anchorPoint.y))];
     [self setBounds:CGRectMake(0, 0, newFrame.size.width, newFrame.size.height)];
 }
 
 - (CGColorRef)shadowColor
 {
-    return shadowColor;
+    return _shadowColor;
 }
 
 - (void)setShadowColor:(CGColorRef)aColor
 {
+    //DLog(@"self: %@", self);
     [self willChangeValueForKey:@"shadowColor"];
-    CGColorRelease(shadowColor);
-    shadowColor = CGColorRetain(aColor);
+    CGColorRelease(_shadowColor);
+    _shadowColor = CGColorRetain(aColor);
     [self didChangeValueForKey:@"shadowColor"];
     _CALayerSetNeedsDisplay(self);
 }
 
 - (CGFloat)shadowOpacity
 {
-    return shadowOpacity;
+    return _shadowOpacity;
 }
 
 - (void)setShadowOpacity:(CGFloat)anOpacity
 {
-    shadowOpacity = anOpacity;
+    //DLog(@"self: %@", self);
+    _shadowOpacity = anOpacity;
     _CALayerSetNeedsDisplay(self);
 }
 
 - (CGSize)shadowOffset
 {
-    return shadowOffset;
+    return _shadowOffset;
 }
  
 - (void)setShadowOffset:(CGSize)anOffset
 {
-    shadowOffset = CGSizeMake(anOffset.width, -anOffset.height); // to keep with the standard of Apple that -3 means going down
+    _shadowOffset = CGSizeMake(anOffset.width, -anOffset.height); // to keep with the standard of Apple that -3 means going down
     _CALayerSetNeedsDisplay(self);
 }
 
 - (BOOL)masksToBounds
 {
-    return masksToBounds;
+    return _masksToBounds;
 }
 
 - (void)setMasksToBounds:(BOOL)newValue
 {
-    masksToBounds = newValue;
+    //DLog(@"self: %@", self);
+    _masksToBounds = newValue;
     _CALayerSetNeedsDisplay(self);
 }
 
 - (CGFloat)shadowRadius
 {
-    return shadowRadius;
+    return _shadowRadius;
 }
 
 - (void)setShadowRadius:(CGFloat)aRadius
 {
-    shadowRadius = aRadius;
+    //DLog(@"self: %@", self);
+    _shadowRadius = aRadius;
     _CALayerSetNeedsDisplay(self);
 }
 
 - (CGPathRef)shadowPath
 {
-    return shadowPath;
+    return _shadowPath;
 }
 
 - (void)setShadowPath:(CGPathRef)aPath
 {
-    shadowPath = aPath;
+    //DLog(@"self: %@", self);
+    _shadowPath = aPath;
     _CALayerSetNeedsDisplay(self);
 }
 
 - (CGAffineTransform)affineTransform
 {
-    return CATransform3DGetAffineTransform(transform);
+    return CATransform3DGetAffineTransform(_transform);
 }
 
 - (void)setAffineTransform:(CGAffineTransform)m
 {
-    transform = CATransform3DMakeAffineTransform(m);
+    //DLog(@"self: %@", self);
+    _transform = CATransform3DMakeAffineTransform(m);
     _CALayerSetNeedsDisplay(self);
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p; frame:%@; _animations:%@>", [self className], self, NSStringFromCGRect(self.frame), _animations];
+    //return [NSString stringWithFormat:@"<%@: %p; frame:%@; _animations:%@>", [self className], self, NSStringFromRect(NSRectFromCGRect(self.frame)), _animations];
+    return [NSString stringWithFormat:@"<%@: %p; frame:%@>", [self className], self, NSStringFromRect(NSRectFromCGRect(self.frame))];
+}
+
+#pragma mark - Layout
+
+- (BOOL)needsLayout
+{
+    return _needsLayout;
+}
+
+- (void)setNeedsLayout
+{
+    //DLog(@"self: %@", self);
+    _CALayerSetNeedsLayout(self);
+}
+
+- (void)layoutIfNeeded
+{
+    if (_needsLayout) {
+        //DLog(@"self: %@", self);
+        if ([delegate respondsToSelector:@selector(layoutSublayersOfLayer:)]) {
+            [delegate layoutSublayersOfLayer:self];
+        } else if ([_layoutManager respondsToSelector:@selector(layoutSublayersOfLayer:)]) {
+            [_layoutManager layoutSublayersOfLayer:self];
+        }
+        _needsLayout = NO;
+    }
 }
 
 #pragma mark - Display
 
 - (BOOL)needsDisplay
 {
-    return needsDisplay;
+    return _needsDisplay;
 }
 
 - (void)setNeedsDisplay
 {
+    DLog(@"self: %@", self);
     _CALayerSetNeedsDisplay(self);
 }
 
 // display here means draw
 - (void)setNeedsDisplayInRect:(CGRect)r
 {
+    //DLog(@"self: %@", self);
     _CALayerSetNeedsDisplay(self);
 }
 
@@ -513,90 +606,90 @@ static NSMutableDictionary *_needDisplayKeys;
 
 - (CFTimeInterval)beginTime
 {
-    return beginTime;
+    return _beginTime;
 }
 
 - (void)setBeginTime:(CFTimeInterval)theBeginTime
 {
-    beginTime = theBeginTime;
+    _beginTime = theBeginTime;
     _CALayerSetNeedsComposite(self);
 }
 
 - (CFTimeInterval)duration
 {
-    return duration;
+    return _duration;
 }
 
 - (void)setDuration:(CFTimeInterval)theDuration
 {
-    duration = theDuration;
+    _duration = theDuration;
     _CALayerSetNeedsComposite(self);
 }
 
 - (float)repeatCount
 {
-    return repeatCount;
+    return _repeatCount;
 }
 
 - (void)setRepeatCount:(float)theRepeatCount
 {
-    repeatCount = theRepeatCount;
+    _repeatCount = theRepeatCount;
     _CALayerSetNeedsComposite(self);
 }
 
 - (CFTimeInterval)repeatDuration
 {
-    return repeatDuration;
+    return _repeatDuration;
 }
 
 - (void)setRepeatDuration:(CFTimeInterval)theRepeatDuration
 {
-    repeatDuration = theRepeatDuration;
+    _repeatDuration = theRepeatDuration;
     _CALayerSetNeedsComposite(self);
 }
 
 - (BOOL)autoreverses
 {
-    return autoreverses;
+    return _autoreverses;
 }
 
 - (void)setAutoreverses:(BOOL)flag
 {
-    autoreverses = flag;
+    _autoreverses = flag;
     _CALayerSetNeedsComposite(self);
 }
 
 - (NSString *)fillMode
 {
-    return fillMode;
+    return _fillMode;
 }
 
 - (void)setFillMode:(NSString *)theFillMode
 {
-    [fillMode release];
-    fillMode = [theFillMode copy];
+    [_fillMode release];
+    _fillMode = [theFillMode copy];
     _CALayerSetNeedsComposite(self);
 }
 
 - (float)speed
 {
-    return speed;
+    return _speed;
 }
 
 - (void)setSpeed:(float)theSpeed
 {
-    speed = theSpeed;
+    _speed = theSpeed;
     _CALayerSetNeedsComposite(self);
 }
 
 - (CFTimeInterval)timeOffset
 {
-    return timeOffset;
+    return _timeOffset;
 }
 
 - (void)setTimeOffset:(CFTimeInterval)theTimeOffset
 {
-    timeOffset = theTimeOffset;
+    _timeOffset = theTimeOffset;
     _CALayerSetNeedsComposite(self);
 }
 
@@ -610,9 +703,9 @@ static NSMutableDictionary *_needDisplayKeys;
     if ([delegate respondsToSelector:@selector(actionForLayer:forKey:)]) {
         return [delegate performSelector:@selector(actionForLayer:forKey:) withObject:self withObject:key];
     }
-    id<CAAction> action = CFDictionaryGetValue(actions, key);
+    id<CAAction> action = CFDictionaryGetValue(_actions, key);
     if (action == nil) {
-        NSDictionary *tmpStyle = style;
+        NSDictionary *tmpStyle = _style;
         while (tmpStyle != nil) {
             action = CFDictionaryGetValue(tmpStyle, key);
             if (action != nil) {
@@ -638,7 +731,7 @@ static NSMutableDictionary *_needDisplayKeys;
     CAAnimation *animation = [anim copy];
     CFDictionarySetValue(_animations, key, animation);
     [animation release];
-    if (!animation->duration) {
+    if (!animation->_duration) {
         animation.duration = [CATransaction animationDuration];
     }
     animation->_startTime = [self convertTime:CACurrentMediaTime() fromLayer:nil];
@@ -646,6 +739,16 @@ static NSMutableDictionary *_needDisplayKeys;
         CABasicAnimation *basicAnimation = (CABasicAnimation *)animation;
         if (!basicAnimation->fromValue) {
             basicAnimation.fromValue = [self valueForKeyPath:basicAnimation->keyPath];
+        }
+    } else if ([animation isKindOfClass:[CAKeyframeAnimation class]]) {
+        //DLog(@"[animation isKindOfClass:[CAKeyframeAnimation class]]");
+        CAKeyframeAnimation *keyframeAnimation = (CAKeyframeAnimation *)animation;
+        if ([keyframeAnimation->keyPath isEqualToString:@"contents"]) {
+            if (_keyframesContents) {
+                [_keyframesContents release];
+            }
+            _keyframesContents = [keyframeAnimation->_values copy];
+            //DLog(@"_keyframesContents: %@", _keyframesContents);
         }
     }
 }
@@ -662,13 +765,11 @@ static NSMutableDictionary *_needDisplayKeys;
 
 - (void)removeAnimationForKey:(NSString *)key
 {
-    //CABasicAnimation *animation = CFDictionaryGetValue(_animations, key);
-    //_CAAnimationRemoveFromAnimationGroup(animation);
     //DLog(@"layer: %p, modelLayer: %d", self, self==modelLayer);
     //DLog(@"_animations1: %@", _animations);
     CFDictionaryRemoveValue(_animations, key);
     if ([key isEqualToString:@"contents"]) {
-        _CABackingStoreUnload(((CARenderLayer *)_renderLayer)->oldBackingStore);
+        _CABackingStoreUnload(((CARenderLayer *)_renderLayer)->_oldBackingStore);
     }
 }
 
@@ -676,86 +777,150 @@ static NSMutableDictionary *_needDisplayKeys;
 {
     return [_animations allKeys];
 //    return _CALayerGetDictionaryKeys(_animations);
-
-/*
-    CFIndex animationsCount = CFDictionaryGetCount(_animations);
-    CFTypeRef *keys = (CFTypeRef *) malloc(animationsCount * sizeof(CFTypeRef));
-    CFDictionaryGetKeysAndValues(_animations, (const void **)&keys, NULL);
-    CFArrayRef animationKeys = CFArrayCreate(kCFAllocatorDefault,(const void **)&keys, animationsCount, &kCFTypeArrayCallBacks);
-    return [(NSArray *)animationKeys autorelease];*/
 }
 
 #pragma mark - Layer actions
 
 - (void)addSublayer:(CALayer *)layer
 {
-    if (layer && layer->superlayer != self) {
+    //DLog(@"layer: %@", layer);
+    if (layer && layer->_superlayer != self) {
         [layer removeFromSuperlayer];
-        CFArrayAppendValue(sublayers, layer);
-        layer->superlayer = self;
-        _CALayerSetNeedsDisplayWithRoot(layer);
+        //DLog(@"_sublayers: %@", _sublayers);
+        CFArrayAppendValue(_sublayers, layer);
+        //DLog(@"_sublayers: %@", _sublayers);
+        layer->_superlayer = self;
+        if (layer->_superlayer->_superlayer == nil) { // if superlayer is the window
+            //DLog(@"layer->_superlayer->_superlayer == nil");
+            _CALayerSetNeedsDisplayWithRoot(layer);
+        } else {
+            _CALayerSetNeedsComposite(layer);
+        }
     }
 }
 
 - (void)removeFromSuperlayer
 {
-    if (superlayer) {
+    if (_superlayer) {
+        //DLog(@"self: %@", self);
         _CATransactionAddToRemoveLayers(self);
-        //[superlayer->sublayers removeObject:self];
-        _CFArrayRemoveValue(superlayer->sublayers, self);
-        _CALayerSetNeedsComposite(superlayer);
-        superlayer = nil;
+        _CFArrayRemoveValue(_superlayer->_sublayers, self);
+        if (self->_superlayer->_superlayer == nil) { // if superlayer is the window
+            _CALayerSetNeedsUnload(self);
+        }
+        _CALayerSetNeedsComposite(_superlayer);
+        _superlayer = nil;
     }
 }
 
 - (void)insertSublayer:(CALayer *)layer atIndex:(unsigned)index
 {
-    if (layer && layer->superlayer != self) {
-        [layer removeFromSuperlayer];
-        CFArrayInsertValueAtIndex(sublayers, index, layer);
-        layer->superlayer = self;
-        _CALayerSetNeedsDisplayWithRoot(layer);
+    //DLog(@"layer: %@", layer);
+    if (!layer) {
+        return;
     }
+    [layer retain];
+    if (layer->_superlayer != self) {
+        //DLog();
+        [layer removeFromSuperlayer];
+        layer->_superlayer = self;
+    } else {
+        //DLog();
+        _CFArrayRemoveValue(_sublayers, layer);
+    }
+    CFArrayInsertValueAtIndex(_sublayers, index, layer);
+    [layer release];
+    if (layer->_superlayer->_superlayer == nil) { // if superlayer is the window
+        //DLog();
+        _CALayerSetNeedsDisplayWithRoot(layer);
+    } else {
+        //DLog(@"layer: %@", layer);
+        _CALayerSetNeedsComposite(layer);
+    }
+}
+
+- (void)moveLayerToTop:(CALayer *)layer
+{
+    //DLog(@"layer: %@", layer);
+    if (!layer) {
+        return;
+    }
+    if (layer->_superlayer != self) {
+        return;
+    }
+    _CFArrayMoveValueToTop(_sublayers, layer);
+    //DLog();
+    _CALayerSetNeedsComposite(layer);
 }
 
 - (void)insertSublayer:(CALayer *)layer below:(CALayer *)sibling
 {
-    if (sibling && layer && layer->superlayer != self) {
+    //DLog(@"layer: %@", layer);
+    if (!layer || !sibling) {
+        return;
+    }
+    [layer retain];
+    if (layer->_superlayer != self) {
         [layer removeFromSuperlayer];
-        CFIndex siblingIndex = [self indexOfLayer:sibling];
-        if (siblingIndex != -1) { // sibling found
-            CFArrayInsertValueAtIndex (sublayers, siblingIndex, layer);
-        }
-        layer->superlayer = self;
+        layer->_superlayer = self;
+    } else {
+        _CFArrayRemoveValue(_sublayers, layer);
+    }
+    CFIndex siblingIndex = [self indexOfLayer:sibling];
+    if (siblingIndex != -1) { // sibling found
+        CFArrayInsertValueAtIndex(_sublayers, siblingIndex, layer);
+    }
+    [layer release];
+    if (layer->_superlayer->_superlayer == nil) { // if superlayer is the window
         _CALayerSetNeedsDisplayWithRoot(layer);
+    } else {
+        _CALayerSetNeedsComposite(self);
     }
 }
 
 - (void)insertSublayer:(CALayer *)layer above:(CALayer *)sibling
 {
-    if (sibling && layer && layer->superlayer != self) {
-        [layer removeFromSuperlayer];
-        CFIndex siblingIndex = [self indexOfLayer:sibling];
-        if (siblingIndex != -1) { // sibling found
-            CFArrayInsertValueAtIndex(sublayers, siblingIndex+1, layer);
-        }
-        layer->superlayer = self;
-        _CALayerSetNeedsDisplayWithRoot(layer);
+    //DLog(@"layer: %@", layer);
+    if (!layer || !sibling) {
+        return;
     }
+    [layer retain];
+    if (layer->_superlayer != self) {
+        [layer removeFromSuperlayer];
+        layer->_superlayer = self;
+    } else {
+        _CFArrayRemoveValue(_sublayers, layer);
+    }
+    CFIndex siblingIndex = [self indexOfLayer:sibling];
+    if (siblingIndex != -1) { // sibling found
+        CFArrayInsertValueAtIndex(_sublayers, siblingIndex+1, layer);
+    }
+    [layer release];
+    if (layer->_superlayer->_superlayer == nil) { // if superlayer is the window
+        _CALayerSetNeedsDisplayWithRoot(layer);
+    } else {
+        _CALayerSetNeedsComposite(self);
+    }
+    //}
 }
 
 - (void)replaceSublayer:(CALayer *)oldLayer with:(CALayer *)newLayer
 {
-    if (oldLayer && newLayer && newLayer->superlayer != self) {
+    //DLog(@"newLayer: %@", newLayer);
+    if (oldLayer && newLayer && newLayer->_superlayer != self) {
         [newLayer removeFromSuperlayer];
         CFIndex oldLayerIndex = [self indexOfLayer:oldLayer];
         CFRange replaceRange = {oldLayerIndex, 1};
         if (oldLayerIndex != -1) {
-            CFArrayReplaceValues(sublayers, replaceRange, (const void **)&newLayer,1);
+            CFArrayReplaceValues(_sublayers, replaceRange, (const void **)&newLayer,1);
             _CALayerSetNeedsUnload(oldLayer);
         }
-        newLayer->superlayer = self;
-        _CALayerSetNeedsDisplayWithRoot(newLayer);
+        newLayer->_superlayer = self;
+        if (newLayer->_superlayer->_superlayer == nil) { // if superlayer is the window
+            _CALayerSetNeedsDisplayWithRoot(newLayer);
+        } else {
+            _CALayerSetNeedsComposite(self);
+        }
     }
 }
 
@@ -766,17 +931,17 @@ static NSMutableDictionary *_needDisplayKeys;
     CGPoint output = CGPointZero;
 
     CALayer *grandSuperLayer = self;
-    while (grandSuperLayer->superlayer) {
+    while (grandSuperLayer->_superlayer) {
         p.x += grandSuperLayer.frame.origin.x;
         p.y += grandSuperLayer.frame.origin.y;
-        grandSuperLayer = grandSuperLayer->superlayer;
+        grandSuperLayer = grandSuperLayer->_superlayer;
     }
     CALayer *foreignGrandSuperLayer = l;
     CGPoint lOrigin = CGPointZero;
-    while (foreignGrandSuperLayer->superlayer) {
+    while (foreignGrandSuperLayer->_superlayer) {
         lOrigin.x += foreignGrandSuperLayer.frame.origin.x;
         lOrigin.y += foreignGrandSuperLayer.frame.origin.y;
-        foreignGrandSuperLayer = foreignGrandSuperLayer->superlayer;
+        foreignGrandSuperLayer = foreignGrandSuperLayer->_superlayer;
     }
     if (grandSuperLayer == foreignGrandSuperLayer) {
         output.x = p.x - lOrigin.x;
@@ -791,17 +956,17 @@ static NSMutableDictionary *_needDisplayKeys;
 
     CALayer *grandSuperLayer = self;
     CGPoint localOrigin = CGPointZero;
-    while (grandSuperLayer->superlayer) {
+    while (grandSuperLayer->_superlayer) {
         localOrigin.x += grandSuperLayer.frame.origin.x;
         localOrigin.y += grandSuperLayer.frame.origin.y;
-        grandSuperLayer = grandSuperLayer->superlayer;
+        grandSuperLayer = grandSuperLayer->_superlayer;
     }
     CALayer *foreignGrandSuperLayer = l;
-    while (foreignGrandSuperLayer->superlayer) {
+    while (foreignGrandSuperLayer->_superlayer) {
         p.x += foreignGrandSuperLayer.frame.origin.x;
         p.y += foreignGrandSuperLayer.frame.origin.y;
 
-        foreignGrandSuperLayer = foreignGrandSuperLayer->superlayer;
+        foreignGrandSuperLayer = foreignGrandSuperLayer->_superlayer;
     }
     if (grandSuperLayer == foreignGrandSuperLayer) {
         output.x = p.x - localOrigin.x;
@@ -829,18 +994,18 @@ static NSMutableDictionary *_needDisplayKeys;
 - (CFTimeInterval)convertTime:(CFTimeInterval)t fromLayer:(CALayer *)l
 {
     if (!l) {
-        if (superlayer) {
-            CFTimeInterval tp = [superlayer convertTime:t fromLayer:l];
-            return (tp - beginTime) * speed + timeOffset;
+        if (_superlayer) {
+            CFTimeInterval tp = [_superlayer convertTime:t fromLayer:l];
+            return (tp - _beginTime) * _speed + _timeOffset;
         } else {
-            return (t - beginTime) * speed + timeOffset;
+            return (t - _beginTime) * _speed + _timeOffset;
         }
     }
     CALayer *rootLayer = l;
     CFTimeInterval tr = t;
-    while (rootLayer->superlayer) {
-        tr = (tr - rootLayer->timeOffset) / rootLayer->speed + rootLayer->beginTime;
-        rootLayer = rootLayer->superlayer;
+    while (rootLayer->_superlayer) {
+        tr = (tr - rootLayer->_timeOffset) / rootLayer->_speed + rootLayer->_beginTime;
+        rootLayer = rootLayer->_superlayer;
     }
     return _CALayerGetLocalTimeWithRootLayer(self, rootLayer, tr);
 }
@@ -852,30 +1017,18 @@ static NSMutableDictionary *_needDisplayKeys;
     }
     CALayer *rootLayer = self;
     CFTimeInterval tr = t;
-    while (rootLayer->superlayer) {
-        tr = (tr - rootLayer->timeOffset) / rootLayer->speed + rootLayer->beginTime;
-        rootLayer = rootLayer->superlayer;
+    while (rootLayer->_superlayer) {
+        tr = (tr - rootLayer->_timeOffset) / rootLayer->_speed + rootLayer->_beginTime;
+        rootLayer = rootLayer->_superlayer;
     }
     return _CALayerGetLocalTimeWithRootLayer(l, rootLayer, tr);
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (CFIndex)indexOfLayer:(CALayer *)layer
 {
     return _CALayerIndexOfLayer(layer);
-}
-
-- (void)setNeedsLayout
-{
-    needsLayout = YES;
-}
-
-- (void)layoutIfNeeded
-{
-    if (needsLayout) {
-        // TODO: call delegate's needs layerout
-    }
 }
 
 - (BOOL)contentsAreFlipped
@@ -885,17 +1038,18 @@ static NSMutableDictionary *_needDisplayKeys;
 
 - (BOOL)containsPoint:(CGPoint)thePoint
 {
-    return CGRectContainsPoint(bounds, thePoint);
+    return CGRectContainsPoint(_bounds, thePoint);
 }
 
 - (CALayer *)hitTest:(CGPoint)thePoint
 {
-    if (hidden || opacity < _kSmallValue || ![self containsPoint:thePoint]) {
+    //DLog();
+    if (_hidden || _opacity < _kSmallValue || ![self containsPoint:thePoint]) {
         return NULL;
     } else {
-        CFIndex count = CFArrayGetCount(sublayers);
+        CFIndex count = CFArrayGetCount(_sublayers);
         for (int i = count - 1; i >= 0; --i) {
-            CALayer *layer = CFArrayGetValueAtIndex(sublayers, i);
+            CALayer *layer = CFArrayGetValueAtIndex(_sublayers, i);
             CALayer *hitLayer = [layer hitTest:[layer convertPoint:thePoint fromLayer:self]];
             if (hitLayer) {
                 return hitLayer;
@@ -907,7 +1061,7 @@ static NSMutableDictionary *_needDisplayKeys;
 
 - (CGSize)preferredFrameSize
 {
-    return bounds.size;
+    return _bounds.size;
 }
 
 - (void)renderInContext:(CGContextRef)ctx
@@ -925,12 +1079,12 @@ static NSMutableDictionary *_needDisplayKeys;
 
 - (CGFloat)contentsScale
 {
-    return contentsScale;
+    return _contentsScale;
 }
 
 - (void)setContentsScale:(CGFloat)newContentsScale
 {
-    contentsScale = newContentsScale;
+    _contentsScale = newContentsScale;
 }
 
 @end

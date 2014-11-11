@@ -47,7 +47,6 @@ typedef enum {
     UIEventType _type;
     UITouch *_touch;
     NSTimeInterval _timestamp;
-    //BOOL _unhandledKeyPressEvent;
 }
 
 @property (nonatomic, readonly) NSTimeInterval timestamp;

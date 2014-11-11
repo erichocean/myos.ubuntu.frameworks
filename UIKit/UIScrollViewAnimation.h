@@ -29,16 +29,16 @@
 
 #import <UIKit/UIScrollView.h>
 
+CGFloat UILinearInterpolation(CGFloat t, CGFloat start, CGFloat end);
+CGFloat UIQuadraticEaseOut(CGFloat t, CGFloat start, CGFloat end);
+
 @interface UIScrollViewAnimation : NSObject {
 @package
-    UIScrollView *scrollView;
-    NSTimeInterval beginTime;
+    UIScrollView *_scrollView;
+    NSTimeInterval _beginTime;
 }
 
 - (id)initWithScrollView:(UIScrollView *)sv;
 - (BOOL)animate;
 
 @end
-
-extern CGFloat UILinearInterpolation(CGFloat t, CGFloat start, CGFloat end);
-extern CGFloat UIQuadraticEaseOut(CGFloat t, CGFloat start, CGFloat end);

@@ -10,29 +10,29 @@
 	<string>frameworks</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>7937541E-6108-4666-A0FC-6E6E9961315D</key>
+		<key>8C99E32046D739B6E7C78CF3ADBF3E7B6511996D</key>
 		<string>https://github.com/amraboelela/myos.ubuntu.frameworks.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>frameworks.xcodeproj/project.xcworkspace</string>
+	<string>frameworks.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>7937541E-6108-4666-A0FC-6E6E9961315D</key>
+		<key>8C99E32046D739B6E7C78CF3ADBF3E7B6511996D</key>
 		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
 	<string>https://github.com/amraboelela/myos.ubuntu.frameworks.git</string>
 	<key>IDESourceControlProjectVersion</key>
-	<integer>110</integer>
+	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>7937541E-6108-4666-A0FC-6E6E9961315D</string>
+	<string>8C99E32046D739B6E7C78CF3ADBF3E7B6511996D</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>7937541E-6108-4666-A0FC-6E6E9961315D</string>
+			<string>8C99E32046D739B6E7C78CF3ADBF3E7B6511996D</string>
 			<key>IDESourceControlWCCName</key>
 			<string>frameworks</string>
 		</dict>

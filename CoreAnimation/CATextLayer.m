@@ -1,6 +1,18 @@
 /*
- * Copyright (c) 2012-2013. All rights reserved.
- *
+ Copyright © 2014 myOS Group.
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ Lesser General Public License for more details.
+ 
+ Contributor(s):
+ Amr Aboelela <amraboelela@gmail.com>
  */
 
 #import "CATextLayer.h"
@@ -76,12 +88,13 @@ static CFArrayRef CreateCTLinesForAttributedString(NSAttributedString *attribute
                 CFRelease(ellipsisString);
                 CFRelease(attributes);
             } else {
-                DLog();
+                //DLog();
                 usedCharacters = CTTypesetterSuggestLineBreak(typesetter, start, constrainedToSize.width);
                 line = CTTypesetterCreateLine(typesetter, CFRangeMake(start, usedCharacters));
             }
             if (line) {
                 drawSize.width = MAX(drawSize.width, ceilf(CTLineGetTypographicBounds(line,NULL,NULL,NULL)));
+                //DLog(@"drawSize.width: %0.1f", drawSize.width);
                 CFArrayAppendValue(lines, line);
                 CFRelease(line);
             }
@@ -97,22 +110,17 @@ static CFArrayRef CreateCTLinesForAttributedString(NSAttributedString *attribute
 
 static CFArrayRef CreateCTLinesForString(NSString *string, CGSize constrainedToSize, CTFontRef font, CGColorRef textColor, NSString *lineBreakMode, CGSize *renderSize)
 {
-	CFAttributedStringRef attributedString;
-	CFArrayRef lines;
-    
+    CFAttributedStringRef attributedString;
+    CFArrayRef lines;
     if (font) {
         CFMutableDictionaryRef attributes = CFDictionaryCreateMutable(NULL, 2, &kCFTypeDictionaryKeyCallBacks, &kCFTypeDictionaryValueCallBacks);
-        CFDictionarySetValue(attributes, kCTFontAttributeName,font);
+        CFDictionarySetValue(attributes, kCTFontAttributeName, font);
         CFDictionarySetValue(attributes, kCTForegroundColorAttributeName, textColor);
-        
-		attributedString = CFAttributedStringCreate(NULL, (__bridge CFStringRef)string, attributes);
-	
-		lines = CreateCTLinesForAttributedString(attributedString, constrainedToSize, lineBreakMode, renderSize);
-
+        attributedString = CFAttributedStringCreate(NULL, (__bridge CFStringRef)string, attributes);
+        lines = CreateCTLinesForAttributedString(attributedString, constrainedToSize, lineBreakMode, renderSize);
         CFRelease(attributes);
-		CFRelease(attributedString);
+        CFRelease(attributedString);
     }
-	
     return lines;
 }
 
@@ -158,7 +166,7 @@ static CFArrayRef CreateCTLinesForString(NSString *string, CGSize constrainedToS
 
 - (void)drawInContext:(CGContextRef)ctx
 {
-    DLog();
+    //DLog();
     CGContextSaveGState(ctx);
     CGSize actualSize = CGSizeZero;
     CFArrayRef lines = nil;
@@ -169,12 +177,13 @@ static CFArrayRef CreateCTLinesForString(NSString *string, CGSize constrainedToS
         CTFontRef _font;
         if (CFGetTypeID(font) == CFStringGetTypeID()) {
             _font = CTFontCreateWithName(font, fontSize, NULL);
-            } else if (CFGetTypeID(font) == CGFontGetTypeID()) {
-                _font = CTFontCreateWithGraphicsFont(font, fontSize, NULL, NULL);
-            } else if (CFGetTypeID(font) == CTFontGetTypeID()) {
-                _font = font;
-            }
-            lines = CreateCTLinesForString(string, self.frame.size, _font, foregroundColor, truncationMode, &actualSize);
+        } else if (CFGetTypeID(font) == CGFontGetTypeID()) {
+            _font = CTFontCreateWithGraphicsFont(font, fontSize, NULL, NULL);
+        } else if (CFGetTypeID(font) == CTFontGetTypeID()) {
+            _font = font;
+        }
+        DLog();
+        lines = CreateCTLinesForString(string, self.frame.size, _font, foregroundColor, truncationMode, &actualSize);
     }
     if (lines) {
         const CFIndex numberOfLines = CFArrayGetCount(lines);

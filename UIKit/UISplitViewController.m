@@ -49,7 +49,7 @@ static const CGFloat SplitterPadding = 3;
 
 @implementation _UISplitViewControllerView
 
-@synthesize;
+//@synthesize;
 
 #pragma mark - Life cycle
 
@@ -165,7 +165,7 @@ static const CGFloat SplitterPadding = 3;
     }
 }*/
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (void)addViewControllers:(NSArray *)viewControllers
 {
@@ -247,7 +247,7 @@ static const CGFloat SplitterPadding = 3;
     _delegateHas.willShowViewController = [_delegate respondsToSelector:@selector(splitViewController:willShowViewController:invalidatingBarButtonItem:)];
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (void)loadView
 {
@@ -261,11 +261,11 @@ static const CGFloat SplitterPadding = 3;
     
     if (![newControllers isEqualToArray:_viewControllers]) {
         for (UIViewController *c in _viewControllers) {
-            [c _setParentViewController:nil];
+            c->_parentViewController = nil;
         }
 
         for (UIViewController *c in newControllers) {
-            [c _setParentViewController:self];
+            c->_parentViewController = self;
         }
         
         if ([self isViewLoaded]) {

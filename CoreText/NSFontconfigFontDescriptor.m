@@ -27,8 +27,7 @@
 #import "CTFontDescriptor.h"
 #import "CTNSFontDescriptor.h"
 
-@interface NSFontconfigFontDescriptor : CTNSFontDescriptor
-{
+@interface NSFontconfigFontDescriptor : CTNSFontDescriptor {
   /**
    * This is a Fontconfig representation of the attributes this descriptor
    * was created with.
@@ -40,6 +39,7 @@
    */
   FcPattern *_matchedPat;
 }
+
 @end
 
 @implementation NSFontconfigFontDescriptor
@@ -577,45 +577,38 @@
 }
 
 
-- (id) initWithFontAttributes: (NSDictionary *)attributes
+- (id)initWithFontAttributes: (NSDictionary *)attributes
 {
-  self = [super initWithFontAttributes: attributes];
-  if (nil == self)
-  {
-    return nil;
-  }
-
-  _pat = FcPatternCreate();
-
-  // Call the corresponding add...: method for each element in the attributes dictionary
-  [self handleAddValues];
-
-  //NSLog(@"NSFontconfigFontDescriptor: Input attributes %@", attributes);
-  //NSLog(@"NSFontconfigFontDescriptor: Output pattern:");
-  //FcPatternPrint(_pat);
-
-  return self;
+    DLog();
+    self = [super initWithFontAttributes: attributes];
+    if (nil == self) {
+        return nil;
+    }
+    _pat = FcPatternCreate();
+    // Call the corresponding add...: method for each element in the attributes dictionary
+    [self handleAddValues];
+    
+    //NSLog(@"NSFontconfigFontDescriptor: Input attributes %@", attributes);
+    //NSLog(@"NSFontconfigFontDescriptor: Output pattern:");
+    //FcPatternPrint(_pat);
+    return self;
 }
 
 /**
  * Private initializer. The provided pattern must have been matched, and must not
  * be subsequently modified.
  */
-- (id) initWithImmutableMatchedPattern: (FcPattern*)pat
+- (id)initWithImmutableMatchedPattern: (FcPattern*)pat
 {
-  self = [super initWithFontAttributes: nil];
-  if (nil == self)
-  {
-    return nil;
-  }
-
-  FcPatternReference(pat);
-  _pat = pat;
-
-  FcPatternReference(pat);
-  _matchedPat = pat;
-
-  return self;
+    self = [super initWithFontAttributes: nil];
+    if (nil == self) {
+        return nil;
+    }
+    FcPatternReference(pat);
+    _pat = pat;
+    FcPatternReference(pat);
+    _matchedPat = pat;
+    return self;
 }
 
 - (void)dealloc

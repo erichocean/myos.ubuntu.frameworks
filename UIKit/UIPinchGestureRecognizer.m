@@ -27,8 +27,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIPinchGestureRecognizer.h>
-#import <UIKit/UIGestureRecognizerSubclass.h>
+#import <UIKit/UIKit-private.h>
+
+//#import <UIKit/UIPinchGestureRecognizer.h>
+//#import <UIKit/UIGestureRecognizerSubclass.h>
 
 @implementation UIPinchGestureRecognizer
 @synthesize scale=_scale;

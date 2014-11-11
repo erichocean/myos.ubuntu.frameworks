@@ -30,9 +30,30 @@
 #import <UIKit/UIBezierPath.h>
 #import <UIKit/UIGraphics.h>
 
+#pragma mark - Static functions
+
+void _UIBezierPathSetContextPath(UIBezierPath *path)
+{
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextBeginPath(context);
+    CGContextAddPath(context, path->_path);
+    CGContextSetLineWidth(context, path->_lineWidth);
+    CGContextSetLineCap(context, path->_lineCapStyle);
+    CGContextSetLineJoin(context, path->_lineJoinStyle);
+    CGContextSetMiterLimit(context, path->_miterLimit);
+    CGContextSetFlatness(context, path->_flatness);
+    CGContextSetLineDash(context, path->_lineDashPhase, &path->_lineDashPhase, path->_lineDashCount);
+}
+
 @implementation UIBezierPath
-@synthesize lineWidth=_lineWidth, lineCapStyle=_lineCapStyle, lineJoinStyle=_lineJoinStyle, miterLimit=_miterLimit;
-@synthesize flatness=_flatness, usesEvenOddFillRule=_usesEvenOddFillRule, CGPath=_path;
+
+@synthesize lineWidth=_lineWidth;
+@synthesize lineCapStyle=_lineCapStyle;
+@synthesize lineJoinStyle=_lineJoinStyle;
+@synthesize miterLimit=_miterLimit;
+@synthesize flatness=_flatness;
+@synthesize usesEvenOddFillRule=_usesEvenOddFillRule;
+@synthesize CGPath=_path;
 
 - (id)init
 {
@@ -67,7 +88,7 @@
 + (UIBezierPath *)bezierPath
 {
     UIBezierPath *bezierPath = [[self alloc] init];
-    bezierPath->_path = CGPathCreateMutable();
+    bezierPath->_path = (CGPathRef)CGPathCreateMutable();
     return [bezierPath autorelease];
 }
 
@@ -77,7 +98,7 @@
     CGPathAddRect(path, NULL, rect);
 
     UIBezierPath *bezierPath = [[self alloc] init];
-    bezierPath->_path = path;
+    bezierPath->_path = (CGPathRef)path;
     return [bezierPath autorelease];
 }
 
@@ -87,7 +108,7 @@
     CGPathAddEllipseInRect(path, NULL, rect);
 
     UIBezierPath *bezierPath = [[self alloc] init];
-    bezierPath->_path = path;
+    bezierPath->_path = (CGPathRef)path;
     return [bezierPath autorelease];
 }
 
@@ -110,39 +131,33 @@
     } else {
         CGPathMoveToPoint(path, NULL, topLeft.x, topLeft.y);
     }
-    
     if (corners & UIRectCornerTopRight) {
         CGPathAddLineToPoint(path, NULL, topRight.x-cornerRadii.width, topRight.y);
         CGPathAddCurveToPoint(path, NULL, topRight.x, topRight.y, topRight.x, topRight.y+cornerRadii.height, topRight.x, topRight.y+cornerRadii.height);
     } else {
         CGPathAddLineToPoint(path, NULL, topRight.x, topRight.y);
     }
-    
     if (corners & UIRectCornerBottomRight) {
         CGPathAddLineToPoint(path, NULL, bottomRight.x, bottomRight.y-cornerRadii.height);
         CGPathAddCurveToPoint(path, NULL, bottomRight.x, bottomRight.y, bottomRight.x-cornerRadii.width, bottomRight.y, bottomRight.x-cornerRadii.width, bottomRight.y);
     } else {
         CGPathAddLineToPoint(path, NULL, bottomRight.x, bottomRight.y);
     }
-    
     if (corners & UIRectCornerBottomLeft) {
         CGPathAddLineToPoint(path, NULL, bottomLeft.x+cornerRadii.width, bottomLeft.y);
         CGPathAddCurveToPoint(path, NULL, bottomLeft.x, bottomLeft.y, bottomLeft.x, bottomLeft.y-cornerRadii.height, bottomLeft.x, bottomLeft.y-cornerRadii.height);
     } else {
         CGPathAddLineToPoint(path, NULL, bottomLeft.x, bottomLeft.y);
     }
-    
     if (corners & UIRectCornerTopLeft) {
         CGPathAddLineToPoint(path, NULL, topLeft.x, topLeft.y+cornerRadii.height);
         CGPathAddCurveToPoint(path, NULL, topLeft.x, topLeft.y, topLeft.x+cornerRadii.width, topLeft.y, topLeft.x+cornerRadii.width, topLeft.y);
     } else {
         CGPathAddLineToPoint(path, NULL, topLeft.x, topLeft.y);
     }
-    
     CGPathCloseSubpath(path);
-    
     UIBezierPath *bezierPath = [[self alloc] init];
-    bezierPath->_path = path;
+    bezierPath->_path = (CGPathRef)path;
     return [bezierPath autorelease];
 }
 
@@ -152,7 +167,7 @@
     CGPathAddArc(path, NULL, center.x, center.y, radius, startAngle, endAngle, clockwise);
     
     UIBezierPath *bezierPath = [[self alloc] init];
-    bezierPath->_path = path;
+    bezierPath->_path = (CGPathRef)path;
     return [bezierPath autorelease];
 }
 
@@ -160,55 +175,55 @@
 {
     CGMutablePathRef mutablePath = CGPathCreateMutableCopy(_path);
     CGPathMoveToPoint(mutablePath, NULL, point.x, point.y);
-    self.CGPath = mutablePath;
-    CGPathRelease(mutablePath);
+    self.CGPath = (CGPathRef)mutablePath;
+    CGPathRelease((CGPathRef)mutablePath);
 }
 
 - (void)addLineToPoint:(CGPoint)point
 {
     CGMutablePathRef mutablePath = CGPathCreateMutableCopy(_path);
     CGPathAddLineToPoint(mutablePath, NULL, point.x, point.y);
-    self.CGPath = mutablePath;
-    CGPathRelease(mutablePath);
+    self.CGPath = (CGPathRef)mutablePath;
+    CGPathRelease((CGPathRef)mutablePath);
 }
 
 - (void)addArcWithCenter:(CGPoint)center radius:(CGFloat)radius startAngle:(CGFloat)startAngle endAngle:(CGFloat)endAngle clockwise:(BOOL)clockwise
 {
     CGMutablePathRef mutablePath = CGPathCreateMutableCopy(_path);
     CGPathAddArc(mutablePath, NULL, center.x, center.y, radius, startAngle, endAngle, clockwise);
-    self.CGPath = mutablePath;
-    CGPathRelease(mutablePath);
+    self.CGPath = (CGPathRef)mutablePath;
+    CGPathRelease((CGPathRef)mutablePath);
 }
 
 - (void)addCurveToPoint:(CGPoint)endPoint controlPoint1:(CGPoint)controlPoint1 controlPoint2:(CGPoint)controlPoint2
 {
     CGMutablePathRef mutablePath = CGPathCreateMutableCopy(_path);
     CGPathAddCurveToPoint(mutablePath, NULL, endPoint.x, endPoint.y, controlPoint1.x, controlPoint1.y, controlPoint2.x, controlPoint2.y);
-    self.CGPath = mutablePath;
-    CGPathRelease(mutablePath);
+    self.CGPath = (CGPathRef)mutablePath;
+    CGPathRelease((CGPathRef)mutablePath);
 }
 
 - (void)addQuadCurveToPoint:(CGPoint)endPoint controlPoint:(CGPoint)controlPoint
 {
     CGMutablePathRef mutablePath = CGPathCreateMutableCopy(_path);
     CGPathAddQuadCurveToPoint(mutablePath, NULL, endPoint.x, endPoint.y, controlPoint.x, controlPoint.y);
-    self.CGPath = mutablePath;
-    CGPathRelease(mutablePath);
+    self.CGPath = (CGPathRef)mutablePath;
+    CGPathRelease((CGPathRef)mutablePath);
 }
 
 - (void)closePath
 {
     CGMutablePathRef mutablePath = CGPathCreateMutableCopy(_path);
     CGPathCloseSubpath(mutablePath);
-    self.CGPath = mutablePath;
-    CGPathRelease(mutablePath);
+    self.CGPath = (CGPathRef)mutablePath;
+    CGPathRelease((CGPathRef)mutablePath);
 }
 
 - (void)removeAllPoints
 {
     CGMutablePathRef mutablePath = CGPathCreateMutable();
-    self.CGPath = mutablePath;
-    CGPathRelease(mutablePath);
+    self.CGPath = (CGPathRef)mutablePath;
+    CGPathRelease((CGPathRef)mutablePath);
 }
 
 - (void)appendPath:(UIBezierPath *)bezierPath
@@ -216,8 +231,8 @@
     if (bezierPath) {
         CGMutablePathRef mutablePath = CGPathCreateMutableCopy(_path);
         CGPathAddPath(mutablePath, NULL, bezierPath.CGPath);
-        self.CGPath = mutablePath;
-        CGPathRelease(mutablePath);
+        self.CGPath = (CGPathRef)mutablePath;
+        CGPathRelease((CGPathRef)mutablePath);
     }
 }
 
@@ -237,8 +252,7 @@
 
 - (void)addClip
 {
-    [self _setContextPath];
-    
+    _UIBezierPathSetContextPath(self);
     if (_usesEvenOddFillRule) {
         CGContextEOClip(UIGraphicsGetCurrentContext());
     } else {
@@ -282,8 +296,7 @@
 {
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGContextSaveGState(context);
-    [self _setContextPath];
-    
+    _UIBezierPathSetContextPath(self);
     if (_usesEvenOddFillRule) {
         CGContextEOFillPath(context);
     } else {
@@ -310,7 +323,7 @@
 {
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGContextSaveGState(context);
-    [self _setContextPath];
+    _UIBezierPathSetContextPath(self);
 
     CGContextStrokePath(context);
     
@@ -349,23 +362,8 @@
 {
     CGMutablePathRef mutablePath = CGPathCreateMutable();
     CGPathAddPath(mutablePath, &transform, _path);
-    self.CGPath = mutablePath;
-    CGPathRelease(mutablePath);
+    self.CGPath = (CGPathRef)mutablePath;
+    CGPathRelease((CGPathRef)mutablePath);
 }
 
 @end
-
-void _UIBezierPathSetContextPath(UIBezierPath* path)
-{
-    CGContextRef context = UIGraphicsGetCurrentContext();
-    CGContextBeginPath(context);
-    CGContextAddPath(context, _path);
-    CGContextSetLineWidth(context, _lineWidth);
-    CGContextSetLineCap(context, _lineCapStyle);
-    CGContextSetLineJoin(context, _lineJoinStyle);
-    CGContextSetMiterLimit(context, _miterLimit);
-    CGContextSetFlatness(context, _flatness);
-    CGContextSetLineDash(context, _lineDashPhase, &_lineDashPhase, _lineDashCount);
-}
-
-

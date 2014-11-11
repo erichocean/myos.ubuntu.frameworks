@@ -27,18 +27,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIActivityIndicatorView.h>
-#import <UIKit/UIImage.h>
-#import <UIKit/UIGraphics.h>
-#import <UIKit/UIColor.h>
-#import <UIKit/UIFont.h>
-#import <UIKit/UIStringDrawing.h>
-#import <UIKit/UIBezierPath.h>
+#import <UIKit/UIKit-private.h>
+#import <CoreAnimation/CoreAnimation-private.h>
 
 static CGSize UIActivityIndicatorViewStyleSize(UIActivityIndicatorViewStyle style)
 {
     if (style == UIActivityIndicatorViewStyleWhiteLarge) {
-        return CGSizeMake(37,37);
+        return CGSizeMake(40,40);
     } else {
         return CGSizeMake(20,20);
     }
@@ -50,34 +45,42 @@ static UIImage *UIActivityIndicatorViewFrameImage(UIActivityIndicatorViewStyle s
     const CGFloat radius = frameSize.width / 2.f;
     const CGFloat TWOPI = M_PI * 2.f;
     const CGFloat numberOfTeeth = 12;
-    const CGFloat toothWidth = (style == UIActivityIndicatorViewStyleWhiteLarge)? 3.5 : 2;
+    const CGFloat toothWidth = (style == UIActivityIndicatorViewStyleWhiteLarge) ? 3.5 : 2;
 
-    UIColor *toothColor = (style == UIActivityIndicatorViewStyleGray)? [UIColor grayColor] : [UIColor whiteColor];
-    
+    UIColor *toothColor = (style == UIActivityIndicatorViewStyleGray) ? [UIColor grayColor] : [UIColor whiteColor];
+    //DLog(@"toothColor: %@", toothColor);
+    //DLog();
     UIGraphicsBeginImageContext(frameSize);
+    //DLog();
     CGContextRef c = UIGraphicsGetCurrentContext();
 
+    //DLog();
     // first put the origin in the center of the frame. this makes things easier later
     CGContextTranslateCTM(c, radius, radius);
-
+    //DLog();
     // now rotate the entire thing depending which frame we're trying to generate
     CGContextRotateCTM(c, frame / (CGFloat)numberOfFrames * TWOPI);
-
+    //DLog();
     // draw all the teeth
     for (NSInteger toothNumber=0; toothNumber<numberOfTeeth; toothNumber++) {
         // set the correct color for the tooth, dividing by more than the number of teeth to prevent the last tooth from being too translucent
         const CGFloat alpha = 0.3 + ((toothNumber / numberOfTeeth) * 0.7);
-        [[toothColor colorWithAlphaComponent:alpha] setFill];
-        
+        //DLog();
+        UIColor *color = [toothColor colorWithAlphaComponent:alpha];
+        //DLog(@"color: %@", color);
+        [color setFill];
+        //DLog();
         // position and draw the tooth
         CGContextRotateCTM(c, 1 / numberOfTeeth * TWOPI);
-        [[UIBezierPath bezierPathWithRoundedRect:CGRectMake(-toothWidth/2.f,-radius,toothWidth,ceilf(radius*.54f)) cornerRadius:toothWidth/2.f] fill];
+        [[UIBezierPath bezierPathWithRoundedRect:CGRectMake(-toothWidth/2.f,-radius,toothWidth,ceilf(radius*.54f))
+                                    cornerRadius:toothWidth/2.f] fill];
+        //DLog();
     }
-    
+    //DLog();
     // hooray!
     UIImage *frameImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
-    
+    //DLog();
     return frameImage;
 }
 
@@ -87,12 +90,13 @@ static UIImage *UIActivityIndicatorViewFrameImage(UIActivityIndicatorViewStyle s
 {
     CGRect frame = CGRectZero;
     frame.size = UIActivityIndicatorViewStyleSize(style);
-    
+    //DLog();
     if ((self=[super initWithFrame:frame])) {
         _animating = NO;
         self.activityIndicatorViewStyle = style;
         self.hidesWhenStopped = YES;
         self.opaque = NO;
+        //DLog();
     }
 
     return self;
@@ -107,6 +111,21 @@ static UIImage *UIActivityIndicatorViewFrameImage(UIActivityIndicatorViewStyle s
     return self;
 }
 
+#pragma mark - Overridden methods
+
+- (void)drawRect:(CGRect)rect
+{
+    UIActivityIndicatorViewStyle style;
+    //DLog();
+    @synchronized (self) {
+        style = _activityIndicatorViewStyle;
+    }
+    //DLog();
+    [UIActivityIndicatorViewFrameImage(style, 0, 1) drawInRect:self.bounds];
+}
+
+#pragma mark - Accessors
+
 - (CGSize)sizeThatFits:(CGSize)aSize
 {
     UIActivityIndicatorViewStyle style;
@@ -114,7 +133,6 @@ static UIImage *UIActivityIndicatorViewFrameImage(UIActivityIndicatorViewStyle s
     @synchronized (self) {
         style = _activityIndicatorViewStyle;
     }
-    
     return UIActivityIndicatorViewStyleSize(style);
 }
 
@@ -123,8 +141,7 @@ static UIImage *UIActivityIndicatorViewFrameImage(UIActivityIndicatorViewStyle s
     @synchronized (self) {
         if (_activityIndicatorViewStyle != style) {
             _activityIndicatorViewStyle = style;
-            [self setNeedsDisplay];
-            
+            _CALayerSetNeedsDisplay(_layer);
             if (_animating) {
                 [self startAnimating];	// this will reset the images in the animation if it was already animating
             }
@@ -167,29 +184,31 @@ static UIImage *UIActivityIndicatorViewFrameImage(UIActivityIndicatorViewStyle s
     return hides;
 }
 
+#pragma mark - Public methods
+
 - (void)startAnimating
 {
     @synchronized (self) {
         _animating = YES;
         self.hidden = NO;
-        
+        //DLog();
         const NSInteger numberOfFrames = 12;
-        const CFTimeInterval animationDuration = 0.8;
-        
+        const CFTimeInterval animationDuration = 1.0;
+        //DLog();
         NSMutableArray *images = [[NSMutableArray alloc] initWithCapacity:numberOfFrames];
-        
         for (NSInteger frameNumber=0; frameNumber<numberOfFrames; frameNumber++) {
             [images addObject:(__bridge id)UIActivityIndicatorViewFrameImage(_activityIndicatorViewStyle, frameNumber, numberOfFrames).CGImage];
         }
-        
+        //DLog(@"images: %@", images);
         CAKeyframeAnimation *animation = [CAKeyframeAnimation animationWithKeyPath:@"contents"];
         animation.calculationMode = kCAAnimationDiscrete;
         animation.duration = animationDuration;
-        animation.repeatCount = HUGE_VALF;
+        //animation.repeatCount = HUGE_VALF;
+        animation.removedOnCompletion = NO;
         animation.values = images;
-        
+        animation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+        //DLog(@"animation: %@", animation);
         [self.layer addAnimation:animation forKey:@"contents"];
-        
         [images release];
     }
 }
@@ -213,19 +232,7 @@ static UIImage *UIActivityIndicatorViewFrameImage(UIActivityIndicatorViewStyle s
     @synchronized (self) {
         animating = _animating;
     }
-
     return animating;
-}
-
-- (void)drawRect:(CGRect)rect
-{
-    UIActivityIndicatorViewStyle style;
-
-    @synchronized (self) {
-        style = _activityIndicatorViewStyle;
-    }
-    
-    [UIActivityIndicatorViewFrameImage(style, 0, 1) drawInRect:self.bounds];
 }
 
 @end

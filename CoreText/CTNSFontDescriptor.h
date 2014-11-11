@@ -33,7 +33,7 @@
 
 #import <Foundation/NSObject.h>
 
-#import <cairo-ft.h>
+#import <cairo/cairo-ft.h>
 
 @class NSArray;
 @class NSCoder;
@@ -105,20 +105,18 @@ NSString *CTNSFontVariationAxisMaximumValueKey;
 NSString *CTNSFontVariationAxisDefaultValueKey;
 NSString *CTNSFontVariationAxisNameKey;
 
-@interface CTNSFontDescriptor : NSObject <NSCopying>
-{
-  
-  @package
-  /**
-   * CTNSFontDescriptor can be used simultaneously by multiple threads, so it is
-   * necessary to lock before we call FreeType, because an FT_Face
-   * object may be used by only one thread.
-   */
-  NSLock *fontFaceLock;
-  NSDictionary *_attributes;
-  FT_Face fontFace;
-
-  cairo_scaled_font_t *cairofont;
+@interface CTNSFontDescriptor : NSObject <NSCopying>{
+@package
+    /**
+     * CTNSFontDescriptor can be used simultaneously by multiple threads, so it is
+     * necessary to lock before we call FreeType, because an FT_Face
+     * object may be used by only one thread.
+     */
+    NSLock *fontFaceLock;
+    NSDictionary *_attributes;
+    FT_Face fontFace;
+    
+    cairo_scaled_font_t *cairofont;
 }
 
 + (id) fontDescriptorWithFontAttributes: (NSDictionary *)attributes;

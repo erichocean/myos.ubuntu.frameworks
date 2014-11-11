@@ -34,7 +34,8 @@ typedef enum {
     UIScrollViewAnimationScrollCurveQuadraticEaseOut
 } UIScrollViewAnimationScrollCurve;
 
-@interface UIScrollViewAnimationScroll : UIScrollViewAnimation {
+@interface UIScrollViewAnimationScroll : UIScrollViewAnimation
+{
     CGPoint beginContentOffset;
     CGPoint endContentOffset;
     NSTimeInterval duration;

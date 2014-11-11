@@ -27,9 +27,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Foundation/Foundation.h>
+//#import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
-//#import <CoreAnimation/CoreAnimation.h>
 
 extern NSString *const UIScreenDidConnectNotification;
 extern NSString *const UIScreenDidDisconnectNotification;
@@ -43,9 +42,12 @@ extern NSString *const UIScreenModeDidChangeNotification;
 //    CALayer *_layer;
     CGRect _bounds;
     CGFloat _scale;
-    UIScreenMode *currentMode;
-    CGRect applicationFrame;
-    NSArray *availableModes;
+    CGFloat _hScale;
+    CGFloat _vScale;
+    //CGFloat _vScale;
+    UIScreenMode *_currentMode;
+    CGRect _applicationFrame;
+    NSArray *_availableModes;
     //UIPopoverController *_popoverController;
 }
 
@@ -58,7 +60,7 @@ extern NSString *const UIScreenModeDidChangeNotification;
 + (UIScreen *)mainScreen;
 + (NSArray *)screens;
 
-- (id)initWithBounds:(CGRect)myBounds;
+//- (id)initWithBounds:(CGRect)myBounds;
 // Using a nil screen will convert to OSX screen coordinates.
 - (CGPoint)convertPoint:(CGPoint)toConvert toScreen:(UIScreen *)toScreen;
 - (CGPoint)convertPoint:(CGPoint)toConvert fromScreen:(UIScreen *)fromScreen;

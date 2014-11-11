@@ -27,10 +27,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UITextField.h>
-#import <UIKit/UIColor.h>
-#import <UIKit/UIFont.h>
-#import <UIKit/UIImage.h>
+#import <UIKit/UIKit-private.h>
+#import <CoreAnimation/CoreAnimation-private.h>
 
 NSString *const UITextFieldTextDidBeginEditingNotification = @"UITextFieldTextDidBeginEditingNotification";
 NSString *const UITextFieldTextDidChangeNotification = @"UITextFieldTextDidChangeNotification";
@@ -43,6 +41,7 @@ NSString *const UITextFieldTextDidEndEditingNotification = @"UITextFieldTextDidE
 //@end
 
 @implementation UITextField
+
 @synthesize delegate=_delegate, background=_background, disabledBackground=_disabledBackground, editing=_editing, clearsOnBeginEditing=_clearsOnBeginEditing;
 @synthesize adjustsFontSizeToFitWidth=_adjustsFontSizeToFitWidth, clearButtonMode=_clearButtonMode, leftView=_leftView, rightView=_rightView;
 @synthesize leftViewMode=_leftViewMode, rightViewMode=_rightViewMode, placeholder=_placeholder, borderStyle=_borderStyle;
@@ -120,7 +119,7 @@ NSString *const UITextFieldTextDidEndEditingNotification = @"UITextFieldTextDidE
     if (![thePlaceholder isEqualToString:_placeholder]) {
         [_placeholder release];
         _placeholder = [thePlaceholder copy];
-        [self setNeedsDisplay];
+        _CALayerSetNeedsDisplay(_layer);
     }
 }
 
@@ -128,7 +127,7 @@ NSString *const UITextFieldTextDidEndEditingNotification = @"UITextFieldTextDidE
 {
     if (style != _borderStyle) {
         _borderStyle = style;
-        [self setNeedsDisplay];
+        _CALayerSetNeedsDisplay(_layer);
     }
 }
 
@@ -137,7 +136,7 @@ NSString *const UITextFieldTextDidEndEditingNotification = @"UITextFieldTextDidE
     if (aBackground != _background) {
         [_background release];
         _background = [aBackground retain];
-        [self setNeedsDisplay];
+        _CALayerSetNeedsDisplay(_layer);
     }
 }
 
@@ -146,7 +145,7 @@ NSString *const UITextFieldTextDidEndEditingNotification = @"UITextFieldTextDidE
     if (aBackground != _disabledBackground) {
         [_disabledBackground release];
         _disabledBackground = [aBackground retain];
-        [self setNeedsDisplay];
+        _CALayerSetNeedsDisplay(_layer);
     }
 }
 
@@ -174,7 +173,7 @@ NSString *const UITextFieldTextDidEndEditingNotification = @"UITextFieldTextDidE
 {
     if (!CGRectEqualToRect(frame,self.frame)) {
         [super setFrame:frame];
-        [self setNeedsDisplay];
+        _CALayerSetNeedsDisplay(_layer);
     }
 }
 
@@ -259,11 +258,11 @@ NSString *const UITextFieldTextDidEndEditingNotification = @"UITextFieldTextDidE
     return CGRectIntegral(bounds);
 }
 
-
-
 - (void)drawPlaceholderInRect:(CGRect)rect
 {
 }
+
+#pragma mark - Overridden methods
 
 - (void)drawTextInRect:(CGRect)rect
 {
@@ -456,8 +455,8 @@ NSString *const UITextFieldTextDidEndEditingNotification = @"UITextFieldTextDidE
     }
     
     _editing = YES;
-    [self setNeedsDisplay];
-    [self setNeedsLayout];
+    _CALayerSetNeedsDisplay(_layer);
+    //[self setNeedsLayout];
 
     if (_delegateHas.didBeginEditing) {
         [_delegate textFieldDidBeginEditing:self];
@@ -473,8 +472,8 @@ NSString *const UITextFieldTextDidEndEditingNotification = @"UITextFieldTextDidE
 - (void)_UITextFieldTextDidEndEditing
 {
     _editing = NO;
-    [self setNeedsDisplay];
-    [self setNeedsLayout];
+    _CALayerSetNeedsDisplay(_layer);
+    //[self setNeedsLayout];
 
     if (_delegateHas.didEndEditing) {
         [_delegate textFieldDidEndEditing:self];

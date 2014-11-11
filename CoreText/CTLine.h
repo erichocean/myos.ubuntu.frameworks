@@ -34,24 +34,24 @@
 
 #ifdef __OBJC__
 @class CTLine;
-typedef CTLine* CTLineRef;
+typedef CTLine *CTLineRef;
 #else
-typedef struct CTLine* CTLineRef;
+typedef struct CTLine *CTLineRef;
 #endif
 
 /* Constants */
 
 typedef enum {
-  kCTLineTruncationStart = 0,
-  kCTLineTruncationEnd = 1,
-  kCTLineTruncationMiddle = 2
+    kCTLineTruncationStart = 0,
+    kCTLineTruncationEnd = 1,
+    kCTLineTruncationMiddle = 2
 } CTLineTruncationType;
 
 /* Functions */
 
 CFTypeID CTLineGetTypeID();
 
-CTLineRef CTLineCreateWithAttributedString(NSAttributedString * string);
+CTLineRef CTLineCreateWithAttributedString(NSAttributedString *string);
 
 CTLineRef CTLineCreateTruncatedLine(
   CTLineRef line,

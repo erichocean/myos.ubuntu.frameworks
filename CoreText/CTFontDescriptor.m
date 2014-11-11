@@ -67,7 +67,8 @@ CTFontDescriptorRef CTFontDescriptorCreateWithNameAndSize(
 
 CTFontDescriptorRef CTFontDescriptorCreateWithAttributes(CFDictionaryRef attributes)
 {
-  return [[CTNSFontDescriptor fontDescriptorWithFontAttributes: attributes] retain];
+    DLog();
+    return [[CTNSFontDescriptor fontDescriptorWithFontAttributes: attributes] retain];
 }
   
 CTFontDescriptorRef CTFontDescriptorCreateCopyWithAttributes(

@@ -31,9 +31,13 @@
 #import <UIKit/UIBarButtonItem.h>
 #import <UIKit/UINavigationBar-private.h>
 
-static void * const UINavigationItemContext = "UINavigationItemContext";
+static void *const UINavigationItemContext = "UINavigationItemContext";
+static NSSet *_keyPaths = nil;
+
+#pragma mark - Static functions
 
 @implementation UINavigationItem
+
 @synthesize title=_title, rightBarButtonItem=_rightBarButtonItem, titleView=_titleView, hidesBackButton=_hidesBackButton;
 @synthesize leftBarButtonItem=_leftBarButtonItem, backBarButtonItem=_backBarButtonItem, prompt=_prompt;
 
@@ -48,7 +52,7 @@ static void * const UINavigationItemContext = "UINavigationItemContext";
 - (void)dealloc
 {
     // removes automatic observation
-    [self _setNavigationBar:nil];
+    _UINavigationItemSetNavigationBar(self, nil);
     
     [_backBarButtonItem release];
     [_leftBarButtonItem release];
@@ -66,8 +70,8 @@ static void * const UINavigationItemContext = "UINavigationItemContext";
             [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
         return;
     }
-    
-    [[self _navigationBar] _updateNavigationItem:self animated:NO];
+    _UINavigationBarUpdateNavigationItem(self->_navigationBar, self, NO);
+    //[self->_navigationBar _updateNavigationItem:self animated:NO];
 }
 
 - (void)setLeftBarButtonItem:(UIBarButtonItem *)item animated:(BOOL)animated
@@ -123,35 +127,29 @@ static void * const UINavigationItemContext = "UINavigationItemContext";
 
 @end
 
-NSSet* _UINavigationItemKeyPathsTriggeringUIUpdates()
+#pragma mark - Shared functions
+
+void _UINavigationItemInitialize()
 {
-    static NSSet * __keyPaths = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        __keyPaths = [[NSSet alloc] initWithObjects:@"title", @"prompt", @"backBarButtonItem", @"leftBarButtonItem", @"rightBarButtonItem", @"titleView", @"hidesBackButton", nil];
-    });
-    return __keyPaths;
+    _keyPaths = [[NSSet alloc] initWithObjects:@"title", @"prompt", @"backBarButtonItem", @"leftBarButtonItem", @"rightBarButtonItem", @"titleView", @"hidesBackButton", nil];
 }
 
-void _UINavigationBarSetNavigationBar(UINavigationItem* navigationItem, UINavigationBar* navigationBar)
+void _UINavigationItemSetNavigationBar(UINavigationItem *navigationItem, UINavigationBar *navigationBar)
 {
     // weak reference
-    if (_navigationBar == navigationBar)
+    if (navigationItem->_navigationBar == navigationBar) {
         return;
-    
-    if (_navigationBar != nil && navigationBar == nil) {
+    }
+    if (navigationItem->_navigationBar != nil && navigationBar == nil) {
         // remove observation
-        for (NSString * keyPath in [isa _keyPathsTriggeringUIUpdates]) {
-            [self removeObserver:self forKeyPath:keyPath];
+        for (NSString *keyPath in _keyPaths) {
+            [navigationItem removeObserver:navigationItem forKeyPath:keyPath];
         }
-    }
-    else if (navigationBar != nil) {
+    } else if (navigationBar != nil) {
         // observe property changes to notify UI element
-        for (NSString * keyPath in [isa _keyPathsTriggeringUIUpdates]) {
-            [self addObserver:self forKeyPath:keyPath options:NSKeyValueObservingOptionNew context:UINavigationItemContext];
+        for (NSString * keyPath in _keyPaths) {
+            [navigationItem addObserver:navigationItem forKeyPath:keyPath options:NSKeyValueObservingOptionNew context:UINavigationItemContext];
         }
     }
-    
-    _navigationBar = navigationBar;
+    navigationItem->_navigationBar = navigationBar;
 }
-

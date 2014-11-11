@@ -27,15 +27,12 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIScreen.h>
-#import <UIKit/UIImage-private.h>
-#import <UIKit/UIImageView.h>
-#import <UIKit/UIApplication.h>
-#import <UIKit/UIViewLayoutManager.h>
-#import <UIKit/UIColor.h>
-//#import <UIKit/UIGeometry.h>
-#import <UIKit/UIScreenMode.h>
-#import <UIKit/UIWindow.h>
+#import <UIKit/UIKit-private.h>
+#import <CoreAnimation/CoreAnimation-private.h>
+#import <OpenGLES/EAGL-private.h>
+
+#define _kScreenWidth   320
+#define _kScreenHeight  568
 
 NSString *const UIScreenDidConnectNotification = @"UIScreenDidConnectNotification";
 NSString *const UIScreenDidDisconnectNotification = @"UIScreenDidDisconnectNotification";
@@ -46,9 +43,9 @@ NSMutableArray *_allScreens = nil;
 @implementation UIScreen
 
 @synthesize bounds=_bounds;
-@synthesize applicationFrame;
-@synthesize availableModes;
-@synthesize currentMode; 
+@synthesize applicationFrame=_applicationFrame;
+@synthesize availableModes=_availableModes;
+@synthesize currentMode=_currentMode;
 @synthesize scale=_scale;
 
 #pragma mark Life cycle
@@ -60,16 +57,22 @@ NSMutableArray *_allScreens = nil;
     }
 }
 
-- (id)initWithBounds:(CGRect)myBounds
+- (id)init
 {
     if ((self = [super init])) {
-        _bounds = myBounds;
+        _bounds = CGRectMake(0,0,_kScreenWidth,_kScreenHeight);
         [_allScreens addObject:self];
+        EAGLContext *context = _EAGLGetCurrentContext();
+        _hScale = context->_width * 1.0 / _kScreenWidth;
+        _vScale = context->_height * 1.0 / _kScreenHeight;
+        _scale = MAX(_hScale, _vScale);
+        //DLog(@"_scale: %f", _scale);
+        
         //_layer = [[CALayer layer] retain];
         //_layer.delegate = self;		// required to get the magic of the UIViewLayoutManager...
         //_layer.layoutManager = [UIViewLayoutManager layoutManager];
-
-      //  _layer.geometryFlipped = YES;
+        
+        //  _layer.geometryFlipped = YES;
         //_layer.sublayerTransform = CATransform3DMakeScale(1,-1,1);
     }
     return self;
@@ -80,21 +83,16 @@ NSMutableArray *_allScreens = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [_allScreens removeObject:[NSValue valueWithNonretainedObject:self]];
     //[_layer release];
-    [currentMode release];
+    [_currentMode release];
     [super dealloc];
 }
 
 #pragma mark - Accessors
 
-- (CGFloat)scale
-{
-    return 1;
-}
-
 - (CGRect)applicationFrame
 {
     const float statusBarHeight = [UIApplication sharedApplication].statusBarHidden? 0 : 20;
-    const CGSize size = [self bounds].size;
+    const CGSize size = _bounds.size;
     return CGRectMake(0,statusBarHeight,size.width,size.height-statusBarHeight);
 }
 
@@ -113,7 +111,7 @@ NSMutableArray *_allScreens = nil;
 + (UIScreen *)mainScreen
 {
     //return ([_allScreens count] > 0)? [[_allScreens objectAtIndex:0] nonretainedObjectValue] : nil;
-    return ([_allScreens count] > 0)? [_allScreens objectAtIndex:0] : nil;
+    return _UIScreenMainScreen();
 }
 
 + (NSArray *)screens
@@ -127,7 +125,7 @@ NSMutableArray *_allScreens = nil;
     return screens;
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (CGPoint)convertPoint:(CGPoint)toConvert toScreen:(UIScreen *)toScreen
 {
@@ -176,13 +174,19 @@ NSMutableArray *_allScreens = nil;
 
 @end
 
-#pragma mark - Private C functions
+#pragma mark - Shared functions
+
+UIScreen *_UIScreenMainScreen()
+{
+    return ([_allScreens count] > 0)? [_allScreens objectAtIndex:0] : nil;
+}
 
 UIView *_UIScreenHitTest(UIScreen *screen, CGPoint touchPoint, UIEvent *theEvent)
 {
     UIWindow *window = [UIApplication sharedApplication]->_keyWindow;
 
-    if (window.screen == screen) {
+    //DLog();
+    if (window->_screen == screen) {
         CGPoint windowPoint = [window convertPoint:touchPoint fromWindow:nil];
         UIView *touchedView = [window hitTest:windowPoint withEvent:theEvent];
         if (touchedView) {
@@ -192,3 +196,12 @@ UIView *_UIScreenHitTest(UIScreen *screen, CGPoint touchPoint, UIEvent *theEvent
     return nil;
 }
 
+CGImageRef _UIScreenCaptureScreen()
+{
+    //DLog();
+    //_CAAnimatorCaptureScreen = YES;
+    /*while (_CAAnimatorCaptureScreen) {
+        usleep(1000);
+    }*/
+    return _CAAnimatorScreenCapture;
+}

@@ -51,7 +51,7 @@ typedef enum {
 @class UINavigationItem, UINavigationController, UIBarButtonItem, UISplitViewController;
 
 @interface UIViewController : UIResponder {
-@private
+@package
     UIView *_view;
     BOOL _wantsFullScreenLayout;
     NSString *_title;
@@ -70,6 +70,31 @@ typedef enum {
     UITabBarItem *_tabBarItem;
     UITabBarController *_tabBarController;
 }
+
+@property (nonatomic, readonly, copy) NSString *nibName;		// always returns nil
+@property (nonatomic, readonly, retain) NSBundle *nibBundle;	// always returns nil
+@property (nonatomic, retain) UIView *view;
+@property (nonatomic, assign) BOOL wantsFullScreenLayout;		// doesn't do anything right now
+@property (nonatomic, copy) NSString *title;
+@property (nonatomic, readonly) UIInterfaceOrientation interfaceOrientation;	// always returns UIInterfaceOrientationLandscapeLeft
+@property (nonatomic, readonly, retain) UINavigationItem *navigationItem;
+@property (nonatomic, retain) NSArray *toolbarItems;
+@property (nonatomic, getter=isEditing) BOOL editing;
+@property (nonatomic) BOOL hidesBottomBarWhenPushed;
+@property (nonatomic, readwrite) CGSize contentSizeForViewInPopover;
+@property (nonatomic,readwrite,getter=isModalInPopover) BOOL modalInPopover;
+@property (nonatomic, readonly) UIViewController *modalViewController;
+@property (nonatomic, assign) UIModalPresentationStyle modalPresentationStyle;
+@property (nonatomic, assign) UIModalTransitionStyle modalTransitionStyle;		// not used right now
+
+@property (nonatomic, readonly) UIViewController *parentViewController;
+@property (nonatomic, readonly, retain) UINavigationController *navigationController;
+@property (nonatomic, readonly, retain) UISplitViewController *splitViewController;
+@property (nonatomic, readonly, retain) UISearchDisplayController *searchDisplayController; // stub
+
+// stubs
+@property (nonatomic, retain) UITabBarItem *tabBarItem;
+@property (nonatomic, readonly, retain) UITabBarController *tabBarController;
 
 - (id)initWithNibName:(NSString *)nibName bundle:(NSBundle *)nibBundle;	// won't load a nib no matter what you do!
 
@@ -95,33 +120,5 @@ typedef enum {
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation;
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration;
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation;
-
-
-@property (nonatomic, readonly, copy) NSString *nibName;		// always returns nil
-@property (nonatomic, readonly, retain) NSBundle *nibBundle;	// always returns nil
-@property (nonatomic, retain) UIView *view;
-@property (nonatomic, assign) BOOL wantsFullScreenLayout;		// doesn't do anything right now
-@property (nonatomic, copy) NSString *title;
-@property (nonatomic, readonly) UIInterfaceOrientation interfaceOrientation;	// always returns UIInterfaceOrientationLandscapeLeft
-@property (nonatomic, readonly, retain) UINavigationItem *navigationItem;
-@property (nonatomic, retain) NSArray *toolbarItems;
-@property (nonatomic, getter=isEditing) BOOL editing;
-@property (nonatomic) BOOL hidesBottomBarWhenPushed;
-
-@property (nonatomic, readwrite) CGSize contentSizeForViewInPopover;
-@property (nonatomic,readwrite,getter=isModalInPopover) BOOL modalInPopover;
-
-@property (nonatomic, readonly) UIViewController *modalViewController;
-@property (nonatomic, assign) UIModalPresentationStyle modalPresentationStyle;
-@property (nonatomic, assign) UIModalTransitionStyle modalTransitionStyle;		// not used right now
-
-@property (nonatomic, readonly) UIViewController *parentViewController;
-@property (nonatomic, readonly, retain) UINavigationController *navigationController;
-@property (nonatomic, readonly, retain) UISplitViewController *splitViewController;
-@property (nonatomic, readonly, retain) UISearchDisplayController *searchDisplayController; // stub
-
-// stubs
-@property (nonatomic, retain) UITabBarItem *tabBarItem;
-@property (nonatomic, readonly, retain) UITabBarController *tabBarController;
 
 @end

@@ -57,7 +57,7 @@ typedef enum {
     NSMutableDictionary *_content;
     UIImage *_adjustedHighlightImage;
     UIImage *_adjustedDisabledImage;
-    CAGradientLayer *gradientLayer;
+    CAGradientLayer *_gradientLayer;
 }
 
 + (id)buttonWithType:(UIButtonType)buttonType;

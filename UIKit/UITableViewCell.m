@@ -37,19 +37,28 @@
 extern CGFloat _UITableViewDefaultRowHeight;
 
 @implementation UITableViewCell
-@synthesize accessoryType=_accessoryType, selectionStyle=_selectionStyle, indentationLevel=_indentationLevel;
-@synthesize editingAccessoryType=_editingAccessoryType, selected=_selected, backgroundView=_backgroundView;
-@synthesize selectedBackgroundView=_selectedBackgroundView, highlighted=_highlighted, reuseIdentifier=_reuseIdentifier;
-@synthesize editing = _editing, detailTextLabel = _detailTextLabel, showingDeleteConfirmation = _showingDeleteConfirmation;
-@synthesize indentationWidth=_indentationWidth, accessoryView=_accessoryView;
+
+@synthesize accessoryType = _accessoryType;
+@synthesize selectionStyle = _selectionStyle;
+@synthesize indentationLevel = _indentationLevel;
+@synthesize editingAccessoryType = _editingAccessoryType;
+@synthesize selected = _selected;
+@synthesize backgroundView = _backgroundView;
+@synthesize selectedBackgroundView = _selectedBackgroundView;
+@synthesize highlighted = _highlighted;
+@synthesize reuseIdentifier = _reuseIdentifier;
+@synthesize editing = _editing;
+@synthesize detailTextLabel = _detailTextLabel;
+@synthesize showingDeleteConfirmation = _showingDeleteConfirmation;
+@synthesize indentationWidth = _indentationWidth;
+@synthesize accessoryView = _accessoryView;
 
 - (id)initWithFrame:(CGRect)frame
 {
-    if ((self=[super initWithFrame:frame])) {
+    if ((self = [super initWithFrame:frame])) {
         _indentationWidth = 10;
         _style = UITableViewCellStyleDefault;
         _selectionStyle = UITableViewCellSelectionStyleBlue;
-
         _seperatorView = [[UITableViewCellSeparator alloc] init];
         [self addSubview:_seperatorView];
         
@@ -58,10 +67,10 @@ extern CGFloat _UITableViewDefaultRowHeight;
     }
     return self;
 }
-
+ 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
-    if ((self=[self initWithFrame:CGRectMake(0,0,320,_UITableViewDefaultRowHeight)])) {
+    if ((self = [self initWithFrame:CGRectMake(0,0,320,_UITableViewDefaultRowHeight)])) {
         _style = style;
         _reuseIdentifier = [reuseIdentifier copy];
     }

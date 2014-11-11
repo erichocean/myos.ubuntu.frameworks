@@ -27,10 +27,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UITapGestureRecognizer.h>
-#import <UIKit/UIGestureRecognizerSubclass.h>
-#import <UIKit/UITouch.h>
-//#import <UIKit/UIGeometry.h>
+#import <UIKit/UIKit-private.h>
 
 #define _KTapGestureMultiTapDelay	0.25
 
@@ -66,28 +63,25 @@
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    //DLog(@"self: %@", self);
     if (self->_state == UIGestureRecognizerStatePossible) {
         self.state = UIGestureRecognizerStateBegan;
-    } /*else if (self->_state == UIGestureRecognizerStateBegan) {
-        self.state = UIGestureRecognizerStateChanged;
-    }*/
+    }
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    /*if (self->_state == UIGestureRecognizerStateBegan) { // || self->_state == UIGestureRecognizerStateChanged) {
-        self.state = UIGestureRecognizerStateChanged;
-    }*/
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    //UITouch *touch = [_trackingTouches anyObject];
+    //DLog(@"self: %@", self);
     [self _changeStatus];
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    //DLog(@"self: %@", self);
     if (self->_state == UIGestureRecognizerStateBegan) {
         self.state = UIGestureRecognizerStateCancelled;
     }
@@ -96,12 +90,7 @@
 // called when _failureRequirements gestures changed its status
 - (void)_changeStatus
 {
-    /*if (self->_state == UIGestureRecognizerStateCancelled || self->_state == UIGestureRecognizerStateFailed) {
-        [self performSelector:@selector(reset) withObject:nil afterDelay:0];
-        //self->_state = UIGestureRecognizerStatePossible;
-        //DLog(@"self: %@", self);
-        return;
-    }*/
+    //DLog(@"self: %@", self);
     UITouch *touch = nil;
     if ([_trackingTouches count]) {
         touch = [_trackingTouches objectAtIndex:0];
@@ -113,7 +102,6 @@
         if (_state == UIGestureRecognizerStateBegan) {
             //DLog(@"failureRequirements: %@", _failureRequirements);
             BOOL canEnd = YES;
-            //for (UIGestureRecognizer *recognizer in self->_failureRequirements) {
             
             for (UIGestureRecognizer *recognizer in _failureRequirements) {
                 if (recognizer->_state != UIGestureRecognizerStateFailed &&
@@ -128,7 +116,6 @@
                 }
             }
             if (canEnd) {
-                //DLog();
                 self.state = UIGestureRecognizerStateRecognized;
             }
         }
@@ -152,28 +139,6 @@
     }
 }
 
-#pragma mark - Helpers
-
-- (BOOL)canBePreventedByGestureRecognizer:(UIGestureRecognizer *)preventingGestureRecognizer
-{
-    // this logic is here based on a note in the docs for -canBePreventedByGestureRecognizer:
-    // it may not be correct :)
-    if ([preventingGestureRecognizer isKindOfClass:[UITapGestureRecognizer class]]) {
-        return (((UITapGestureRecognizer *)preventingGestureRecognizer).numberOfTapsRequired > self.numberOfTapsRequired);
-    } else {
-        return [super canBePreventedByGestureRecognizer:preventingGestureRecognizer];
-    }
-}
-
-- (BOOL)canPreventGestureRecognizer:(UIGestureRecognizer *)preventedGestureRecognizer
-{
-    // this logic is here based on a note in the docs for -canPreventGestureRecognizer:
-    // it may not be correct :)
-    if ([preventedGestureRecognizer isKindOfClass:[UITapGestureRecognizer class]]) {
-        return (((UITapGestureRecognizer *)preventedGestureRecognizer).numberOfTapsRequired <= self.numberOfTapsRequired);
-    } else {
-        return [super canPreventGestureRecognizer:preventedGestureRecognizer];
-    }
-}
+#pragma mark - Public methods
 
 @end

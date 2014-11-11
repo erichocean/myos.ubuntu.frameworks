@@ -48,28 +48,31 @@
   return NSClassFromString(@"CTNSFontDescriptor");//(@"CTNSFontconfigFontDescriptor");
 }
 
-+ (id)fontDescriptorWithFontAttributes: (NSDictionary *)attributes
++ (id)fontDescriptorWithFontAttributes:(NSDictionary *)attributes
 {
-  return AUTORELEASE([[[self fontDescriptorClass] alloc] initWithFontAttributes: attributes]);
+    //DLog();
+    return AUTORELEASE([[[self fontDescriptorClass] alloc] initWithFontAttributes: attributes]);
 }
 
 + (id)fontDescriptorWithName: (NSString *)name
 		       matrix: (NSAffineTransform *)matrix
 {
-  return [self fontDescriptorWithFontAttributes:
-    [NSDictionary dictionaryWithObjectsAndKeys:
-      name, CTNSFontNameAttribute,
-      matrix, CTNSFontMatrixAttribute,
-      nil]];
+    //DLog();
+    return [self fontDescriptorWithFontAttributes:
+            [NSDictionary dictionaryWithObjectsAndKeys:
+             name, CTNSFontNameAttribute,
+             matrix, CTNSFontMatrixAttribute,
+             nil]];
 }
 
-+ (id) fontDescriptorWithName: (NSString *)name size: (CGFloat)size
++ (id)fontDescriptorWithName: (NSString *)name size: (CGFloat)size
 {
-  return [self fontDescriptorWithFontAttributes:
-    [NSDictionary dictionaryWithObjectsAndKeys:
-      name, CTNSFontNameAttribute,
-      [NSString stringWithFormat: @"%f", size], kCTFontSizeAttribute,
-      nil]];
+    //DLog();
+    return [self fontDescriptorWithFontAttributes:
+            [NSDictionary dictionaryWithObjectsAndKeys:
+             name, CTNSFontNameAttribute,
+             [NSString stringWithFormat: @"%f", size], kCTFontSizeAttribute,
+             nil]];
 }
 
 - (NSDictionary *) fontAttributes
@@ -80,15 +83,16 @@
 - (CTNSFontDescriptor *) fontDescriptorByAddingAttributes:
   (NSDictionary *)attributes
 {
-  NSMutableDictionary *m = [_attributes mutableCopy];
-  CTNSFontDescriptor *new;
-
-  [m addEntriesFromDictionary: attributes];
-
-  new = [isa fontDescriptorWithFontAttributes: m];
-  RELEASE(m);
-
-  return new;
+    //DLog();
+    NSMutableDictionary *m = [_attributes mutableCopy];
+    CTNSFontDescriptor *new;
+    
+    [m addEntriesFromDictionary: attributes];
+    
+    new = [isa fontDescriptorWithFontAttributes:m];
+    RELEASE(m);
+    
+    return new;
 }
 
 - (CTNSFontDescriptor *) fontDescriptorWithFace: (NSString *)face
@@ -141,40 +145,43 @@
 			       forKey: CTNSFontTraitsAttribute]];
 }
 
-- (id) initWithFontAttributes: (NSDictionary *)attributes
+- (id)initWithFontAttributes:(NSDictionary *)attributes
 {
-  if ((self = [super init]) != nil)
-  {
-    if (attributes) {
-      _attributes = [attributes copy];
-      // fill the rest of attributes given the font
-      NSString * fontName = [attributes objectForKey:kCTFontNameAttribute];
-      
-      if (fontName != nil)
-      {
-        FcPattern *pat = opal_FcPatternCacheLookup([fontName UTF8String]);
-        cairo_font_face_t *unscaled;
-        if(pat) {
-          unscaled = cairo_ft_font_face_create_for_pattern(pat);
+    if ((self = [super init]) != nil) {
+        if (attributes) {
+            _attributes = [attributes copy];
+            // fill the rest of attributes given the font
+            NSString *fontName = [attributes objectForKey:kCTFontNameAttribute];
+            
+            if (fontName != nil) {
+                //DLog(@"fontName: %@", fontName);
+                FcPattern *pat = opal_FcPatternCacheLookup([fontName UTF8String]);
+                cairo_font_face_t *unscaled;
+                if (pat) {
+                    unscaled = cairo_ft_font_face_create_for_pattern(pat);
+                } else {
+                    [self release];
+                    return NULL;
+                }
+                cairo_matrix_t ident;
+                cairo_matrix_init_identity(&ident);
+                //DLog(@"1");
+                cairo_font_options_t *opts = cairo_font_options_create();
+                //DLog(@"2");
+                cairo_font_options_set_hint_metrics(opts, CAIRO_HINT_METRICS_OFF);
+                //DLog(@"3");
+                cairo_font_options_set_hint_style(opts, CAIRO_HINT_STYLE_NONE);
+                //DLog(@"4");
+                self->cairofont = cairo_scaled_font_create(unscaled, &ident, &ident, opts);
+                //DLog(@"5");
+                cairo_font_options_destroy(opts);
+                //DLog(@"6");
+            }
         } else {
-          [self release];
-          return NULL;
+            _attributes = [NSDictionary new];
         }
-        cairo_matrix_t ident;
-        cairo_matrix_init_identity(&ident);
-
-        cairo_font_options_t *opts = cairo_font_options_create();
-        cairo_font_options_set_hint_metrics(opts, CAIRO_HINT_METRICS_OFF);
-        cairo_font_options_set_hint_style(opts, CAIRO_HINT_STYLE_NONE);
-  
-        self->cairofont = cairo_scaled_font_create(unscaled, &ident, &ident, opts);
-    
-        cairo_font_options_destroy(opts);
-      }
-    } else
-      _attributes = [NSDictionary new];
-  }
-  return self;
+    }
+    return self;
 }
 
 - (void) encodeWithCoder: (NSCoder *)aCoder

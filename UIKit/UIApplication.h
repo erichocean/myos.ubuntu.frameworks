@@ -27,10 +27,11 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+//#import <Foundation/Foundation.h>
 #import <CoreGraphics/CoreGraphics.h>
 #import <UIKit/UIResponder.h>
 #import <UIKit/UIDevice.h>
-#import <Foundation/Foundation.h>
+#import <UIKit/UIImageView.h>
 
 extern NSString *const UIApplicationWillChangeStatusBarOrientationNotification;
 extern NSString *const UIApplicationDidChangeStatusBarOrientationNotification;
@@ -96,7 +97,7 @@ const NSTimeInterval UIMinimumKeepAliveTimeout;
 @protocol UIApplicationDelegate;
 
 @interface UIApplication : UIResponder {
-@package
+    @package
     UIEvent *_currentEvent;
     UIWindow *_keyWindow;
     NSMutableSet *_visibleWindows;
@@ -112,7 +113,25 @@ const NSTimeInterval UIMinimumKeepAliveTimeout;
     UIView *_blackScreen;
     NSTimeInterval _lastActivityTime;
     int _screenMode;
+    UIImageView *_appImage;
 }
+
+@property (nonatomic, readonly) UIWindow *keyWindow;
+@property (nonatomic, readonly) NSArray *windows;
+@property (nonatomic, getter=isStatusBarHidden, readonly) BOOL statusBarHidden;
+@property (nonatomic, readonly) CGRect statusBarFrame;
+@property (nonatomic, getter=isNetworkActivityIndicatorVisible) BOOL networkActivityIndicatorVisible; // does nothing, always returns NO
+@property (nonatomic) UIInterfaceOrientation statusBarOrientation;
+@property (nonatomic, readonly) NSTimeInterval statusBarOrientationAnimationDuration;
+@property (nonatomic, assign) id<UIApplicationDelegate> delegate;
+@property (nonatomic, getter=isIdleTimerDisabled) BOOL idleTimerDisabled;	// has no actual affect
+@property (nonatomic) BOOL applicationSupportsShakeToEdit;					// no effect
+@property (nonatomic) UIStatusBarStyle statusBarStyle;                      // always returns UIStatusBarStyleDefault
+@property (nonatomic, readonly) UIApplicationState applicationState;        // see notes near UIApplicationState struct for details!
+@property (nonatomic, readonly) NSTimeInterval backgroundTimeRemaining;     // always 0
+@property (nonatomic) NSInteger applicationIconBadgeNumber;                 // no effect, but does set/get the number correctly
+@property (nonatomic, copy) NSArray *scheduledLocalNotifications;           // no effect, returns nil
+@property (nonatomic, retain) UIImageView *appImage;
 
 + (UIApplication *)sharedApplication;
 
@@ -125,28 +144,10 @@ const NSTimeInterval UIMinimumKeepAliveTimeout;
 - (void)endIgnoringInteractionEvents;
 - (BOOL)isIgnoringInteractionEvents;
 
-//- (void)presentLocalNotificationNow:(UILocalNotification *)notification;
-//- (void)cancelLocalNotification:(UILocalNotification *)notification;
 - (void)cancelAllLocalNotifications;
 
-- (UIBackgroundTaskIdentifier)beginBackgroundTaskWithExpirationHandler:(void(^)(void))handler;
+//- (UIBackgroundTaskIdentifier)beginBackgroundTaskWithExpirationHandler:(void(^)(void))handler;
 - (void)endBackgroundTask:(UIBackgroundTaskIdentifier)identifier;
-
-@property (nonatomic, readonly) UIWindow *keyWindow;
-@property (nonatomic, readonly) NSArray *windows;
-@property (nonatomic, getter=isStatusBarHidden, readonly) BOOL statusBarHidden;
-@property (nonatomic, readonly) CGRect statusBarFrame;
-@property (nonatomic, getter=isNetworkActivityIndicatorVisible) BOOL networkActivityIndicatorVisible;	// does nothing, always returns NO
-@property (nonatomic) UIInterfaceOrientation statusBarOrientation;
-@property (nonatomic, readonly) NSTimeInterval statusBarOrientationAnimationDuration;
-@property (nonatomic, assign) id<UIApplicationDelegate> delegate;
-@property (nonatomic, getter=isIdleTimerDisabled) BOOL idleTimerDisabled;	// has no actual affect
-@property (nonatomic) BOOL applicationSupportsShakeToEdit;					// no effect
-@property (nonatomic) UIStatusBarStyle statusBarStyle;                      // always returns UIStatusBarStyleDefault
-@property (nonatomic, readonly) UIApplicationState applicationState;        // see notes near UIApplicationState struct for details!
-@property (nonatomic, readonly) NSTimeInterval backgroundTimeRemaining;     // always 0
-@property (nonatomic) NSInteger applicationIconBadgeNumber;                 // no effect, but does set/get the number correctly
-@property (nonatomic, copy) NSArray *scheduledLocalNotifications;           // no effect, returns nil
 
 @end
 
@@ -167,4 +168,3 @@ const NSTimeInterval UIMinimumKeepAliveTimeout;
 @end
 
 int UIApplicationMain(int argc, char *argv[], NSString *principalClassName, NSString *delegateClassName);
-

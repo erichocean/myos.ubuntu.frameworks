@@ -41,7 +41,7 @@
     return [NSString stringWithFormat:@"<%@: %p; target = <%@: %p>; action = %@>", [self className], self, [_target className], _target, NSStringFromSelector(_action)];
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (BOOL)isEqual:(id)object
 {

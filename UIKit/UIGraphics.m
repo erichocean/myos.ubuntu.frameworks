@@ -38,20 +38,18 @@ void UIGraphicsPushContext(CGContextRef ctx)
     if (!contextStack) {
         contextStack = [[NSMutableArray alloc] initWithCapacity:10];
     }
-    [contextStack addObject:ctx];    
-    //[NSGraphicsContext setCurrentContext:[NSGraphicsContext graphicsContextWithGraphicsPort:(void *)ctx flipped:YES]];
-    //[contextStack addObject:[NSGraphicsContext currentContext]];
+    //DLog(@"ctx: %@", ctx);
+    [contextStack addObject:ctx];
 }
 
 void UIGraphicsPopContext()
 {
     [contextStack removeLastObject];
-    //[NSGraphicsContext setCurrentContext:[contextStack lastObject]];
 }
 
 CGContextRef UIGraphicsGetCurrentContext()
 {
-    return [contextStack lastObject];// graphicsPort];
+    return [contextStack lastObject];
 }
 
 void UIGraphicsBeginImageContextWithOptions(CGSize size, BOOL opaque, CGFloat scale)
@@ -59,18 +57,19 @@ void UIGraphicsBeginImageContextWithOptions(CGSize size, BOOL opaque, CGFloat sc
     if (scale == 0.f) {
         scale = [UIScreen mainScreen].scale;
     }
-    
     const size_t width = size.width * scale;
     const size_t height = size.height * scale;
-    
+    //DLog();
     if (width > 0 && height > 0) {
         CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-        CGContextRef ctx = CGBitmapContextCreate(NULL, width, height, 8, 4*width, colorSpace, (opaque? kCGBitmapByteOrderDefault : kCGBitmapAlphaInfoMask));
-        CGContextConcatCTM(ctx, CGAffineTransformMake(1, 0, 0, -1, 0, height));
-        CGContextScaleCTM(ctx, 1.f/scale, 1.f/scale);
+        CGContextRef ctx = CGBitmapContextCreate(NULL, width, height, 8, 4*width, colorSpace, kCGImageAlphaPremultipliedFirst); //(opaque? kCGBitmapByteOrderDefault : kCGBitmapAlphaInfoMask));
+        //CGContextConcatCTM(ctx, CGAffineTransformMake(1, 0, 0, -1, 0, height));
+        CGContextScaleCTM(ctx, scale, scale);
         CGColorSpaceRelease(colorSpace);
         UIGraphicsPushContext(ctx);
+        //DLog();
         CGContextRelease(ctx);
+        //DLog();
     }
 }
 

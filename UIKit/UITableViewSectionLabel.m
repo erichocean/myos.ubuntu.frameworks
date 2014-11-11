@@ -31,6 +31,7 @@
 #import <UIKit/UIGraphics.h>
 
 @implementation UITableViewSectionLabel
+
 + (UITableViewSectionLabel *)sectionLabelWithTitle:(NSString *)title
 {
     UITableViewSectionLabel *label = [[self alloc] init];
@@ -41,6 +42,8 @@
     label.shadowOffset = CGSizeMake(0,1);
     return [label autorelease];
 }
+
+#pragma mark - Overridden methods
 
 - (void)drawRect:(CGRect)rect
 {

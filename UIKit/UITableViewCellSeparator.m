@@ -27,9 +27,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UITableViewCellSeparator.h>
-#import <UIKit/UIColor.h>
-#import <UIKit/UIGraphics.h>
+#import <UIKit/UIKit-private.h>
+#import <CoreAnimation/CoreAnimation-private.h>
 
 @implementation UITableViewCellSeparator
 
@@ -52,17 +51,19 @@
 {
     if (_style != theStyle) {
         _style = theStyle;
-        [self setNeedsDisplay];
+        _CALayerSetNeedsDisplay(_layer);
     }
 
     if (_color != theColor) {
         [_color release];
         _color = [theColor retain];
-        [self setNeedsDisplay];
+        _CALayerSetNeedsDisplay(_layer);
     }
     
     self.hidden = (_style == UITableViewCellSeparatorStyleNone);
 }
+
+#pragma mark - Overridden methods
 
 - (void)drawRect:(CGRect)rect
 {

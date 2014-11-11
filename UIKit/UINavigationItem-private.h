@@ -37,3 +37,4 @@
 @class UINavigationBar;
 
 void _UINavigationItemSetNavigationBar(UINavigationItem* navItem, UINavigationBar* navBar);
+void _UINavigationItemInitialize();

@@ -29,13 +29,12 @@
 /**
  * Container of CTRun objects (glyph runs)
  */
-@interface CTLine : NSObject
-{
-	@package
-  	NSArray *_runs;
-  	double penOffset;
+@interface CTLine : NSObject {
+    @package
+    NSArray *_runs;
+    double penOffset;
 }
 
-- (id)initWithRuns: (NSArray*)runs;
+- (id)initWithRuns:(NSArray *)runs;
 
 @end

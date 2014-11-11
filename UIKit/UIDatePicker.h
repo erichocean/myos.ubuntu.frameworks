@@ -28,7 +28,7 @@
  */
 
 
-#import <Foundation/Foundation.h>
+//#import <Foundation/Foundation.h>
 #import <UIKit/UIControl.h>
 
 typedef enum {

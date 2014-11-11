@@ -24,8 +24,7 @@
 
 #include <windows.h>
 
-@interface CTNSGDIFontDescriptor : CTNSFontDescriptor
-{
+@interface CTNSGDIFontDescriptor : CTNSFontDescriptor {
   LOGFONTW _logfont;
 }
 

@@ -28,7 +28,7 @@
  */
 
 #import <UIKit/UIGestureRecognizer-private.h>
-#import <UIKit/UIGestureRecognizerSubclass.h>
+//#import <UIKit/UIGestureRecognizerSubclass.h>
 #import <UIKit/UITouch.h>
 #import <UIKit/UIAction.h>
 #import <UIKit/UIApplication.h>
@@ -137,23 +137,24 @@
     // the docs didn't say explicitly if these state transitions were verified, but I suspect they are. if anything, a check like this
     // should help debug things. it also helps me better understand the whole thing, so it's not a total waste of time :)
 
+    //DLog(@"state: %d", state);
     typedef struct { UIGestureRecognizerState fromState, toState; BOOL shouldNotify, shouldReset; } StateTransition;
 
     #define _kNumberOfStateTransitions 10
     static const StateTransition allowedTransitions[_kNumberOfStateTransitions] = {
         // discrete gestures
         {UIGestureRecognizerStatePossible,	UIGestureRecognizerStateRecognized,	YES,   YES},
-        {UIGestureRecognizerStatePossible,	UIGestureRecognizerStateFailed,         NO,    YES},
+        {UIGestureRecognizerStatePossible,	UIGestureRecognizerStateFailed,     NO,    YES},
 
         // continuous gestures
-        {UIGestureRecognizerStatePossible,	UIGestureRecognizerStateBegan,          NO,    NO },
-        {UIGestureRecognizerStateBegan,		UIGestureRecognizerStateChanged,        NO,    NO },
-        {UIGestureRecognizerStateBegan,		UIGestureRecognizerStateCancelled,      NO,    YES},
-        {UIGestureRecognizerStateBegan,		UIGestureRecognizerStateFailed,         NO,    YES},
-        {UIGestureRecognizerStateBegan,		UIGestureRecognizerStateEnded,          YES,   YES},
-        {UIGestureRecognizerStateChanged,	UIGestureRecognizerStateChanged,        NO,    NO },
-        {UIGestureRecognizerStateChanged,	UIGestureRecognizerStateCancelled,      NO,    YES},
-        {UIGestureRecognizerStateChanged,	UIGestureRecognizerStateEnded,          YES,   YES}
+        {UIGestureRecognizerStatePossible,	UIGestureRecognizerStateBegan,      NO,    NO },
+        {UIGestureRecognizerStateBegan,		UIGestureRecognizerStateChanged,    NO,    NO },
+        {UIGestureRecognizerStateBegan,		UIGestureRecognizerStateCancelled,  NO,    YES},
+        {UIGestureRecognizerStateBegan,		UIGestureRecognizerStateFailed,     NO,    YES},
+        {UIGestureRecognizerStateBegan,		UIGestureRecognizerStateEnded,      YES,   YES},
+        {UIGestureRecognizerStateChanged,	UIGestureRecognizerStateChanged,    NO,    NO },
+        {UIGestureRecognizerStateChanged,	UIGestureRecognizerStateCancelled,  NO,    YES},
+        {UIGestureRecognizerStateChanged,	UIGestureRecognizerStateEnded,      YES,   YES}
     };
     
     const StateTransition *transition = NULL;
@@ -175,21 +176,13 @@
         _state = transition->toState;
         [self didChangeValueForKey:@"state"];
         if (transition->shouldNotify) {
+            //DLog(@"transition->shouldNotify");
             _UIGestureRecognizerPerformActions(self);
         }
         if (transition->shouldReset) {
             //[self reset];
             [self performSelector:@selector(reset) withObject:nil afterDelay:0];
         }
-
-/*
- else if (_state == UIGestureRecognizerStateFailed || _state == UIGestureRecognizerStateCancelled) {
-            for (UIGestureRecognizer *recognizer in _failureDependents) {
-                if (recognizer->_state == UIGestureRecognizerStateBegan) {
-                    recognizer.state = UIGestureRecognizerStateEnded;
-                }
-            }           
-        }*/
     }
 }
 
@@ -256,7 +249,7 @@
 
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (void)addTarget:(id)target action:(SEL)action
 {
@@ -281,16 +274,9 @@
 
 - (void)requireGestureRecognizerToFail:(UIGestureRecognizer *)otherGestureRecognizer
 {
+    //DLog(@"otherGestureRecognizer: %@", otherGestureRecognizer);
     [_failureRequirements addObject:otherGestureRecognizer];
-    //[otherGestureRecognizer->_failureDependents addObject:self];
     [otherGestureRecognizer addObserver:self forKeyPath:@"state" options:NSKeyValueObservingOptionOld context:nil];
-    /*
-    if (_requiresToFail) {
-        [_requiresToFail removeObserver:self forKeyPath:@"state"];
-        [_requiresToFail release];
-    }
-    _requiresToFail = [otherGestureRecognizer retain];
-    [_requiresToFail addObserver:self forKeyPath:@"state" options:NSKeyValueObservingOptionOld context:nil];*/
 }
 
 - (void)reset
@@ -316,7 +302,7 @@
         }
     }*/
 }
-
+/*
 - (BOOL)canPreventGestureRecognizer:(UIGestureRecognizer *)preventedGestureRecognizer
 {
     return YES;
@@ -325,11 +311,11 @@
 - (BOOL)canBePreventedByGestureRecognizer:(UIGestureRecognizer *)preventingGestureRecognizer
 {
     return YES;
-}
+}*/
 
 @end
 
-#pragma mark - Private C functions
+#pragma mark - Shared functions
 
 void _UIGestureRecognizerSetView(UIGestureRecognizer *recognizer, UIView *v)
 {
@@ -348,6 +334,7 @@ BOOL _UIGestureRecognizerShouldAttemptToRecognize(UIGestureRecognizer *recognize
 
 void _UIGestureRecognizerRecognizeTouches(UIGestureRecognizer *recognizer, NSSet *touches, UIEvent *event)
 {
+    //DLog();
     if (_UIGestureRecognizerShouldAttemptToRecognize(recognizer)) {
         [recognizer->_trackingTouches setArray:[touches allObjects]];
         for (UITouch *touch in recognizer->_trackingTouches) {
@@ -365,18 +352,6 @@ void _UIGestureRecognizerRecognizeTouches(UIGestureRecognizer *recognizer, NSSet
                 case UITouchPhaseCancelled:
                     [recognizer touchesCancelled:touches withEvent:event];
                     break;
-                /*case _UITouchPhaseGestureBegan:
-                    [recognizer _gesturesBegan:touches withEvent:event];
-                    break;
-                case _UITouchPhaseGestureChanged:
-                    [recognizer _gesturesMoved:touches withEvent:event];
-                    break;
-                case _UITouchPhaseGestureEnded:
-                    [recognizer _gesturesEnded:touches withEvent:event];
-                    break;
-                case _UITouchPhaseDiscreteGesture:
-                    [recognizer _discreteGestures:touches withEvent:event];
-                    break;*/
                 default:
                     break;
             }
@@ -387,13 +362,14 @@ void _UIGestureRecognizerRecognizeTouches(UIGestureRecognizer *recognizer, NSSet
 
 void _UIGestureRecognizerPerformActions(UIGestureRecognizer *recognizer)
 {
+    //DLog(@"recognizer: %@", recognizer);
     for (UIAction *actionRecord in recognizer->_registeredActions) {
-        //DLog(@"actionRecord: %@", actionRecord);
+        //DLog(@"recognizer: %@", recognizer);
         // docs mention that the action messages are sent on the next run loop, so we'll do that here.
         // note that this means that reset can't happen until the next run loop, either otherwise
         // the state property is going to be wrong when the action handler looks at it, so as a result
         // I'm also delaying the reset call (if necessary) just below here.
-        [actionRecord.target performSelector:actionRecord.action withObject:recognizer afterDelay:0];
+        [actionRecord.target performSelector:actionRecord.action withObject:recognizer];
     }
     //for (UIGestureRecognizer *failureRecognizer in recognizer->_failureDependents) {
     //    failureRecognizer->_state = UIGestureRecognizerStateCancelled;

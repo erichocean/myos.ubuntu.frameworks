@@ -1,6 +1,18 @@
 /*
- * Copyright (c) 2012-2013. All rights reserved.
- *
+ Copyright © 2014 myOS Group.
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ Lesser General Public License for more details.
+ 
+ Contributor(s):
+ Amr Aboelela <amraboelela@gmail.com>
  */
 
 #import <CoreAnimation/CoreAnimation-private.h>
@@ -29,9 +41,9 @@
 {
     CGContextSaveGState(ctx);
     
-    CGRect aRect = self->bounds;//[self frame];
+    CGRect aRect = self->_bounds;
     // Clipping the view for the gradient
-    CGFloat myRadius = self->cornerRadius;
+    CGFloat myRadius = self->_cornerRadius;
     CGContextBeginPath(ctx);
     CGContextAddArc(ctx, aRect.size.width - myRadius, myRadius, myRadius, PI*1.5, 0 , NO);
     CGContextAddArc(ctx, aRect.size.width - myRadius, aRect.size.height - myRadius, myRadius, 0, PI/2 , NO);
@@ -70,4 +82,3 @@
 }
 
 @end
-

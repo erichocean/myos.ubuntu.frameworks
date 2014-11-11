@@ -92,14 +92,13 @@ const CFStringRef kCTFrameProgressionAttributeName = @"kCTFrameProgressionAttrib
 
 - (void)drawOnContext: (CGContextRef)ctx
 {
-  // FIXME: see CTFrameProgression docs comment about rotating 90 degrees
-  NSUInteger linesCount = [_lines count];
-  for (NSUInteger i=0; i<linesCount; i++)
-  {
-    CTLineRef line = [_lines objectAtIndex: i];
-    // FIXME: How does positioning work?
-    CTLineDraw(line, ctx);
-  }
+    // FIXME: see CTFrameProgression docs comment about rotating 90 degrees
+    NSUInteger linesCount = [_lines count];
+    for (NSUInteger i=0; i<linesCount; i++) {
+        CTLineRef line = [_lines objectAtIndex: i];
+        // FIXME: How does positioning work?
+        CTLineDraw(line, ctx);
+    }
 }
 
 @end

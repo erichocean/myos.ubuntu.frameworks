@@ -37,9 +37,109 @@ static const NSTimeInterval kAnimationDuration = 0.33;
 static const CGFloat NavBarHeight = 28;
 static const CGFloat ToolbarHeight = 28;
 
+#pragma mark - Static functions
+
+static CGRect _UINavigationControllerNavigationBarFrame(UINavigationController *controller)
+{
+    CGRect navBarFrame = controller->_view.bounds;
+    navBarFrame.size.height = NavBarHeight;
+    return navBarFrame;
+}
+
+static CGRect _UINavigationControllerToolbarFrame(UINavigationController *controller)
+{
+    CGRect toolbarRect = controller->_view.bounds;
+    toolbarRect.origin.y = toolbarRect.origin.y + toolbarRect.size.height - ToolbarHeight;
+    toolbarRect.size.height = ToolbarHeight;
+    return toolbarRect;
+}
+
+static CGRect _UINavigationControllerControllerFrame(UINavigationController *controller)
+{
+    CGRect controllerFrame = controller->_view.bounds;
+    // adjust for the nav bar
+    if (!controller->_navigationBarHidden) {
+        controllerFrame.origin.y += NavBarHeight;
+        controllerFrame.size.height -= NavBarHeight;
+    }
+    // adjust for toolbar (if there is one)
+    if (!controller->_toolbarHidden) {
+        controllerFrame.size.height -= ToolbarHeight;
+    }
+    return controllerFrame;
+}
+
+static void _UINavigationControllerUpdateToolbar(UINavigationController *controller, BOOL animated)
+{
+    UIViewController *topController = controller.topViewController;
+    [controller->_toolbar setItems:topController.toolbarItems animated:animated];
+    controller->_toolbar.hidden = controller->_toolbarHidden;
+    topController.view.frame = _UINavigationControllerControllerFrame(controller);
+}
+
+static UIViewController *_UINavigationControllerPopViewControllerWithoutPoppingNavigationBarAnimated(UINavigationController *controller, BOOL animated)
+{
+    if ([controller->_viewControllers count] > 1) {
+        UIViewController *oldViewController = [controller.topViewController retain];
+        
+        [controller->_viewControllers removeLastObject];
+        oldViewController->_parentViewController=nil;
+        
+        if ([controller isViewLoaded]) {
+            UIViewController *nextViewController = controller.topViewController;
+            
+            const CGRect controllerFrame = _UINavigationControllerToolbarFrame(controller);
+            const CGRect nextFrameStart = CGRectOffset(controllerFrame, -controllerFrame.size.width, 0);
+            const CGRect nextFrameEnd = controllerFrame;
+            const CGRect oldFrameStart = controllerFrame;
+            const CGRect oldFrameEnd = CGRectOffset(controllerFrame, controllerFrame.size.width, 0);
+            
+            nextViewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+            [controller->_view insertSubview:nextViewController.view atIndex:0];
+            
+            [nextViewController viewWillAppear:animated];
+            if (controller->_delegateHas.willShowViewController) {
+                [controller->_delegate navigationController:controller willShowViewController:nextViewController animated:animated];
+            }
+            if (animated) {
+                nextViewController.view.frame = nextFrameStart;
+                oldViewController.view.frame = oldFrameStart;
+                
+                [oldViewController retain];
+                
+                [UIView animateWithDuration:kAnimationDuration
+                                 animations:^(void) {
+                                     nextViewController.view.frame = nextFrameEnd;
+                                     oldViewController.view.frame = oldFrameEnd;
+                                 }
+                                 completion:^(BOOL finished) {
+                                     [oldViewController.view removeFromSuperview];
+                                     [oldViewController release];
+                                 }];
+            } else {
+                nextViewController.view.frame = nextFrameEnd;
+                [oldViewController.view removeFromSuperview];
+            }
+            
+            [nextViewController viewDidAppear:animated];
+            if (controller->_delegateHas.didShowViewController) {
+                [controller->_delegate navigationController:controller didShowViewController:nextViewController animated:animated];
+            }
+        }
+        
+        _UINavigationControllerUpdateToolbar(controller, animated);
+        return [oldViewController autorelease];
+    } else {
+        return nil;
+    }
+}
+
 @implementation UINavigationController
+
 @synthesize viewControllers=_viewControllers, delegate=_delegate, navigationBar=_navigationBar;
 @synthesize toolbar=_toolbar, toolbarHidden=_toolbarHidden, navigationBarHidden=_navigationBarHidden;
+
+#pragma mark - Life cycle
 
 - (UIViewController *)visibleViewController
 {
@@ -66,14 +166,6 @@ static const CGFloat ToolbarHeight = 28;
     return self;
 }
 
-- (void)dealloc
-{
-    [_viewControllers release];
-    [_navigationBar release];
-    [_toolbar release];
-    [super dealloc];
-}
-
 - (void)setDelegate:(id<UINavigationControllerDelegate>)newDelegate
 {
     _delegate = newDelegate;
@@ -87,16 +179,16 @@ static const CGFloat ToolbarHeight = 28;
     self.view.clipsToBounds = YES;
     
     UIViewController *topViewController = self.topViewController;
-    topViewController.view.frame = [self _controllerFrame];
+    topViewController.view.frame = _UINavigationControllerControllerFrame(self);
     topViewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     [self.view addSubview:topViewController.view];
     
-    _navigationBar.frame = [self _navigationBarFrame];
+    _navigationBar.frame = _UINavigationControllerNavigationBarFrame(self);
     _navigationBar.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     _navigationBar.hidden = self.navigationBarHidden;
     [self.view addSubview:_navigationBar];
     
-    _toolbar.frame = [self _toolbarFrame];
+    _toolbar.frame = _UINavigationControllerToolbarFrame(self);
     _toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     _toolbar.hidden = self.toolbarHidden;
     [self.view addSubview:_toolbar];
@@ -126,6 +218,16 @@ static const CGFloat ToolbarHeight = 28;
     [self.topViewController viewDidDisappear:animated];
 }
 
+- (void)dealloc
+{
+    [_viewControllers release];
+    [_navigationBar release];
+    [_toolbar release];
+    [super dealloc];
+}
+
+#pragma mark - Accessors
+
 - (void)setViewControllers:(NSArray *)newViewControllers animated:(BOOL)animated
 {
     assert([newViewControllers count] >= 1);
@@ -137,7 +239,7 @@ static const CGFloat ToolbarHeight = 28;
         }
         
         for (UIViewController *controller in _viewControllers) {
-            [controller _setParentViewController:nil];
+            controller->_parentViewController=nil;
         }
         
         [_viewControllers release];
@@ -146,7 +248,7 @@ static const CGFloat ToolbarHeight = 28;
         NSMutableArray *items = [NSMutableArray arrayWithCapacity:[_viewControllers count]];
         
         for (UIViewController *controller in _viewControllers) {
-            [controller _setParentViewController:self];
+            controller->_parentViewController = self;
             [items addObject:controller.navigationItem];
         }
         
@@ -159,7 +261,7 @@ static const CGFloat ToolbarHeight = 28;
                 [_delegate navigationController:self willShowViewController:newTopController animated:animated];
             }
             
-            newTopController.view.frame = [self _controllerFrame];
+            newTopController.view.frame = _UINavigationControllerControllerFrame(self);
             [self.view insertSubview:newTopController.view atIndex:0];
             
             [newTopController viewDidAppear:animated];
@@ -169,7 +271,7 @@ static const CGFloat ToolbarHeight = 28;
         }
         
         [_navigationBar setItems:items animated:animated];
-        [self _updateToolbar:animated];
+        _UINavigationControllerUpdateToolbar(self, animated);
     }
 }
 
@@ -188,12 +290,12 @@ static const CGFloat ToolbarHeight = 28;
     assert(![viewController isKindOfClass:[UITabBarController class]]);
     assert(![_viewControllers containsObject:viewController]);
     
-    [viewController _setParentViewController:self];
+    viewController->_parentViewController=self;
     
     if ([self isViewLoaded]) {
         UIViewController *oldViewController = self.topViewController;
         
-        const CGRect controllerFrame = [self _controllerFrame];
+        const CGRect controllerFrame = _UINavigationControllerToolbarFrame(self);
         const CGRect nextFrameStart = CGRectOffset(controllerFrame, controllerFrame.size.width, 0);
         const CGRect nextFrameEnd = controllerFrame;
         const CGRect oldFrameStart = controllerFrame;
@@ -235,12 +337,12 @@ static const CGFloat ToolbarHeight = 28;
     
     [_viewControllers addObject:viewController];
     [_navigationBar pushNavigationItem:viewController.navigationItem animated:animated];
-    [self _updateToolbar:animated];
+    _UINavigationControllerUpdateToolbar(self, animated);
 }
 
 - (UIViewController *)popViewControllerAnimated:(BOOL)animate
 {
-    UIViewController *controller = [self _popViewControllerWithoutPoppingNavigationBarAnimated:animate];
+    UIViewController *controller = _UINavigationControllerPopViewControllerWithoutPoppingNavigationBarAnimated(self, animate);
     if (controller) {
         [_navigationBar popNavigationItemAnimated:animate];
     }
@@ -270,14 +372,14 @@ static const CGFloat ToolbarHeight = 28;
 
 - (BOOL)navigationBar:(UINavigationBar *)navigationBar shouldPopItem:(UINavigationItem *)item
 {
-    [self _popViewControllerWithoutPoppingNavigationBarAnimated:YES];
+    _UINavigationControllerPopViewControllerWithoutPoppingNavigationBarAnimated(self, YES);
     return YES;
 }
 
 - (void)setToolbarHidden:(BOOL)hidden animated:(BOOL)animated
 {
     _toolbarHidden = hidden;
-    [self _updateToolbar:animated];
+    _UINavigationControllerUpdateToolbar(self, animated);
 }
 
 - (void)setToolbarHidden:(BOOL)hidden
@@ -315,102 +417,3 @@ static const CGFloat ToolbarHeight = 28;
 }
 
 @end
-
-CGRect _UINavigationControllerNavigationBarFrame(UINavigationController* controller)
-{
-    CGRect navBarFrame = self.view.bounds;
-    navBarFrame.size.height = NavBarHeight;
-    return navBarFrame;
-}
-
-CGRect _UINavigationControllerToolbarFrame(UINavigationController* controller)
-{
-    CGRect toolbarRect = self.view.bounds;
-    toolbarRect.origin.y = toolbarRect.origin.y + toolbarRect.size.height - ToolbarHeight;
-    toolbarRect.size.height = ToolbarHeight;
-    return toolbarRect;
-}
-
-CGRect _UINavigationControllerControllerFrame(UINavigationController* controller)
-{
-    CGRect controllerFrame = self.view.bounds;
-    
-    // adjust for the nav bar
-    if (!self.navigationBarHidden) {
-        controllerFrame.origin.y += NavBarHeight;
-        controllerFrame.size.height -= NavBarHeight;
-    }
-    
-    // adjust for toolbar (if there is one)
-    if (!self.toolbarHidden) {
-        controllerFrame.size.height -= ToolbarHeight;
-    }
-    
-    return controllerFrame;
-}
-
-void _UINavigationControllerUpdateToolbar(UINavigationController* controller, BOOL animated)
-{
-    UIViewController *topController = self.topViewController;
-    [_toolbar setItems:topController.toolbarItems animated:animated];
-    _toolbar.hidden = self.toolbarHidden;
-    topController.view.frame = [self _controllerFrame];
-}
-
-UIViewController* _UINavigationControllerPopViewControllerWithoutPoppingNavigationBarAnimated(UINavigationController* controller, BOOL animated)
-{
-    if ([_viewControllers count] > 1) {
-        UIViewController *oldViewController = [self.topViewController retain];
-        
-        [_viewControllers removeLastObject];
-        [oldViewController _setParentViewController:nil];
-        
-        if ([self isViewLoaded]) {
-            UIViewController *nextViewController = self.topViewController;
-            
-            const CGRect controllerFrame = [self _controllerFrame];
-            const CGRect nextFrameStart = CGRectOffset(controllerFrame, -controllerFrame.size.width, 0);
-            const CGRect nextFrameEnd = controllerFrame;
-            const CGRect oldFrameStart = controllerFrame;
-            const CGRect oldFrameEnd = CGRectOffset(controllerFrame, controllerFrame.size.width, 0);
-            
-            nextViewController.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-            [self.view insertSubview:nextViewController.view atIndex:0];
-            
-            [nextViewController viewWillAppear:animated];
-            if (_delegateHas.willShowViewController) {
-                [_delegate navigationController:self willShowViewController:nextViewController animated:animated];
-            }
-            if (animated) {
-                nextViewController.view.frame = nextFrameStart;
-                oldViewController.view.frame = oldFrameStart;
-                
-                [oldViewController retain];
-                
-                [UIView animateWithDuration:kAnimationDuration
-                                 animations:^(void) {
-                                     nextViewController.view.frame = nextFrameEnd;
-                                     oldViewController.view.frame = oldFrameEnd;
-                                 }
-                                 completion:^(BOOL finished) {
-                                     [oldViewController.view removeFromSuperview];
-                                     [oldViewController release];
-                                 }];
-            } else {
-                nextViewController.view.frame = nextFrameEnd;
-                [oldViewController.view removeFromSuperview];
-            }
-            
-            [nextViewController viewDidAppear:animated];
-            if (_delegateHas.didShowViewController) {
-                [_delegate navigationController:self didShowViewController:nextViewController animated:animated];
-            }
-        }
-        
-        [self _updateToolbar:animated];
-        return [oldViewController autorelease];
-    } else {
-        return nil;
-    }
-}
-

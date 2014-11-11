@@ -41,7 +41,7 @@
 @end
 
 @interface UINavigationBar : UIView {
-@private
+@package
     NSMutableArray *_navStack;
     UIColor *_tintColor;
     __unsafe_unretained id _delegate;
@@ -67,6 +67,8 @@
 - (void)setItems:(NSArray *)items animated:(BOOL)animated;
 - (void)pushNavigationItem:(UINavigationItem *)item animated:(BOOL)animated;
 - (UINavigationItem *)popNavigationItemAnimated:(BOOL)animated;
+- (void)_removeAnimatedViews:(NSArray *)views;
+- (void)_backButtonTapped:(id)sender;
 
 @property (nonatomic, assign) UIBarStyle barStyle;
 @property (nonatomic, retain) UIColor *tintColor;

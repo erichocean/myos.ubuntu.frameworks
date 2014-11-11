@@ -23,22 +23,21 @@
    */
 
 
-#include <ft2build.h>
+#include <freetype/ft2build.h>
 #include FT_FREETYPE_H
 
 #import "CTNSFont.h"
 #include <stdint.h>
-@interface OPFreeTypeFont: CTNSFont
-{
-  FT_Face fontFace;
-  /**
-   * CTNSFont can be used simultaneously by multiple threads, so it is
-   * necessary to lock before we call FreeType, because an FT_Face
-   * object may be used by only one thread.
-   */
-  NSLock *fontFaceLock;
-  BOOL isType1;
-  NSCache *tableCache;
+@interface OPFreeTypeFont: CTNSFont {
+    FT_Face fontFace;
+    /**
+     * CTNSFont can be used simultaneously by multiple threads, so it is
+     * necessary to lock before we call FreeType, because an FT_Face
+     * object may be used by only one thread.
+     */
+    NSLock *fontFaceLock;
+    BOOL isType1;
+    NSCache *tableCache;
 }
 
 

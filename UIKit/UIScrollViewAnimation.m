@@ -29,6 +29,26 @@
 
 #import <UIKit/UIScrollViewAnimation.h>
 
+@implementation UIScrollViewAnimation
+
+- (id)initWithScrollView:(UIScrollView *)sv
+{
+    if ((self=[super init])) {
+        _scrollView = sv;
+        _beginTime = [NSDate timeIntervalSinceReferenceDate];
+    }
+    return self;
+}
+    
+- (BOOL)animate
+{
+    return YES;
+}
+
+@end
+
+#pragma mark - Shared functions
+
 CGFloat UILinearInterpolation(CGFloat t, CGFloat start, CGFloat end)
 {
     if (t <= 0) {
@@ -50,21 +70,3 @@ CGFloat UIQuadraticEaseOut(CGFloat t, CGFloat start, CGFloat end)
         return UILinearInterpolation(2 * t - t * t, start, end);
     }
 }
-
-@implementation UIScrollViewAnimation
-
-- (id)initWithScrollView:(UIScrollView *)sv
-{
-    if ((self=[super init])) {
-        scrollView = sv;
-        beginTime = [NSDate timeIntervalSinceReferenceDate];
-    }
-    return self;
-}
-    
-- (BOOL)animate
-{
-    return YES;
-}
-
-@end

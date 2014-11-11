@@ -1,6 +1,18 @@
 /*
- * Copyright (c) 2012-2013. All rights reserved.
- *
+ Copyright © 2014 myOS Group.
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ Lesser General Public License for more details.
+ 
+ Contributor(s):
+ Amr Aboelela <amraboelela@gmail.com>
  */
 
 #import <CoreAnimation/CAAnimation.h>
@@ -15,10 +27,11 @@ void _CAAnimationApplyAnimationForLayer(CAAnimation *theAnimation, CALayer *laye
 
 // CAAnimationGroup
 
-CAAnimationGroup *_CAAnimationNewAnimationGroup();
-CAAnimationGroup *_CAAnimationCurrentAnimationGroup();
-void _CAAnimationAddToAnimationGroup(CAAnimation *animation);
-void _CAAnimationCommitAnimationGroup();
+CAAnimationGroup *_CAAnimationGroupNew();
+CAAnimationGroup *_CAAnimationGroupGetCurrent();
+void _CAAnimationGroupAddAnimation(CAAnimationGroup *animationGroup, CAAnimation *animation);
+void _CAAnimationGroupRemoveAnimation(CAAnimationGroup *animationGroup, CAAnimation *animation);
+void _CAAnimationGroupCommit();
 
 // Helpers
 

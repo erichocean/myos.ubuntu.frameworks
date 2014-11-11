@@ -38,7 +38,7 @@
 @end
 
 @interface UINavigationController : UIViewController {
-@private
+@package
     UINavigationBar *_navigationBar;
     UIToolbar *_toolbar;
     NSMutableArray *_viewControllers;

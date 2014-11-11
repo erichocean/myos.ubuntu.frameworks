@@ -94,7 +94,7 @@ UIWindow* _UIResponderGetResponderWindow(UIResponder *responder);
 {
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (BOOL)isFirstResponder
 {
@@ -105,10 +105,6 @@ UIWindow* _UIResponderGetResponderWindow(UIResponder *responder);
     else {
         return NO;
     }
-/*
-    DLog(@"window: %@", window);
-    DLog(@"window->_firstResponder: %@", window->_firstResponder);
-    return (_UIResponderGetResponderWindow(self)->_firstResponder == self);*/
 }
 
 - (BOOL)canBecomeFirstResponder
@@ -179,7 +175,7 @@ UIWindow* _UIResponderGetResponderWindow(UIResponder *responder);
 
 @end
 
-#pragma mark - Private C functions
+#pragma mark - Shared functions
 
 UIWindow* _UIResponderGetResponderWindow(UIResponder* responder)
 {

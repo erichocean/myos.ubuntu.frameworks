@@ -27,17 +27,24 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#import <UIKit/UIKit-private.h>
+/*
 #import <UIKit/UIControl-private.h>
-//#import <UIKit/UIEvent.h>
 #import <UIKit/UITouch.h>
 #import <UIKit/UIApplication.h>
 #import <UIKit/UIControlAction.h>
-
-void _UIControlSendActionsForControlEvents(UIControl *control, UIControlEvents controlEvents, UIEvent *event);
+*/
+//void _UIControlSendActionsForControlEvents(UIControl *control, UIControlEvents controlEvents, UIEvent *event);
 
 @implementation UIControl
-@synthesize tracking=_tracking, touchInside=_touchInside, selected=_selected, enabled=_enabled, highlighted=_highlighted;
-@synthesize contentHorizontalAlignment=_contentHorizontalAlignment, contentVerticalAlignment=_contentVerticalAlignment;
+
+@synthesize tracking=_tracking;
+@synthesize touchInside=_touchInside;
+@synthesize selected=_selected;
+@synthesize enabled=_enabled;
+@synthesize highlighted=_highlighted;
+@synthesize contentHorizontalAlignment=_contentHorizontalAlignment;
+@synthesize contentVerticalAlignment=_contentVerticalAlignment;
 
 #pragma mark - Life cycle
 
@@ -65,7 +72,8 @@ void _UIControlSendActionsForControlEvents(UIControl *control, UIControlEvents c
     if (newEnabled != _enabled) {
         _enabled = newEnabled;
         self.userInteractionEnabled = _enabled;
-        _UIControlStateDidChange(self);
+        [self _stateDidChange];
+        //_UIControlStateDidChange(self);
     }
 }
 
@@ -73,7 +81,8 @@ void _UIControlSendActionsForControlEvents(UIControl *control, UIControlEvents c
 {
     if (newHighlighted != _highlighted) {
         _highlighted = newHighlighted;
-        _UIControlStateDidChange(self);
+        //_UIControlStateDidChange(self);
+        [self _stateDidChange];
     }
 }
 
@@ -81,18 +90,23 @@ void _UIControlSendActionsForControlEvents(UIControl *control, UIControlEvents c
 {
     if (newSelected != _selected) {
         _selected = newSelected;
-        _UIControlStateDidChange(self);
+        [self _stateDidChange];
+        //_UIControlStateDidChange(self);
     }
 }
 
 - (UIControlState)state
 {
     UIControlState state = UIControlStateNormal;
-    
-    if (_highlighted)	state |= UIControlStateHighlighted;
-    if (!_enabled)	state |= UIControlStateDisabled;
-    if (_selected)	state |= UIControlStateSelected;
-
+    if (_highlighted) {
+      state |= UIControlStateHighlighted;
+    }
+    if (!_enabled) {
+        state |= UIControlStateDisabled;
+    }
+    if (_selected) {
+        state |= UIControlStateSelected;
+    }
     return state;
 }
 
@@ -126,7 +140,8 @@ void _UIControlSendActionsForControlEvents(UIControl *control, UIControlEvents c
         if (touch.tapCount > 1) {
             currentEvents |= UIControlEventTouchDownRepeat;
         }
-        _UIControlSendActionsForControlEvents(self, currentEvents, event);
+        [self _sendActionsForControlEvents:currentEvents withEvent:event];
+        //_UIControlSendActionsForControlEvents(self, currentEvents, event);
     }
 }
 
@@ -142,13 +157,13 @@ void _UIControlSendActionsForControlEvents(UIControl *control, UIControlEvents c
         _tracking = [self continueTrackingWithTouch:touch withEvent:event];
         if (_tracking) {
             UIControlEvents currentEvents = ((_touchInside)? UIControlEventTouchDragInside : UIControlEventTouchDragOutside);
-
             if (!wasTouchInside && _touchInside) {
                 currentEvents |= UIControlEventTouchDragEnter;
             } else if (wasTouchInside && !_touchInside) {
                 currentEvents |= UIControlEventTouchDragExit;
             }
-            _UIControlSendActionsForControlEvents(self, currentEvents, event);
+            [self _sendActionsForControlEvents:currentEvents withEvent:event];
+            //_UIControlSendActionsForControlEvents(self, currentEvents, event);
         }
     }
 }
@@ -161,7 +176,7 @@ void _UIControlSendActionsForControlEvents(UIControl *control, UIControlEvents c
     self.highlighted = NO;
     if (_tracking) {
         [self endTrackingWithTouch:touch withEvent:event];
-        _UIControlSendActionsForControlEvents(self, ((_touchInside)? UIControlEventTouchUpInside : UIControlEventTouchUpOutside), event);
+        [self _sendActionsForControlEvents:((_touchInside)? UIControlEventTouchUpInside : UIControlEventTouchUpOutside) withEvent:event];
     }
     _tracking = NO;
     _touchInside = NO;
@@ -173,17 +188,37 @@ void _UIControlSendActionsForControlEvents(UIControl *control, UIControlEvents c
 
     if (_tracking) {
         [self cancelTrackingWithEvent:event];
-        _UIControlSendActionsForControlEvents(self, UIControlEventTouchCancel, event);
+        [self _sendActionsForControlEvents:UIControlEventTouchCancel withEvent:event];
+        //_UIControlSendActionsForControlEvents(self, UIControlEventTouchCancel, event);
     }
     _touchInside = NO;
     _tracking = NO;
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
+
+- (void)_stateDidChange
+{
+    [self _updateContent];
+}
+
+- (void)_sendActionsForControlEvents:(UIControlEvents)controlEvents withEvent:(UIEvent *)event
+{
+    //DLog();
+    for (UIControlAction *controlAction in _registeredActions) {
+        //DLog(@"controlAction: %@", controlAction);
+        //DLog(@"controlEvents: %d", controlEvents);
+        //DLog(@"controlAction.controlEvents: %d", controlAction.controlEvents);
+        if (controlAction.controlEvents & controlEvents) {
+            //DLog(@"controlAction.controlEvents & controlEvents");
+            [self sendAction:controlAction.action to:controlAction.target forEvent:event];
+        }
+    }
+}
 
 - (void)sendActionsForControlEvents:(UIControlEvents)controlEvents
 {
-    _UIControlSendActionsForControlEvents(self, controlEvents, nil);
+    [self _sendActionsForControlEvents:controlEvents withEvent:nil];
 }
 
 - (void)sendAction:(SEL)action to:(id)target forEvent:(UIEvent *)event
@@ -208,7 +243,6 @@ void _UIControlSendActionsForControlEvents(UIControl *control, UIControlEvents c
 - (void)cancelTrackingWithEvent:(UIEvent *)event
 {
 }
-
 
 - (void)addTarget:(id)target action:(SEL)action forControlEvents:(UIControlEvents)controlEvents
 {
@@ -252,23 +286,4 @@ void _UIControlSendActionsForControlEvents(UIControl *control, UIControlEvents c
     }
 }
 
-
 @end
-
-#pragma mark - Private C functions
-
-void _UIControlSendActionsForControlEvents(UIControl *control, UIControlEvents controlEvents, UIEvent *event)
-{
-    for (UIControlAction *controlAction in control->_registeredActions) {
-        if (controlAction.controlEvents & controlEvents) {
-            [control sendAction:controlAction.action to:controlAction.target forEvent:event];
-        }
-    }
-}
-
-void _UIControlStateDidChange(UIControl* control)
-{
-    [control setNeedsDisplay];
-    [control setNeedsLayout];
-}
-

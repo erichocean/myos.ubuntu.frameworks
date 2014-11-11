@@ -28,8 +28,7 @@
 #import "CTFontDescriptor.h"
 #import "CTNSFontDescriptor.h"
 
-@interface CTNSFontconfigFontDescriptor : CTNSFontDescriptor
-{
+@interface CTNSFontconfigFontDescriptor : CTNSFontDescriptor {
   /**
    * This is a Fontconfig representation of the attributes this descriptor
    * was created with.
@@ -580,24 +579,20 @@
 }
 
 
-- (id) initWithFontAttributes: (NSDictionary *)attributes
+- (id)initWithFontAttributes:(NSDictionary *)attributes
 {
-  self = [super initWithFontAttributes: attributes];
-  if (nil == self)
-  {
-    return nil;
-  }
-
-  _pat = FcPatternCreate();
-
-  // Call the corresponding add...: method for each element in the attributes dictionary
-  [self handleAddValues];
-
-  //NSLog(@"CTNSFontconfigFontDescriptor: Input attributes %@", attributes);
-  //NSLog(@"CTNSFontconfigFontDescriptor: Output pattern:");
-  //FcPatternPrint(_pat);
-
-  return self;
+    DLog();
+    self = [super initWithFontAttributes: attributes];
+    if (nil == self) {
+        return nil;
+    }
+    _pat = FcPatternCreate();
+    // Call the corresponding add...: method for each element in the attributes dictionary
+    [self handleAddValues];
+    //NSLog(@"CTNSFontconfigFontDescriptor: Input attributes %@", attributes);
+    //NSLog(@"CTNSFontconfigFontDescriptor: Output pattern:");
+    //FcPatternPrint(_pat);
+    return self;
 }
 
 /**

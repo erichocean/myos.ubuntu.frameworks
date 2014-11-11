@@ -27,8 +27,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UISwipeGestureRecognizer.h>
-#import <UIKit/UIGestureRecognizerSubclass.h>
+#import <UIKit/UIKit-private.h>
+
+//#import <UIKit/UISwipeGestureRecognizer.h>
+//#import <UIKit/UIGestureRecognizerSubclass.h>
 
 @implementation UISwipeGestureRecognizer
 @synthesize direction=_direction, numberOfTouchesRequired=_numberOfTouchesRequired;

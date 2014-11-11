@@ -31,8 +31,6 @@
 
 @class UIView, UIEvent;
 
-//CALayer* _UIScreenGetLayer(UIScreen* screen);
-//BOOL _UIScreenHasResizeIndicator(UIScreen* screen);
-//void _UIScreenSetPopoverController(UIScreen* screen, UIPopoverController* controller);
-//UIPopoverController* _UIScreenPopoverController(UIScreen* screen);
-UIView* _UIScreenHitTest(UIScreen *screen, CGPoint touchPoint, UIEvent *theEvent);
+UIScreen *_UIScreenMainScreen();
+UIView *_UIScreenHitTest(UIScreen *screen, CGPoint touchPoint, UIEvent *theEvent);
+CGImageRef _UIScreenCaptureScreen();

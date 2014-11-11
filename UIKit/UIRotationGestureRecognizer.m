@@ -27,8 +27,10 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIRotationGestureRecognizer.h>
-#import <UIKit/UIGestureRecognizerSubclass.h>
+#import <UIKit/UIKit-private.h>
+
+//#import <UIKit/UIRotationGestureRecognizer.h>
+//#import <UIKit/UIGestureRecognizerSubclass.h>
 
 @implementation UIRotationGestureRecognizer
 @synthesize rotation=_rotation;

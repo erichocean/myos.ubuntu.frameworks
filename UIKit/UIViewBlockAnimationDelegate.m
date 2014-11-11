@@ -31,7 +31,11 @@
 #import <UIKit/UIApplication.h>
 
 @implementation UIViewBlockAnimationDelegate
-@synthesize completion=_completion, ignoreInteractionEvents=_ignoreInteractionEvents;
+
+@synthesize completion=_completion;
+@synthesize ignoreInteractionEvents=_ignoreInteractionEvents;
+
+#pragma mark - Life cycle
 
 - (void)dealloc
 {
@@ -39,12 +43,14 @@
     [super dealloc];
 }
 
+#pragma mark - Delegates
+
 - (void)animationDidStop:(NSString *)animationID finished:(NSNumber *)finished
 {
+    DLog(@"animationID: %@, finished: %d", animationID, finished);
     if (_completion) {
         _completion([finished boolValue]);
     }
-    
     if (_ignoreInteractionEvents) {
         [[UIApplication sharedApplication] endIgnoringInteractionEvents];
     }	

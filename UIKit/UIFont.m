@@ -29,17 +29,12 @@
 
 #import <UIKit/UIFont.h>
 
-static NSString *UIFontSystemFontName = @"Helvetica";
-static NSString *UIFontBoldSystemFontName = @"Helvetica-Bold";
+static NSString *const UIFontSystemFontName = @"Helvetica";
+static NSString *const UIFontBoldSystemFontName = @"Helvetica-Bold";
 
-UIFont* _UIFontGetFontWithCTFont(CTFontRef aFont);
+//UIFont *_UIFontGetFontWithCTFont(CTFontRef aFont);
 
-@implementation UIFont
-
-+ (UIFont *)fontWithName:(NSString *)fontName size:(CGFloat)fontSize
-{
-    return [[[UIFont alloc] initWithName:fontName size:fontSize] autorelease];
-}
+#pragma mark - Static functions
 
 static NSArray *_getFontCollectionNames(CTFontCollectionRef collection, CFStringRef nameAttr)
 {
@@ -62,6 +57,42 @@ static NSArray *_getFontCollectionNames(CTFontCollectionRef collection, CFString
         }
     }
     return [names allObjects];
+}
+
+static UIFont *_UIFontGetFontWithCTFont(CTFontRef aFont)
+{
+    UIFont *theFont = [[UIFont alloc] init];
+    theFont->_font = CFRetain(aFont);
+    return [theFont autorelease];
+}
+
+@implementation UIFont
+
+#pragma mark - Life cycle
+
+- (id)initWithName:(NSString *)name size:(CGFloat)size
+{
+    //DLog();
+    self = [super init];
+    if (self) {
+        //DLog(@"name: %@", name);
+        //DLog(@"size: %@", NSStringFromCGSize(size));
+        _font = CTFontCreateWithName(name, size, NULL);
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    CFRelease(_font);
+    [super dealloc];
+}
+
+#pragma mark - Class methods
+
++ (UIFont *)fontWithName:(NSString *)fontName size:(CGFloat)fontSize
+{
+    return [[[UIFont alloc] initWithName:fontName size:fontSize] autorelease];
 }
 
 + (NSArray *)familyNames
@@ -124,21 +155,7 @@ static NSArray *_getFontCollectionNames(CTFontCollectionRef collection, CFString
     return 17.0;
 }
 
-- (id) initWithName:(NSString *)name size:(CGFloat)size
-{
-    self = [super init];
-    if (self)
-    {
-        _font = CTFontCreateWithName(name, size, NULL);
-    }
-    return self;
-}
-
-- (void)dealloc
-{
-    CFRelease(_font);
-    [super dealloc];
-}
+#pragma mark - Accessors
 
 - (NSString *)fontName
 {
@@ -191,18 +208,14 @@ static NSArray *_getFontCollectionNames(CTFontCollectionRef collection, CFString
         UIFont *theFont = _UIFontGetFontWithCTFont(newFont);
         CFRelease(newFont);
         return theFont;
-    } 
-    else {
+    } else {
         return nil;
     }
 }
 
-@end
-
-UIFont* _UIFontGetFontWithCTFont(CTFontRef aFont)
+- (NSString *)description
 {
-    UIFont *theFont = [[UIFont alloc] init];
-    theFont->_font = CFRetain(aFont);
-    return [theFont autorelease];
+    return [NSString stringWithFormat:@"<%@: %p; fontName: %@; pointSize: %0.0f>", [self className], self, self.fontName, self.pointSize];
 }
 
+@end

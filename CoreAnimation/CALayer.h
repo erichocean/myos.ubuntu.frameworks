@@ -1,12 +1,24 @@
 /*
- * Copyright (c) 2012-2013. All rights reserved.
- *
+ Copyright © 2014 myOS Group.
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ Lesser General Public License for more details.
+ 
+ Contributor(s):
+ Amr Aboelela <amraboelela@gmail.com>
  */
 
 #import <CoreAnimation/CABase.h>
 #import <CoreAnimation/CAAction.h>
 #import <CoreAnimation/CATransform3D.h>
-#import "CAMediaTiming.h"
+#import <CoreAnimation/CAMediaTiming.h>
 
 extern NSString *const kCAGravityResize;
 extern NSString *const kCAGravityResizeAspect;
@@ -24,66 +36,67 @@ extern NSString *const kCATransition;
 
 @class CAAnimation;
 
-@interface CALayer : NSObject <CAMediaTiming>
-{
-@package
+@interface CALayer : NSObject <CAMediaTiming> {
+@public
     id delegate;
-    CALayer *modelLayer;
-    CALayer *presentationLayer;
+    CALayer *_modelLayer;
+    CALayer *_presentationLayer;
     CALayer *_renderLayer;
-    CALayer *superlayer;
-    CFMutableArrayRef sublayers;
-    id layoutManager;
-    BOOL geometryFlipped;
-    float opacity;
-    BOOL opaque;
+    CALayer *_superlayer;
+    CFMutableArrayRef _sublayers;
+    id _layoutManager;
+    BOOL _geometryFlipped;
+    float _opacity;
+    BOOL _opaque;
     id _oldContents;
-    id contents;
+    id _contents;
+    //BOOL _contentsWasSet;
     id _displayContents;
-    CGPoint position;
-    CGFloat zPosition;
-    CGPoint anchorPoint;
-    CGRect bounds;
-    CGColorRef backgroundColor;
-    CGFloat cornerRadius;
-    CGFloat borderWidth;
-    CGColorRef borderColor;
-    CGColorRef shadowColor;
-    CGFloat shadowOpacity;
-    CGSize shadowOffset;
-    CGFloat shadowRadius;
-    CGPathRef shadowPath;
-    BOOL masksToBounds;
-    CGRect contentsRect;
+    NSArray *_keyframesContents;
+    CGPoint _position;
+    CGFloat _zPosition;
+    CGPoint _anchorPoint;
+    CGRect _bounds;
+    CGColorRef _backgroundColor;
+    CGFloat _cornerRadius;
+    CGFloat _borderWidth;
+    CGColorRef _borderColor;
+    CGColorRef _shadowColor;
+    CGFloat _shadowOpacity;
+    CGSize _shadowOffset;
+    CGFloat _shadowRadius;
+    CGPathRef _shadowPath;
+    BOOL _masksToBounds;
+    CGRect _contentsRect;
     float _contentsTransitionProgress;
-    BOOL hidden;
-    NSString *contentsGravity;
-    CGRect contentsCenter;
-    BOOL needsDisplayOnBoundsChange;
-    CGFloat contentsScale;
-    CATransform3D transform;
-    CFMutableDictionaryRef _animations; // any variable not tied with property we use _ in its name
-    CFDictionaryRef actions;
-    CFDictionaryRef style;
-    BOOL needsLayout;
-    BOOL needsDisplay; // to render / draw layer content
+    float _keyframesProgress;
+    BOOL _hidden;
+    NSString *_contentsGravity;
+    CGRect _contentsCenter;
+    BOOL _needsDisplayOnBoundsChange;
+    CGFloat _contentsScale;
+    CATransform3D _transform;
+    CFMutableDictionaryRef _animations;
+    CFDictionaryRef _actions;
+    CFDictionaryRef _style;
+    BOOL _needsLayout;
+    BOOL _needsDisplay; // to render / draw layer content
     BOOL _needsComposite; // needs just to show content without redrawing
     BOOL _needsUnload;
-    CGRect visibleRect;
+    CGRect _visibleRect;
     
-    CFTimeInterval beginTime;
-    CFTimeInterval duration;
-    float repeatCount;
-    CFTimeInterval repeatDuration;
-    BOOL autoreverses;
-    NSString *fillMode;
-    float speed;
-    CFTimeInterval timeOffset;
+    CFTimeInterval _beginTime;
+    CFTimeInterval _duration;
+    float _repeatCount;
+    CFTimeInterval _repeatDuration;
+    BOOL _autoreverses;
+    NSString *_fillMode;
+    float _speed;
+    CFTimeInterval _timeOffset;
 }
 
 @property (assign) id delegate;
 @property (retain) id contents;
-@property (assign) id layoutManager;
 @property (readonly) CALayer *superlayer;
 @property (copy) NSMutableArray *sublayers;
 @property CGPoint position;
@@ -94,7 +107,7 @@ extern NSString *const kCATransition;
 @property float opacity;
 @property (getter=isOpaque) BOOL opaque;
 @property (getter=isGeometryFlipped) BOOL geometryFlipped;
-@property (assign) CGColorRef backgroundColor;
+@property (retain) CGColorRef backgroundColor;
 @property (assign) CGFloat cornerRadius;
 @property (assign) CGFloat borderWidth;
 @property (assign) CGColorRef borderColor;
@@ -171,6 +184,7 @@ extern NSString *const kCATransition;
 
 @interface NSObject (CALayerDelegate)
 
+- (void)layoutSublayersOfLayer:(CALayer *)layer;
 - (void)displayLayer:(CALayer *)layer;
 - (void)drawLayer:(CALayer *)layer inContext:(CGContextRef)context;
 

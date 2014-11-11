@@ -224,6 +224,8 @@
     return [_toolbarItems valueForKey:@"item"];
 }
 
+#pragma mark - Overridden methods
+
 - (void)drawRect:(CGRect)rect
 {
     const CGRect bounds = self.bounds;

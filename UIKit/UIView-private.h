@@ -34,10 +34,15 @@ extern NSString *const UIViewBoundsDidChangeNotification;
 extern NSString *const UIViewDidMoveToSuperviewNotification;
 extern NSString *const UIViewHiddenDidChangeNotification;
 
+extern NSMutableArray *_animationGroups;
+
 void _UIViewRemoveFromSuperview(UIView* view, BOOL notifyViewController);
 void _UIViewSetViewController(UIView* view, UIViewController* theViewController);
 UIViewController* _UIViewGetViewController(UIView* view);
 void _UIViewSuperviewSizeDidChange(UIView* view, CGSize oldSize, CGSize newSize);
-//BOOL _UIViewImplementsDrawRect(id view);
 
+@interface UIView (private)
 
+- (void)_updateContent;
+
+@end

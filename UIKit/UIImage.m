@@ -27,12 +27,55 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIImage-private.h>
-#import <UIKit/UIColor.h>
-#import <UIKit/UIGraphics.h>
-#import <UIKit/UIPhotosAlbum.h>
+#import <UIKit/UIKit-private.h>
+#import <OpenGLES/EAGL-private.h>
 
 NSMutableDictionary *_imageCache = nil;
+
+#pragma mark - Static functions
+
+static UIImage *_UIImageCachedImageForName(NSString *name)
+{
+    return [[UIImage imageCache] objectForKey:name];
+}
+
+static UIImage *_UIImageNALoadImageNamed(NSString *name)
+{
+    //DLog(@"name: %@", name);
+    //NSBundle *bundle = [NSBundle mainBundle];
+    //DLog(@"bundle: %@", bundle);
+    NSString *path = name;//[[bundle resourcePath] stringByAppendingPathComponent:name];
+    //DLog(@"path: %@", path);
+    UIImage *img = [UIImage imageWithContentsOfFile:path];
+    /*
+     if (!img) {
+     // if nothing is found, try again after replacing any underscores in the name with dashes.
+     // I don't know why, but UIKit does something similar. it probably has a good reason and it might not be this simplistic, but
+     // for now this little hack makes Ramp Champ work. :)
+     path = [[[bundle resourcePath] stringByAppendingPathComponent:[[name stringByDeletingPathExtension] stringByReplacingOccurrencesOfString:@"_" withString:@"-"]] stringByAppendingPathExtension:[name pathExtension]];
+     img = [self imageWithContentsOfFile:path];
+     }*/
+    return img;
+}
+
+static UIImage *_UIImageLoadImageNamed(NSString *name)
+{
+    //DLog(@"name: %@", name);
+    NSBundle *bundle = [NSBundle mainBundle];
+    //DLog(@"bundle: %@", bundle);
+    NSString *path = [[bundle resourcePath] stringByAppendingPathComponent:name];
+    //DLog(@"path: %@", path);
+    UIImage *img = [UIImage imageWithContentsOfFile:path];
+    /*
+     if (!img) {
+     // if nothing is found, try again after replacing any underscores in the name with dashes.
+     // I don't know why, but UIKit does something similar. it probably has a good reason and it might not be this simplistic, but
+     // for now this little hack makes Ramp Champ work. :)
+     path = [[[bundle resourcePath] stringByAppendingPathComponent:[[name stringByDeletingPathExtension] stringByReplacingOccurrencesOfString:@"_" withString:@"-"]] stringByAppendingPathExtension:[name pathExtension]];
+     img = [self imageWithContentsOfFile:path];
+     }*/
+    return img;
+}
 
 @implementation UIImage
 
@@ -43,16 +86,28 @@ NSMutableDictionary *_imageCache = nil;
     if (data) {
         return nil;
     } else {
-//        [self release];
         return nil;
     }
 }
 
 - (id)initWithContentsOfFile:(NSString *)path
 {
-    CGDataProviderRef pngData = CGDataProviderCreateWithFilename([path cString]);
+    CGDataProviderRef pngData;
+#ifdef NA
+    if ([path rangeOfString:@"/"].length > 0) {
+        pngData = CGDataProviderCreateWithFilename([path cString]);
+        //DLog(@"pngData: %@", pngData);
+        _image = CGImageCreateWithPNGDataProvider(pngData, NULL, YES, kCGRenderingIntentDefault);
+    } else {
+        pngData = CGDataProviderCreateWithFilenameWithAsset([path cString]);
+        //DLog(@"pngData: %@", pngData);
+        _image = CGImageCreateWithPNGDataProviderWithAsset(pngData, NULL, YES, kCGRenderingIntentDefault);
+    }
+#else
+    pngData = CGDataProviderCreateWithFilename([path cString]);
     //DLog(@"pngData: %@", pngData);
     _image = CGImageCreateWithPNGDataProvider(pngData, NULL, YES, kCGRenderingIntentDefault);
+#endif
     //DLog(@"_image: %@", _image);
     CGDataProviderRelease(pngData);
     return self;
@@ -72,7 +127,9 @@ NSMutableDictionary *_imageCache = nil;
 
 - (void)dealloc
 {
-    if (_image) CGImageRelease(_image);
+    if (_image) {
+        CGImageRelease(_image);
+    }
     [super dealloc];
 }
 
@@ -126,7 +183,11 @@ NSMutableDictionary *_imageCache = nil;
 
     if (!img) {
         // as per the iOS docs, if it fails to find a match with the bare name, it re-tries by appending a png file extension
+#ifdef NA
+        img = _UIImageNALoadImageNamed(name) ?: _UIImageNALoadImageNamed([name stringByAppendingPathExtension:@"png"]);
+#else
         img = _UIImageLoadImageNamed(name) ?: _UIImageLoadImageNamed([name stringByAppendingPathExtension:@"png"]);
+#endif
         _UIImageCacheImage(img, name);
     }
 
@@ -160,7 +221,7 @@ NSMutableDictionary *_imageCache = nil;
     return [[[UIImage alloc] initWithCGImage:imageRef] autorelease];
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (void)drawAtPoint:(CGPoint)point blendMode:(CGBlendMode)blendMode alpha:(CGFloat)alpha
 {
@@ -196,7 +257,7 @@ NSMutableDictionary *_imageCache = nil;
 
 @end
 
-#pragma mark - Private C functions
+#pragma mark - Shared functions
 
 void UIImageWriteToSavedPhotosAlbum(UIImage *image, id completionTarget, SEL completionSelector, void *contextInfo)
 {
@@ -220,23 +281,6 @@ NSData *UIImageJPEGRepresentation(UIImage *image, CGFloat compressionQuality)
 NSData *UIImagePNGRepresentation(UIImage *image)
 {
     return nil;
-}
-
-UIImage *_UIImageLoadImageNamed(NSString *name)
-{
-
-    //NSBundle *bundle = [NSBundle mainBundle];
-    NSString *path = name; //[[bundle resourcePath] stringByAppendingPathComponent:name];
-    UIImage *img = [UIImage imageWithContentsOfFile:path];
-/*
-    if (!img) {
-        // if nothing is found, try again after replacing any underscores in the name with dashes.
-        // I don't know why, but UIKit does something similar. it probably has a good reason and it might not be this simplistic, but
-        // for now this little hack makes Ramp Champ work. :)
-        path = [[[bundle resourcePath] stringByAppendingPathComponent:[[name stringByDeletingPathExtension] stringByReplacingOccurrencesOfString:@"_" withString:@"-"]] stringByAppendingPathExtension:[name pathExtension]];
-        img = [self imageWithContentsOfFile:path];
-    }*/
-    return img;
 }
 
 NSString *_UIImageMacPathForFile(NSString* path)
@@ -267,11 +311,6 @@ void _UIImageCacheImage(UIImage *image, NSString *name)
     }
 }
 
-UIImage *_UIImageCachedImageForName(NSString* name)
-{
-    return [[UIImage imageCache] objectForKey:name];
-}
-
 // NSString *_UIImageNameForCachedImage(UIImage* image)
 // {
 //     __block NSString * result = nil;
@@ -292,7 +331,7 @@ UIImage *_UIImageFrameworkImageWithName(NSString* name, NSUInteger leftCapWidth,
         NSBundle *frameworkBundle = [NSBundle bundleWithIdentifier:@"org.chameleonproject.UIKit"];
         NSString *frameworkFile = [[frameworkBundle resourcePath] stringByAppendingPathComponent:name];
         image = [UIImage imageWithContentsOfFile:frameworkFile];// stretchableImageWithLeftCapWidth:leftCapWidth topCapHeight:topCapHeight];
-        _UIImageCacheImage(image,name);
+        _UIImageCacheImage(image, name);
     }
     return image;
 }
@@ -367,7 +406,7 @@ UIImage *_UIImageButtonBarSystemItemReply()
     return _UIImageFrameworkImageWithName(@"<UIBarButtonSystemItem> reply.png", 0, 0);
 }
 
-UIImage *_UIImageToolbarImage(UIImage* image)
+UIImage *_UIImageToolbarImage(UIImage *image)
 {
     // NOTE.. I don't know where to put this, really, but it seems like the real UIKit reduces image size by 75% if they are too
     // big for a toolbar. That seems funky, but I guess here is as good a place as any to do that? I don't really know...
@@ -395,11 +434,76 @@ UIImage *_UIImageToolbarImage(UIImage* image)
 
 UIImage *_UIImageTabBarBackgroundImage()
 {
-  return _UIImageFrameworkImageWithName(@"<UITabBar> background.png", 6, 0);
+    return _UIImageFrameworkImageWithName(@"<UITabBar> background.png", 6, 0);
 }
 
 UIImage *_UIImageTabBarItemImage()
 {
-  return _UIImageFrameworkImageWithName(@"<UITabBar> item.png", 8, 0);
+    return _UIImageFrameworkImageWithName(@"<UITabBar> item.png", 8, 0);
 }
 
+UIImage *_UIImageCaptureScreen()
+{
+    //UIScreen *screen = [UIScreen mainScreen];
+    //CGFloat s = screen->_scale;
+    //if ([screen respondsToSelector:@selector(scale)]) {
+    //s = (int)screen->_scale;
+    //}
+    //DLog(@"s: %.1f", s);
+    
+    EAGLContext *context = _EAGLGetCurrentContext();
+    //_hScale = context->_width * 1.0 / _kScreenWidth;
+    //_vScale = context->_height * 1.0 / _kScreenHeight;
+    
+    //CGRect frame = [screen bounds];
+    const int w = context->_width;
+    const int h = context->_height;
+    const NSInteger myDataLength = w * h * 4;
+    DLog(@"w: %d, h: %d", w, h);
+    // allocate array and read pixels into it.
+    GLubyte *buffer = (GLubyte *)malloc(myDataLength);
+    DLog();
+    glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
+    DLog();
+    // gl renders "upside down" so swap top to bottom into new array.
+    // there's gotta be a better way, but this works.
+    /*GLubyte *buffer2 = (GLubyte *)malloc(myDataLength);
+     DLog();
+     for (int y = 0; y < h*s; y++) {
+     memcpy(buffer2 + (h*s - 1 - y) * w * 4 * s, buffer + (y * 4 * w * s), w * 4 * s);
+     }*/
+    //DLog();
+    //free(buffer); // work with the flipped buffer, so get rid of the original one.
+    //DLog();
+    // make data provider with data.
+    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, buffer, myDataLength, NULL);
+    // prep the ingredients
+    /*int bitsPerComponent = 8;
+    int bitsPerPixel = 32;
+    int bytesPerRow = 4 * w * s;
+    CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
+    CGBitmapInfo bitmapInfo = kCGImageAlphaPremultipliedLast;//kCGBitmapByteOrderDefault;
+    CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;*/
+    DLog();
+    // make the cgimage
+    
+    CGImageRef imageRef = [[CGImage alloc] initWithWidth:w
+                                                  height:h
+                                        bitsPerComponent:8
+                                            bitsPerPixel:32
+                                             bytesPerRow:4*w
+                                              colorSpace:CGColorSpaceCreateWithName(kCGColorSpaceAdobeRGB1998)
+                                              bitmapInfo:kCGImageAlphaPremultipliedLast
+                                                provider:provider
+                                                  decode:NULL
+                                       shouldInterpolate:YES
+                                                  intent:kCGRenderingIntentDefault];
+    
+    //CGImageRef imageRef = CGImageCreate(w, h, bitsPerComponent, bitsPerPixel, bytesPerRow, colorSpaceRef, bitmapInfo, provider, NULL, NO, renderingIntent);
+    DLog();
+    // then make the uiimage from that
+    UIImage *image = [[[UIImage alloc] initWithCGImage:imageRef] autorelease];
+    CGImageRelease(imageRef);
+    return image;
+    //return [UIImage imageWithCGImage:imageRef scale:s orientation:UIImageOrientationUp];
+}

@@ -407,7 +407,7 @@ const CGFloat _UITableViewDefaultRowHeight = 43;
     _needsReload = NO;
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (void)beginUpdates
 {
@@ -513,7 +513,7 @@ const CGFloat _UITableViewDefaultRowHeight = 43;
 
 @end
 
-#pragma mark - Private C functions
+#pragma mark - Shared functions
 
 void _UITableViewUpdateSectionsCache(UITableView* tableView)
 {
@@ -601,7 +601,7 @@ void _UITableViewUpdateSectionsCacheIfNeeded(UITableView* tableView)
     }
 }
 
-void _UITableViewSetContentSize(UITableView* tableView)
+void _UITableViewSetContentSize(UITableView *tableView)
 {
     // first calls _updateSectionsCacheIfNeeded, then sets the scroll view's size
     // taking into account the size of the header, footer, and all rows.

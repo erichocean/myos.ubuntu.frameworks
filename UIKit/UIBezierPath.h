@@ -28,6 +28,7 @@
  */
 
 #import <Foundation/Foundation.h>
+#import <CoreGraphics/CoreGraphics.h>
 
 enum {
     UIRectCornerTopLeft     = 1 << 0,
@@ -39,7 +40,7 @@ enum {
 typedef NSUInteger UIRectCorner;
 
 @interface UIBezierPath : NSObject {
-@private
+@package
     CGPathRef _path;
     CGFloat _lineWidth;
     CGLineCap _lineCapStyle;

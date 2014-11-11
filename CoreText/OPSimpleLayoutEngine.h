@@ -24,8 +24,7 @@
 
 #import "OPLayoutEngine.h"
 
-@interface OPSimpleLayoutEngine : NSObject <OPLayoutEngine>
-{
+@interface OPSimpleLayoutEngine : NSObject <OPLayoutEngine> {
 }
 
 @end

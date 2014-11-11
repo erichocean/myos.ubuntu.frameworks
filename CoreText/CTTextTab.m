@@ -33,8 +33,7 @@ const CFStringRef kCTTabColumnTerminatorsAttributeName = @"kCTTabColumnTerminato
 /**
  * Tab
  */
-@interface CTTextTab : NSObject
-{
+@interface CTTextTab : NSObject {
   CTTextAlignment _alignment;
   double _location;
   NSDictionary *_options;

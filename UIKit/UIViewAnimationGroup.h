@@ -30,17 +30,15 @@
 #import <UIKit/UIView.h>
 
 @interface UIViewAnimationGroup : NSObject {
-@private
+@package
     NSString *_name;
     void *_context;
     NSUInteger _waitingAnimations;
     BOOL _didSendStartMessage;
-    //NSTimeInterval _animationDelay;
-    //NSTimeInterval _animationDuration;
     UIViewAnimationCurve _animationCurve;
     id _animationDelegate;
-    SEL _animationDidStopSelector;
     SEL _animationWillStartSelector;
+    SEL _animationDidStopSelector;
     BOOL _animationBeginsFromCurrentState;
     CALayer *_transitionLayer;
     UIViewAnimationTransition _transitionType;
@@ -67,3 +65,5 @@
 - (void)commit;
 
 @end
+
+UIViewAnimationGroup *UIViewAnimationGroupGetCurrent();

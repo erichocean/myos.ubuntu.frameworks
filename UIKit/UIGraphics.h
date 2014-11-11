@@ -30,11 +30,6 @@
 #import <CoreGraphics/CoreGraphics.h>
 
 @class UIImage;
-/*
-#ifdef __cplusplus
-extern "C" {
-#endif
-*/
 
 CGContextRef UIGraphicsGetCurrentContext(void);
 void UIGraphicsPushContext(CGContextRef ctx);
@@ -52,7 +47,3 @@ void UIRectFillUsingBlendMode(CGRect rect, CGBlendMode blendMode);
 
 void UIRectFrame(CGRect rect);
 void UIRectFrameUsingBlendMode(CGRect rect, CGBlendMode blendMode);
-/*
-#ifdef __cplusplus
-}
-#endif*/

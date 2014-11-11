@@ -45,7 +45,7 @@ typedef enum {
 typedef enum {
     UITableViewCellStyleDefault,
     UITableViewCellStyleValue1,
-    UITableViewCellStyleValue2,
+    UITableViewCellStyleValue2, 
     UITableViewCellStyleSubtitle
 } UITableViewCellStyle;
 

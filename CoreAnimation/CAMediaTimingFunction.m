@@ -1,6 +1,18 @@
 /*
- * Copyright (c) 2012-2013. All rights reserved.
- *
+ Copyright © 2014 myOS Group.
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ Lesser General Public License for more details.
+ 
+ Contributor(s):
+ Amr Aboelela <amraboelela@gmail.com>
  */
 
 #import <CoreAnimation/CoreAnimation-private.h>
@@ -15,7 +27,7 @@ static CAMediaTimingFunction *_defaultMediaTimingFunction = nil;
 
 #define _kCAMTFSmallValue   0.001
 
-#pragma mark - Static C functions
+#pragma mark - Static functions
 
 static float _CAMTFSolveCubicPolynomialBetweenValues(float t0, float t1, float x, float b, float c, float d)
 {
@@ -95,7 +107,7 @@ static float _CAMTFSolveCubicPolynomialBetweenValues(float t0, float t1, float x
     return [NSString stringWithFormat:@"<%@: %p; _c1x:%0.2f; _c1y:%0.2f; _c2x:%0.2f; _c2y:%0.2f>", [self className], self, _c1x, _c1y, _c2x, _c2y];
 }
 
-#pragma mark - Helpers
+#pragma mark - Public methods
 
 - (void)getControlPointAtIndex:(size_t)idx values:(float[2])ptr
 {

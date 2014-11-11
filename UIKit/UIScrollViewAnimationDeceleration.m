@@ -27,7 +27,9 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIScrollViewAnimationDeceleration.h>
+#import <UIKit/UIKit-private.h>
+
+//#import <UIKit/UIScrollViewAnimationDeceleration.h>
 
 /*
  I attempted to emulate 10.7's behavior here as best I could, however my physics-fu is weak.
@@ -79,6 +81,8 @@ static const NSTimeInterval physicsTimeStep = 1/120.;
 static const CGFloat springTightness = 7;
 static const CGFloat springDampening = 15;
 
+#pragma mark - Static functions
+
 static CGFloat Clamp(CGFloat v, CGFloat min, CGFloat max)
 {
     return (v < min)? min : (v > max)? max : v;
@@ -126,18 +130,18 @@ static BOOL BounceComponent(NSTimeInterval t, UIScrollViewAnimationDecelerationC
 - (id)initWithScrollView:(UIScrollView *)sv velocity:(CGPoint)v;
 {
     if ((self=[super initWithScrollView:sv])) {
-        lastMomentumTime = beginTime;
+        lastMomentumTime = _beginTime;
 
-        x.decelerateTime = beginTime;
+        x.decelerateTime = _beginTime;
         x.velocity = ClampedVelocty(v.x);
-        x.position = scrollView.contentOffset.x;
+        x.position = _scrollView.contentOffset.x;
         x.returnFrom = 0;
         x.returnTime = 0;
         x.bounced = NO;
 
-        y.decelerateTime = beginTime;
+        y.decelerateTime = _beginTime;
         y.velocity = ClampedVelocty(v.y);
-        y.position = scrollView.contentOffset.y;
+        y.position = _scrollView.contentOffset.y;
         y.returnFrom = 0;
         y.returnTime = 0;
         y.bounced = NO;
@@ -148,13 +152,13 @@ static BOOL BounceComponent(NSTimeInterval t, UIScrollViewAnimationDecelerationC
         // (along with the associated code in UIScrollView) results in crazy forces being applied in those cases.
         if (x.velocity == 0) {
             x.bounced = YES;
-            x.returnTime = beginTime;
+            x.returnTime = _beginTime;
             x.returnFrom = x.position;
         }
         
         if (y.velocity == 0) {
             y.bounced = YES;
-            y.returnTime = beginTime;
+            y.returnTime = _beginTime;
             y.returnFrom = y.position;
         }
     }
@@ -167,20 +171,14 @@ static BOOL BounceComponent(NSTimeInterval t, UIScrollViewAnimationDecelerationC
     const BOOL isFinishedWaitingForMomentumScroll = ((currentTime - lastMomentumTime) > 0.15f);
 
     BOOL finished = NO;
-
-    while (!finished && currentTime >= beginTime) {
-        CGPoint confinedOffset = [scrollView _confinedContentOffset:CGPointMake(x.position, y.position)];
-        
-        const BOOL verticalIsFinished   = BounceComponent(beginTime, &y, confinedOffset.y);
-        const BOOL horizontalIsFinished = BounceComponent(beginTime, &x, confinedOffset.x);
-        
+    while (!finished && currentTime >= _beginTime) {
+        CGPoint confinedOffset = _UIScrollViewConfinedContentOffset(_scrollView, CGPointMake(x.position, y.position));
+        const BOOL verticalIsFinished   = BounceComponent(_beginTime, &y, confinedOffset.y);
+        const BOOL horizontalIsFinished = BounceComponent(_beginTime, &x, confinedOffset.x);
         finished = (verticalIsFinished && horizontalIsFinished && isFinishedWaitingForMomentumScroll);
-
-        beginTime += physicsTimeStep;
+        _beginTime += physicsTimeStep;
     }
-
-    [scrollView _setRestrainedContentOffset:CGPointMake(x.position, y.position)];
-    
+    _UIScrollViewSetRestrainedContentOffset(_scrollView, CGPointMake(x.position, y.position));
     return finished;
 }
 

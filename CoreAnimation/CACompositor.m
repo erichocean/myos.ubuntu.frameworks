@@ -1,23 +1,37 @@
 /*
- * Copyright (c) 2012-2013. All rights reserved.
- *
+ Copyright © 2014 myOS Group.
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ Lesser General Public License for more details.
+ 
+ Contributor(s):
+ Amr Aboelela <amraboelela@gmail.com>
  */
 
+
 #import <CoreAnimation/CoreAnimation-private.h>
+#import <IOKit/IOKit.h>
 
 static CGRect _compositeRect;
-//static BOOL _needsFlush;
 
-#pragma mark - Static C functions
+#pragma mark - Static functions
 
 // Copy Presentation Tree to Render Tree
 static void _CACompositorCopyTree(CALayer *layer)
 {
+    //DLog(@"layer: %@", layer);
     CARenderLayer *renderLayer = (CARenderLayer *)layer->_renderLayer;
     if (layer->_needsComposite) {
         _CARenderLayerCopy(renderLayer, layer);
     }
-    for (CALayer *sublayer in layer->sublayers) {
+    for (CALayer *sublayer in layer->_sublayers) {
         _CACompositorCopyTree(sublayer);
     }
 }
@@ -25,7 +39,7 @@ static void _CACompositorCopyTree(CALayer *layer)
 static void _CACompositorAddCompositeRectOfLayer(CARenderLayer *layer)
 {
     CARenderLayer *rootLayer = (CARenderLayer *)_CALayerRootLayer()->_renderLayer;
-    CGRect layerBounds = _CARenderLayerApplyMasksToBoundsToRect(layer, layer->superlayer, layer->bounds);
+    CGRect layerBounds = _CARenderLayerApplyMasksToBoundsToRect(layer, layer->_superlayer, layer->_bounds);
     CGRect rectInRootLayer = [layer convertRect:layerBounds toLayer:rootLayer];
     _compositeRect = CGRectUnion(_compositeRect, rectInRootLayer);
 }
@@ -35,21 +49,18 @@ static void _CACompositorUpdateCompositeRect(CALayer *layer)
     if (layer->_needsComposite) {
         _CACompositorAddCompositeRectOfLayer((CARenderLayer *)layer->_renderLayer);
     }
-    for (CALayer *sublayer in layer->sublayers) {
+    for (CALayer *sublayer in layer->_sublayers) {
         _CACompositorUpdateCompositeRect(sublayer);
     }
 }
 
 static void _CACompositorAddCompositeRectToLayer(CARenderLayer *layer)
 {
-    //CARenderLayer *rootLayer = (CARenderLayer *)presentationLayer->_renderLayer;
     CARenderLayer *rootLayer = (CARenderLayer *)_CALayerRootLayer()->_renderLayer;
-    //CGRect rectInRootLayer = [layer convertRect:layer->bounds toLayer:rootLayer];
-    //_compositeRect = CGRectUnion(_compositeRect, rectInRootLayer);
     CARenderLayer *opaqueLayer = _CARenderLayerClosestOpaqueLayerFromLayer(layer);
     CGRect boundsInOpaqueLayer = [rootLayer convertRect:_compositeRect toLayer:opaqueLayer];
-    while (!CGRectEqualToRect(opaqueLayer->bounds, CGRectUnion(opaqueLayer->bounds, boundsInOpaqueLayer)) && opaqueLayer->superlayer) {
-        opaqueLayer = (CARenderLayer *)opaqueLayer->superlayer;
+    while (!CGRectEqualToRect(opaqueLayer->_bounds, CGRectUnion(opaqueLayer->_bounds, boundsInOpaqueLayer)) && opaqueLayer->_superlayer) {
+        opaqueLayer = (CARenderLayer *)opaqueLayer->_superlayer;
         boundsInOpaqueLayer = [rootLayer convertRect:_compositeRect toLayer:opaqueLayer];
     }
     _CARenderLayerSetNeedsCompositeInRect(rootLayer, opaqueLayer, boundsInOpaqueLayer);
@@ -61,7 +72,7 @@ static void _CACompositorUpdateCompositeRects(CALayer *layer)
         //DLog(@"layer: %@", layer);
         _CACompositorAddCompositeRectToLayer((CARenderLayer *)layer->_renderLayer);
     }
-    for (CALayer *sublayer in layer->sublayers) {
+    for (CALayer *sublayer in layer->_sublayers) {
         _CACompositorUpdateCompositeRects(sublayer);
     }
 }
@@ -69,8 +80,9 @@ static void _CACompositorUpdateCompositeRects(CALayer *layer)
 // Traversing depth first search
 static void _CACompositorCompositeTreeRecursive(CARenderLayer *layer)
 {
-    for (CARenderLayer *sublayer in layer->sublayers) {
-        if (!sublayer->hidden) {
+    for (CARenderLayer *sublayer in layer->_sublayers) {
+        //DLog(@"sublayer: %@", sublayer);
+        if (!sublayer->_hidden) {
             _CARenderLayerCompositeIfNeeded(sublayer);
             _CACompositorCompositeTreeRecursive(sublayer);
         }
@@ -79,35 +91,30 @@ static void _CACompositorCompositeTreeRecursive(CARenderLayer *layer)
 
 static void _CACompositorCompositeTree(CARenderLayer *rootRenderLayer)
 {
-    //_needsFlush = NO;
-    if (!rootRenderLayer->hidden) {
+    if (!rootRenderLayer->_hidden) {
+        //DLog(@"rootRenderLayer: %@", rootRenderLayer);
         _CARenderLayerCompositeIfNeeded(rootRenderLayer);
         _CACompositorCompositeTreeRecursive(rootRenderLayer);
     }
-    /*if (_needsFlush) {
-        //_CAAnimatorFrameCount++;
-        //DLog(@"_needsFlush");
-        _EAGLFlush();
-    }*/
-    //CGContextRestoreGState(_offlineWindowContext);
 }
 
 static void _CACompositorCleanPresentationTree(CALayer *layer)
 {
     if (layer->_needsComposite) {
+        //DLog();
         if (![layer->_animations count]) {
             layer->_needsComposite = NO;
         }
     }
-    for (CALayer *sublayer in layer->sublayers) {
+    for (CALayer *sublayer in layer->_sublayers) {
         _CACompositorCleanPresentationTree(sublayer);
     }
 }
 
 static void _CACompositorCleanRenderTree(CARenderLayer *layer)
 {
-    layer->rectNeedsComposite = CGRectZero;
-    for (CARenderLayer *sublayer in layer->sublayers) {
+    layer->_rectNeedsComposite = CGRectZero;
+    for (CARenderLayer *sublayer in layer->_sublayers) {
         _CACompositorCleanRenderTree(sublayer);
     }
 }
@@ -117,35 +124,43 @@ static void _CACompositorCleanRenderTree(CARenderLayer *layer)
 
 @end
 
-#pragma mark - Private C functions
+#pragma mark - Shared functions
+
+void _CACompositorInitialize()
+{
+    IOWindow *screenWindow = IOWindowGetSharedWindow();
+    _compositeRect = CGRectMake(0,0,screenWindow->_rect.size.width, screenWindow->_rect.size.height);
+}
 
 void _CACompositorPrepareComposite()
 {
-    CALayer *rootPresentationLayer = _CALayerRootLayer()->presentationLayer;
-    _compositeRect = CGRectZero;
-    _CACompositorUpdateCompositeRect(rootPresentationLayer);
-    //DLog(@"CopyTreeWithRoot");
+    //DLog();
+    CALayer *rootPresentationLayer = _CALayerRootLayer()->_presentationLayer;
+    //if (_firstBuffer) {
+    //CGRect _tempRect = _compositeRect;
+    //_compositeRect = CGRectZero;
+    //_oldCompositeRect = _tempRect;
+    //_CACompositorUpdateCompositeRect(rootPresentationLayer);
+    //}
+    //DLog(@"_CACompositorCopyTree");
     _CACompositorCopyTree(rootPresentationLayer);
-    _CACompositorUpdateCompositeRect(rootPresentationLayer);
-    //DLog(@"_compositeRect: %@", NSStringFromCGRect(_compositeRect));
+    //_CACompositorUpdateCompositeRect(rootPresentationLayer);
+    //DLog(@"_CACompositorUpdateCompositeRects");
     _CACompositorUpdateCompositeRects(rootPresentationLayer);
+    //if (!_firstBuffer) {
+    //DLog(@"_CACompositorCleanPresentationTree");
     _CACompositorCleanPresentationTree(rootPresentationLayer);
+    //}
+    //DLog(@"_compositeRect: %@", NSStringFromRect(NSRectFromCGRect(_compositeRect)));
+    //_firstBuffer = !_firstBuffer;
 }
 
 void _CACompositorComposite()
 {
     //DLog();
-    CALayer *rootPresentationLayer = _CALayerRootLayer()->presentationLayer;
-    CARenderLayer *rootRenderLayer = (CARenderLayer *)rootPresentationLayer->_renderLayer;
-    //DLog(@"CompositeTree");
+    CARenderLayer *rootRenderLayer = (CARenderLayer *)_CALayerRootLayer()->_renderLayer;
     _CACompositorCompositeTree(rootRenderLayer);
-    //DLog(@"CleanTreeWithRoot");
-    //_CACompositorCleanTree(rootPresentationLayer);
+    //DLog();
     _CACompositorCleanRenderTree(rootRenderLayer);
+    //DLog();
 }
-/*
-void _CACompositorNeedsFlush(BOOL needsFlush)
-{
-    _needsFlush = needsFlush;
-}*/
-

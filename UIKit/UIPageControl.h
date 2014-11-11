@@ -30,11 +30,17 @@
 #import <UIKit/UIControl.h>
 
 @interface UIPageControl : UIControl {
+@package
     NSInteger _currentPage;
     NSInteger _numberOfPages;
+    UIView *_dotView;
+    BOOL _defersCurrentPageDisplay;
 }
 
 @property (nonatomic) NSInteger currentPage;
 @property (nonatomic) NSInteger numberOfPages;
+@property (nonatomic) BOOL defersCurrentPageDisplay;
+
+- (void)updateCurrentPageDisplay;
 
 @end

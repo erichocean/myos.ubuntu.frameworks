@@ -27,10 +27,13 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <UIKit/UIProgressView.h>
+#import <UIKit/UIKit-private.h>
+#import <CoreAnimation/CoreAnimation-private.h>
 
 @implementation UIProgressView
-@synthesize progressViewStyle=_progressViewStyle, progress=_progress;
+
+@synthesize progressViewStyle=_progressViewStyle;
+@synthesize  progress=_progress;
 
 - (id)initWithProgressViewStyle:(UIProgressViewStyle)style
 {
@@ -44,7 +47,8 @@
 {
     if (style != _progressViewStyle) {
         _progressViewStyle = style;
-        [self setNeedsDisplay];
+        _CALayerSetNeedsDisplay(_layer);
+        //[self setNeedsDisplay];
     }
 }
 
@@ -52,7 +56,8 @@
 {
     if (p != _progress) {
         _progress = MIN(1,MAX(0,p));
-        [self setNeedsDisplay];
+        _CALayerSetNeedsDisplay(_layer);
+        //[self setNeedsDisplay];
     }
 }
 

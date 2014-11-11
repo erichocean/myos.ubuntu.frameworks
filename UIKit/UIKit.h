@@ -107,10 +107,8 @@
 #import <UIKit/UIRotationGestureRecognizer.h>
 #import <UIKit/UISwipeGestureRecognizer.h>
 #import <UIKit/UIDatePicker.h>
-
-// non-standard imports
-//#import <UIKit/UIKey.h>
-//#import <UIKit/UIScrollWheelGestureRecognizer.h>
+#import <UIKit/UIBackgroundTask.h>
+#import <UIKit/UIPhotosAlbum.h>
 
 // SystemConfiguration-Helper
 #define kSCNetworkReachabilityFlagsIsWWAN kSCNetworkReachabilityFlagsConnectionOnDemand
